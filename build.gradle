@@ -1,9 +1,11 @@
 plugins {
+    id 'java'
+    id 'idea'
     id 'org.spongepowered.plugin' version '0.9.0'
 }
 
-group = pluginGroup
-version = pluginVersion
+group = "io.github.aquerr"
+version = "0.1.0"
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
