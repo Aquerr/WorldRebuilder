@@ -13,10 +13,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class BlockBreakListener extends AbstractListener
@@ -43,7 +40,7 @@ public class BlockBreakListener extends AbstractListener
 				return;
 		}
 
-		final List<Region> regions = super.getPlugin().getRegions();
+		final Map<String, Region> regions = super.getPlugin().getRegionManager().getRegions();
 		if(regions.size() == 0)
 			return;
 
@@ -51,7 +48,7 @@ public class BlockBreakListener extends AbstractListener
 		final List<BlockSnapshot> blocksToRestore = new ArrayList<>();
 		final UUID worldUUID = transactions.get(0).getOriginal().getWorldUniqueId();
 
-		for(final Region region : regions)
+		for(final Region region : regions.values())
 		{
 			for(final Transaction<BlockSnapshot> transaction : transactions)
 			{

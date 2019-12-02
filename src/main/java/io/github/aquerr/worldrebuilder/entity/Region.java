@@ -10,11 +10,19 @@ public class Region
 	private final Vector3i firstPoint;
 	private final Vector3i secondPoint;
 
-	public Region(final UUID worldUniqueId, final Vector3i firstPoint, final Vector3i secondPoint)
+	private final String name;
+
+	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint, final Vector3i secondPoint)
 	{
+		this.name = name;
 		this.worldUniqueId = worldUniqueId;
 		this.firstPoint = firstPoint;
 		this.secondPoint = secondPoint;
+	}
+
+	public String getName()
+	{
+		return this.name;
 	}
 
 	public UUID getWorldUniqueId()

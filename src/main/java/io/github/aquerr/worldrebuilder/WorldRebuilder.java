@@ -4,10 +4,10 @@ package io.github.aquerr.worldrebuilder;
 import com.google.inject.Inject;
 import io.github.aquerr.worldrebuilder.commands.CreateRegionCommand;
 import io.github.aquerr.worldrebuilder.commands.WandCommand;
-import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.entity.SelectionPoints;
 import io.github.aquerr.worldrebuilder.listener.BlockBreakListener;
 import io.github.aquerr.worldrebuilder.listener.WandUsageListener;
+import io.github.aquerr.worldrebuilder.managers.RegionManager;
 import org.slf4j.Logger;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandManager;
@@ -32,8 +32,6 @@ public class WorldRebuilder
 	private final Map<List<String>, CommandCallable> subcommands = new HashMap<>();
 	private final Map<UUID, SelectionPoints> playerSelectionPoints = new HashMap<>();
 
-	private final List<Region> regions = new ArrayList<>();
-
 	@Inject
 	private Logger logger;
 
@@ -41,12 +39,16 @@ public class WorldRebuilder
 	private final EventManager eventManager;
 	private final Path configDir;
 
+	private final RegionManager regionManager;
+
 	@Inject
-	public WorldRebuilder(final CommandManager commandManager, final EventManager eventManager, final @ConfigDir(sharedRoot = false) Path configDir)
+	public WorldRebuilder(final CommandManager commandManager, final EventManager eventManager, final RegionManager regionManager, final @ConfigDir(sharedRoot = false) Path configDir)
 	{
 		this.commandManager = commandManager;
 		this.eventManager = eventManager;
 		this.configDir = configDir;
+
+		this.regionManager = regionManager;
 	}
 
 	@Listener
@@ -61,9 +63,9 @@ public class WorldRebuilder
 		return this.playerSelectionPoints;
 	}
 
-	public List<Region> getRegions()
+	public RegionManager getRegionManager()
 	{
-		return this.regions;
+		return this.regionManager;
 	}
 
 	private void registerCommands()
