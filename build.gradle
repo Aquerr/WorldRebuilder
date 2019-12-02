@@ -15,8 +15,6 @@ dependencies {
     annotationProcessor 'org.spongepowered:spongeapi:7.1.0'
 }
 
-sponge.plugin.id = pluginId
-
 tasks.create("publishBuildOnDiscord") {
     group = "Publishing"
     description = "Task for publishing the jar file to discord's jenkins channel"
