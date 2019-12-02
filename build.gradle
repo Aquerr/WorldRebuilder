@@ -14,3 +14,24 @@ dependencies {
 }
 
 sponge.plugin.id = pluginId
+
+tasks.create("publishBuildOnDiscord") {
+    group = "Publishing"
+    description = "Task for publishing the jar file to discord's jenkins channel"
+    doLast {
+        String[] jarFiles = new FileNameFinder().getFileNames(project.buildDir.getPath(), "**/*.jar")
+
+        if(jarFiles.length > 0) {
+            println("Found jar files: " + jarFiles)
+
+            String lastCommitDescription = "git log -1 --pretty=%B".execute().getText()
+            if(lastCommitDescription == null || lastCommitDescription == "") {
+                lastCommitDescription = "No changelog provided"
+            }
+
+            exec {
+                commandLine("java", "-jar", "..\\jenkinsdiscordbot-1.0.jar", "WorldRebuilder", jarFiles[0], lastCommitDescription)
+            }
+        }
+    }
+}
