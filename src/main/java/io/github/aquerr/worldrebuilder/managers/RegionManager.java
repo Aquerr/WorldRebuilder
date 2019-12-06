@@ -15,4 +15,29 @@ public class RegionManager
 	{
 		return this.regions;
 	}
+
+	public void loadRegions()
+	{
+
+	}
+
+	public void addRegion()
+	{
+
+	}
+
+	public void updateRegion()
+	{
+
+	}
+
+	public void deleteRegion()
+	{
+
+	}
+
+	public Region getRegion(final String name)
+	{
+		return null;
+	}
 }

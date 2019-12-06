@@ -58,6 +58,11 @@ public class WorldRebuilder
 		registerListeners();
 	}
 
+	public Path getConfigDir()
+	{
+		return this.configDir;
+	}
+
 	public Map<UUID, SelectionPoints> getPlayerSelectionPoints()
 	{
 		return this.playerSelectionPoints;
