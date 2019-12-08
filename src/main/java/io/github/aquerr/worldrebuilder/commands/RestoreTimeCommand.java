@@ -23,6 +23,7 @@ public class RestoreTimeCommand extends WRCommand
 		final int timeInSeconds = args.requireOne(Text.of("timeInSeconds"));
 
 		region.setRestoreTime(timeInSeconds);
+		super.getPlugin().getRegionManager().updateRegion(region);
 		source.sendMessage(Text.of(WorldRebuilder.PLUGIN_PREFIX, TextColors.GREEN, "Restore time has been changed!"));
 		return CommandResult.success();
 	}
