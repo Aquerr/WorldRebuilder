@@ -1,5 +1,6 @@
 package io.github.aquerr.worldrebuilder.scheduling;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import org.spongepowered.api.Sponge;
@@ -10,17 +11,16 @@ import java.util.concurrent.TimeUnit;
 @Singleton
 public class WorldRebuilderScheduler
 {
-	private final WorldRebuilder plugin;
 	private final Scheduler spongeScheduler;
 
-	public WorldRebuilderScheduler(final WorldRebuilder plugin)
+	@Inject
+	public WorldRebuilderScheduler()
 	{
-		this.plugin = plugin;
 		this.spongeScheduler = Sponge.getScheduler();
 	}
 
 	public void scheduleRebuildBlocksTask(final RebuildBlocksTask rebuildBlocksTask, final int delayInSeconds)
 	{
-		this.spongeScheduler.createTaskBuilder().execute(rebuildBlocksTask).delay(delayInSeconds, TimeUnit.SECONDS).name("World Rebuilder - Blocks Rebuild Task").submit(this.plugin);
+		this.spongeScheduler.createTaskBuilder().execute(rebuildBlocksTask).delay(delayInSeconds, TimeUnit.SECONDS).name("World Rebuilder - Blocks Rebuild Task").submit(WorldRebuilder.getPlugin());
 	}
 }

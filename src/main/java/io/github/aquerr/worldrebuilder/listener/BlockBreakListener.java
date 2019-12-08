@@ -20,12 +20,10 @@ import java.util.concurrent.TimeUnit;
 
 public class BlockBreakListener extends AbstractListener
 {
-	private final Task.Builder taskBuilder;
 
 	public BlockBreakListener(final WorldRebuilder plugin)
 	{
 		super(plugin);
-		taskBuilder = Sponge.getScheduler().createTaskBuilder();
 	}
 
 	@Listener(order = Order.LAST)

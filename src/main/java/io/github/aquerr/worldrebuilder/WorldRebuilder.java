@@ -31,14 +31,16 @@ import java.util.*;
 @Plugin(id = "worldrebuilder", name = "Worldrebuilder", description = "Rebuilds blocks that have been previously destroyed.", authors = {"Aquerr"})
 public class WorldRebuilder
 {
-	public static final Text PLUGIN_ERROR = Text.of(TextColors.RED, "[WR]" );
-	public static final Text PLUGIN_PREFIX = Text.of(TextColors.GREEN, "[WR]" );
+	public static final Text PLUGIN_ERROR = Text.of(TextColors.RED, "[WR] ");
+	public static final Text PLUGIN_PREFIX = Text.of(TextColors.GREEN, "[WR] ");
 
 	private final Map<List<String>, CommandCallable> subcommands = new HashMap<>();
 	private final Map<UUID, SelectionPoints> playerSelectionPoints = new HashMap<>();
 
 	@Inject
 	private Logger logger;
+
+	private static WorldRebuilder INSTANCE;
 
 	private final CommandManager commandManager;
 	private final EventManager eventManager;
@@ -50,12 +52,18 @@ public class WorldRebuilder
 	@Inject
 	public WorldRebuilder(final CommandManager commandManager, final EventManager eventManager, final RegionManager regionManager, final WorldRebuilderScheduler worldRebuilderScheduler, final @ConfigDir(sharedRoot = false) Path configDir)
 	{
+		INSTANCE = this;
 		this.commandManager = commandManager;
 		this.eventManager = eventManager;
 		this.configDir = configDir;
 
 		this.regionManager = regionManager;
 		this.worldRebuilderScheduler = worldRebuilderScheduler;
+	}
+
+	public static WorldRebuilder getPlugin()
+	{
+		return INSTANCE;
 	}
 
 	@Listener
@@ -100,6 +108,7 @@ public class WorldRebuilder
 				.description(Text.of("Creates a region from selected points"))
 				.permission(Permissions.CREATE_REGION_COMMAND)
 				.executor(new CreateRegionCommand(this))
+				.arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))))
 				.build());
 
 		//Info Command

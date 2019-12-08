@@ -2,6 +2,7 @@ package io.github.aquerr.worldrebuilder.storage;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.reflect.TypeToken;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.typesafe.config.ConfigParseOptions;
 import com.typesafe.config.ConfigSyntax;
@@ -12,6 +13,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.api.config.ConfigDir;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,16 +25,15 @@ public class HOCONStorage implements Storage
 {
 	private static final String ROOT_NODE_NAME = "regions";
 
-	private final WorldRebuilder plugin;
 	private final Path regionsFilePath;
 
 	private final ConfigurationLoader<CommentedConfigurationNode> configLoader;
 	private CommentedConfigurationNode configNode;
 
-	public HOCONStorage(final WorldRebuilder plugin)
+	@Inject
+	public HOCONStorage(final Path configDir)
 	{
-		this.plugin = plugin;
-		final Path configDir = this.plugin.getConfigDir();
+//		final Path configDir = this.plugin.getConfigDir();
 
 		//Prepare storage directory
 		Path storageDirPath = configDir.resolve("storage");

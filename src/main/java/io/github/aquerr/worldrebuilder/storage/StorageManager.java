@@ -5,21 +5,21 @@ import com.google.inject.Singleton;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.api.config.ConfigDir;
 
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
 @Singleton
 public class StorageManager
 {
-	private final WorldRebuilder plugin;
 	private final Storage storage;
 
 	@Inject
-	public StorageManager(final WorldRebuilder plugin)
+	public StorageManager(final @ConfigDir(sharedRoot = false) Path configDir)
 	{
-		this.plugin = plugin;
-		this.storage = new HOCONStorage(plugin);
+		this.storage = new HOCONStorage(configDir);
 	}
 
 	public List<Region> getRegions()

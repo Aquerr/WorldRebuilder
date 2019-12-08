@@ -15,14 +15,12 @@ import java.util.concurrent.CompletableFuture;
 @Singleton
 public class RegionManager
 {
-	private final WorldRebuilder plugin;
 	private final StorageManager storageManager;
 	private final Map<String, Region> regions = new HashMap<>();
 
 	@Inject
-	public RegionManager(final WorldRebuilder plugin, final StorageManager storageManager)
+	public RegionManager(final StorageManager storageManager)
 	{
-		this.plugin = plugin;
 		this.storageManager = storageManager;
 		loadRegions();
 	}

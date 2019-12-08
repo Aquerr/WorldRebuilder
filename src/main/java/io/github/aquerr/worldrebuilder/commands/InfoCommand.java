@@ -36,11 +36,11 @@ public class InfoCommand extends WRCommand
 
 
 		final Text.Builder textBuilder = Text.builder();
-		textBuilder.append(Text.of(TextColors.BLUE, "Name: " + TextColors.GOLD, region.getName() + "\n"))
-				.append(Text.of(TextColors.BLUE, "World Name: ", TextColors.GOLD, worldName))
-				.append(Text.of(TextColors.BLUE, "First Point: ", TextColors.GOLD, region.getFirstPoint()))
-				.append(Text.of(TextColors.BLUE, "Second Point: ", TextColors.GOLD, region.getSecondPoint()))
-				.append(Text.of(TextColors.BLUE, "Restore Time: ", TextColors.GOLD, region.getRestoreTime()));
+		textBuilder.append(Text.of(TextColors.BLUE,  " - Name: ", TextColors.GOLD, region.getName(), "\n"))
+				.append(Text.of(TextColors.BLUE, " - World Name: ", TextColors.GOLD, worldName, "\n"))
+				.append(Text.of(TextColors.BLUE, " - First Point: ", TextColors.GOLD, region.getFirstPoint(), "\n"))
+				.append(Text.of(TextColors.BLUE, " - Second Point: ", TextColors.GOLD, region.getSecondPoint(), "\n"))
+				.append(Text.of(TextColors.BLUE, " - Restore Time: ", TextColors.GOLD, region.getRestoreTime()));
 
 		helpList.add(textBuilder.build());
 		final PaginationList paginationList = PaginationList.builder().title(Text.of(TextColors.GOLD, "Region Info")).contents(helpList).linesPerPage(14).padding(Text.of(TextColors.BLUE, "-")).build();

@@ -10,10 +10,7 @@ import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class RegionArgument extends CommandElement
 {
@@ -41,6 +38,9 @@ public class RegionArgument extends CommandElement
 	@Override
 	public List<String> complete(final CommandSource src, final CommandArgs args, final CommandContext context)
 	{
+		if(args.getAll().size() > 2)
+			return Collections.emptyList();
+
 		final List<String> regionsList = new LinkedList<>();
 		final Optional<String> optionalArg = args.nextIfPresent();
 		if(optionalArg.isPresent())
