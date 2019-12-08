@@ -2,6 +2,7 @@ package io.github.aquerr.worldrebuilder.listener;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.scheduling.RebuildBlocksTask;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
@@ -14,6 +15,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class BlockBreakListener extends AbstractListener
@@ -45,8 +47,15 @@ public class BlockBreakListener extends AbstractListener
 			return;
 
 		final List<Transaction<BlockSnapshot>> transactions = event.getTransactions();
-		final List<BlockSnapshot> blocksToRestore = new ArrayList<>();
 		final UUID worldUUID = transactions.get(0).getOriginal().getWorldUniqueId();
+
+		CompletableFuture.runAsync(() -> rebuildBlocks(worldUUID, new LinkedList<>(transactions)));
+	}
+
+	private void rebuildBlocks(final UUID worldUUID, final List<Transaction<BlockSnapshot>> transactions)
+	{
+		final Map<String, Region> regions = super.getPlugin().getRegionManager().getRegions();
+		final List<BlockSnapshot> blocksToRestore = new LinkedList<>();
 
 		for(final Region region : regions.values())
 		{
@@ -59,17 +68,7 @@ public class BlockBreakListener extends AbstractListener
 			}
 		}
 
-		taskBuilder.delay(10, TimeUnit.SECONDS).execute(() -> {
-
-			final Optional<World> optionalWorld = Sponge.getServer().getWorld(worldUUID);
-			if(!optionalWorld.isPresent())
-				return;
-			final World world = optionalWorld.get();
-
-			for(final BlockSnapshot blockSnapshot : blocksToRestore)
-			{
-				world.setBlock(blockSnapshot.getPosition(), blockSnapshot.getState());
-			}
-		}).name("WorldRebuilder - Rebuild Task").submit(super.getPlugin());
+		final Region region = regions.values().stream().filter(x->x.intersects(transactions.get(0).getOriginal().getPosition())).findFirst().get();
+		super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(new RebuildBlocksTask(worldUUID, blocksToRestore), region.getRestoreTime());
 	}
 }

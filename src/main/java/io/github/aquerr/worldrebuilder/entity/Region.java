@@ -12,12 +12,15 @@ public class Region
 
 	private final String name;
 
-	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint, final Vector3i secondPoint)
+	private int restoreTime; //Seconds. Default: 10
+
+	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint, final Vector3i secondPoint, final int restoreTime)
 	{
 		this.name = name;
 		this.worldUniqueId = worldUniqueId;
 		this.firstPoint = firstPoint;
 		this.secondPoint = secondPoint;
+		this.restoreTime = restoreTime;
 	}
 
 	public String getName()
@@ -38,6 +41,16 @@ public class Region
 	public Vector3i getSecondPoint()
 	{
 		return this.secondPoint;
+	}
+
+	public int getRestoreTime()
+	{
+		return this.restoreTime;
+	}
+
+	public void setRestoreTime(int restoreTimeInSeconds)
+	{
+		this.restoreTime = restoreTimeInSeconds;
 	}
 
 	public boolean intersects(final Vector3i position)
