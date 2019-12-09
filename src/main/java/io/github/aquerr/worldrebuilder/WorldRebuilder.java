@@ -10,6 +10,7 @@ import io.github.aquerr.worldrebuilder.listener.WandUsageListener;
 import io.github.aquerr.worldrebuilder.managers.RegionManager;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
 import org.slf4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.command.args.GenericArguments;
@@ -68,8 +69,10 @@ public class WorldRebuilder
 	@Listener
 	public void onInit(final GameInitializationEvent event)
 	{
+		Sponge.getServer().getConsole().sendMessage(Text.of(PLUGIN_PREFIX, TextColors.YELLOW, "Initializing WorldRebuilder..."));
 		registerCommands();
 		registerListeners();
+		Sponge.getServer().getConsole().sendMessage(Text.of(PLUGIN_PREFIX, TextColors.GREEN, "Loading completed. Plugin is ready to use!"));
 	}
 
 	public Path getConfigDir()
@@ -127,6 +130,14 @@ public class WorldRebuilder
 				.permission(Permissions.CREATE_REGION_COMMAND)
 				.executor(new CreateRegionCommand(this))
 				.arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))))
+				.build());
+
+		//Delete Region Command
+		this.subcommands.put(Collections.singletonList("deleteregion"), CommandSpec.builder()
+				.description(Text.of("Deletes a region"))
+				.permission(Permissions.DELETE_COMMAND)
+				.executor(new DeleteRegionCommand(this))
+				.arguments(GenericArguments.onlyOne(new RegionArgument(this, Text.of("region"))))
 				.build());
 
 		//Info Command
