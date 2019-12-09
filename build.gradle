@@ -15,6 +15,15 @@ dependencies {
     annotationProcessor 'org.spongepowered:spongeapi:7.1.0'
 }
 
+jar {
+    if(System.getenv("JENKINS_HOME")) {
+        version = version + "_" + System.getenv("BUILD_NUMBER")
+        println("File name => " + baseName)
+    } else {
+        version = version + "-SNAPSHOT"
+    }
+}
+
 tasks.create("publishBuildOnDiscord") {
     group = "Publishing"
     description = "Task for publishing the jar file to discord's jenkins channel"
