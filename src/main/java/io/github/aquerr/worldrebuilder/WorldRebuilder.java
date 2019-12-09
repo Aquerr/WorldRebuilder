@@ -25,9 +25,11 @@ import org.spongepowered.api.text.format.TextColors;
 import java.nio.file.Path;
 import java.util.*;
 
-@Plugin(id = "worldrebuilder", name = "Worldrebuilder", description = "Rebuilds blocks that have been previously destroyed.", authors = {"Aquerr"})
+@Plugin(id = "worldrebuilder", name = "Worldrebuilder", version = WorldRebuilder.VERSION, description = "Rebuilds blocks that have been previously destroyed.", authors = {"Aquerr"})
 public class WorldRebuilder
 {
+	public static final String VERSION = "0.2.0";
+
 	public static final Text PLUGIN_ERROR = Text.of(TextColors.RED, "[WR] ");
 	public static final Text PLUGIN_PREFIX = Text.of(TextColors.GREEN, "[WR] ");
 
