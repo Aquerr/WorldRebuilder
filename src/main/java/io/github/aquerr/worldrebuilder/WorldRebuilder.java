@@ -90,8 +90,20 @@ public class WorldRebuilder
 		return this.worldRebuilderScheduler;
 	}
 
+	public Map<List<String>, CommandCallable> getSubcommands()
+	{
+		return this.subcommands;
+	}
+
 	private void registerCommands()
 	{
+		//Help Command
+		this.subcommands.put(Collections.singletonList("help"), CommandSpec.builder()
+				.description(Text.of("Shows all available commands"))
+				.permission(Permissions.HELP_COMMAND)
+				.executor(new HelpCommand(this))
+				.arguments(GenericArguments.optional(GenericArguments.integer(Text.of("page"))))
+				.build());
 
 		//Wand Command
 		this.subcommands.put(Collections.singletonList("wand"), CommandSpec.builder()

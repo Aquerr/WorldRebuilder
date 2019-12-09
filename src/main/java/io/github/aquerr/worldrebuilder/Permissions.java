@@ -2,6 +2,8 @@ package io.github.aquerr.worldrebuilder;
 
 public class Permissions
 {
+	public static final String HELP_COMMAND = "worldrebuilder.player.command.help";
+
 	public static final String WAND_COMMAND = "worldrebuilder.player.command.wand";
 	public static final String LIST_COMMAND = "worldrebuilder.player.command.list";
 
