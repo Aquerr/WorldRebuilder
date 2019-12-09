@@ -2,10 +2,7 @@
 package io.github.aquerr.worldrebuilder;
 
 import com.google.inject.Inject;
-import io.github.aquerr.worldrebuilder.commands.CreateRegionCommand;
-import io.github.aquerr.worldrebuilder.commands.InfoCommand;
-import io.github.aquerr.worldrebuilder.commands.RestoreTimeCommand;
-import io.github.aquerr.worldrebuilder.commands.WandCommand;
+import io.github.aquerr.worldrebuilder.commands.*;
 import io.github.aquerr.worldrebuilder.commands.args.RegionArgument;
 import io.github.aquerr.worldrebuilder.entity.SelectionPoints;
 import io.github.aquerr.worldrebuilder.listener.BlockBreakListener;
@@ -101,6 +98,13 @@ public class WorldRebuilder
 				.description(Text.of("Gives WorldRebuilder wand"))
 				.permission(Permissions.WAND_COMMAND)
 				.executor(new WandCommand(this))
+				.build());
+
+		//List Command
+		this.subcommands.put(Collections.singletonList("list"), CommandSpec.builder()
+				.description(Text.of("Shows a list of all regions"))
+				.permission(Permissions.LIST_COMMAND)
+				.executor(new ListCommand(this))
 				.build());
 
 		//Create Region Command
