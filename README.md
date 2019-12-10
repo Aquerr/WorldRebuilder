@@ -24,3 +24,7 @@ And that is what **WorldRebuilder** is all about. **It simply rebuilds blocks wh
 ## License
 
 [MIT](https://github.com/Aquerr/WorldRebuilder/blob/master/LICENSE)
+
+## Donation
+
+Creation of this plugin is really a time consuming task. If you would like to support me then you can send me some cookies through [PayPal](https://www.paypal.me/aquerr)
