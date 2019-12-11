@@ -15,6 +15,8 @@ That means, if anyone destroy something in that region by using a pickaxe, tnt, 
 
 And that is what **WorldRebuilder** is all about. **It simply rebuilds blocks which have been destroyed.**
 
+**If you enjoy using World Rebuilder, give this repo a star!**
+
 ## Links
 
 * [Releases](https://github.com/Aquerr/WorldRebuilder/releases)
@@ -27,4 +29,4 @@ And that is what **WorldRebuilder** is all about. **It simply rebuilds blocks wh
 
 ## Donation
 
-Creation of this plugin is really a time consuming task. If you would like to support me then you can send me some cookies through [PayPal](https://www.paypal.me/aquerr)
+Creation of this plugin is really a time consuming task. If you would like to support me then you can star this repo or send me some cookies through [PayPal](https://www.paypal.me/aquerr).
