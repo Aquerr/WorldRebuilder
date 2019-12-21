@@ -62,7 +62,7 @@ public class HOCONStorage implements Storage
 			}
 		}
 
-		this.configLoader = HoconConfigurationLoader.builder().setPath(this.regionsFilePath).setParseOptions(ConfigParseOptions.defaults().setSyntax(ConfigSyntax.CONF)).build();
+		this.configLoader = HoconConfigurationLoader.builder().setPath(this.regionsFilePath).build();
 		reload();
 	}
 
