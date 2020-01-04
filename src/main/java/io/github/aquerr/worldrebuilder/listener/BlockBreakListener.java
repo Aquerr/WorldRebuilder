@@ -41,7 +41,7 @@ public class BlockBreakListener extends AbstractListener
 				return;
 		}
 
-		final Map<String, Region> regions = super.getPlugin().getRegionManager().getRegions();
+		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
 		if(regions.size() == 0)
 			return;
 
@@ -53,10 +53,10 @@ public class BlockBreakListener extends AbstractListener
 
 	private void rebuildBlocks(final UUID worldUUID, final List<Transaction<BlockSnapshot>> transactions)
 	{
-		final Map<String, Region> regions = super.getPlugin().getRegionManager().getRegions();
+		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
 		final List<BlockSnapshot> blocksToRestore = new LinkedList<>();
 
-		for(final Region region : regions.values())
+		for(final Region region : regions)
 		{
 			for(final Transaction<BlockSnapshot> transaction : transactions)
 			{
@@ -67,7 +67,7 @@ public class BlockBreakListener extends AbstractListener
 			}
 		}
 
-		final Region region = regions.values().stream().filter(x->x.intersects(transactions.get(0).getOriginal().getPosition())).findFirst().get();
+		final Region region = regions.stream().filter(x->x.intersects(transactions.get(0).getOriginal().getPosition())).findFirst().get();
 		super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(new RebuildBlocksTask(worldUUID, blocksToRestore), region.getRestoreTime());
 	}
 }

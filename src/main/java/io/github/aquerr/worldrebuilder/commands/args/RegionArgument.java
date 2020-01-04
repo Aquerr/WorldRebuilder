@@ -46,11 +46,11 @@ public class RegionArgument extends CommandElement
 		if(optionalArg.isPresent())
 		{
 			final String arg = optionalArg.get();
-			final Map<String, Region> regions = this.plugin.getRegionManager().getRegions();
-			for(final String regionName : regions.keySet())
+			final Collection<Region> regions = this.plugin.getRegionManager().getRegions();
+			for(final Region region : regions)
 			{
-				if(regionName.contains(arg))
-					regionsList.add(regionName);
+				if(region.getName().contains(arg))
+					regionsList.add(region.getName());
 			}
 		}
 		return regionsList;

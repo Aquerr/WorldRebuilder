@@ -7,6 +7,7 @@ import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.storage.StorageManager;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +26,9 @@ public class RegionManager
 		loadRegions();
 	}
 
-	public Map<String, Region> getRegions()
+	public Collection<Region> getRegions()
 	{
-		return this.regions;
+		return this.regions.values();
 	}
 
 	public void loadRegions()

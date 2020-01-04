@@ -11,6 +11,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,11 +43,11 @@ public class EntityDestroyListener extends AbstractListener
 			return;
 		final Location<World> location = optionalLocation.get();
 
-		final Map<String, Region> regions = super.getPlugin().getRegionManager().getRegions();
+		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
 		boolean shouldRestore = false;
 		Region affectedRegion = null;
 
-		for(final Region region : regions.values())
+		for(final Region region : regions)
 		{
 			if(region.intersects(location.getBlockPosition()))
 			{

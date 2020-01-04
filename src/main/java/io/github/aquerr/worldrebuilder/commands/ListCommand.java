@@ -28,7 +28,7 @@ public class ListCommand extends WRCommand
 	@Override
 	public CommandResult execute(final CommandSource source, final CommandContext args) throws CommandException
 	{
-		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions().values();
+		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
 		final List<Text> helpList = new LinkedList<>();
 
 		for(final Region region : regions)
