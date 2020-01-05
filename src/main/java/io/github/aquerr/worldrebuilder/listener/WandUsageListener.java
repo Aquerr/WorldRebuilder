@@ -1,15 +1,10 @@
 package io.github.aquerr.worldrebuilder.listener;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.SelectionPoints;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -17,11 +12,6 @@ import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-
-import java.util.Optional;
 
 public class WandUsageListener extends AbstractListener
 {
@@ -59,6 +49,7 @@ public class WandUsageListener extends AbstractListener
 
         super.getPlugin().getPlayerSelectionPoints().put(player.getUniqueId(), selectionPoints);
         player.sendMessage(Text.of(TextColors.GOLD, "Second point", TextColors.BLUE, " has been selected at ", TextColors.GOLD, event.getTargetBlock().getPosition()));
+        event.setCancelled(true);
     }
 
     @Listener
@@ -90,6 +81,7 @@ public class WandUsageListener extends AbstractListener
 
         super.getPlugin().getPlayerSelectionPoints().put(player.getUniqueId(), selectionPoints);
         player.sendMessage(Text.of(TextColors.GOLD, "First point", TextColors.BLUE, " has been selected at ", TextColors.GOLD, event.getTargetBlock().getPosition()));
+        event.setCancelled(true);
     }
 
 //    @Listener
