@@ -44,20 +44,21 @@ public class EntityDestroyListener extends AbstractListener
 		final Location<World> location = optionalLocation.get();
 
 		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
-		boolean shouldRestore = false;
 		Region affectedRegion = null;
 
 		for(final Region region : regions)
 		{
+			if (!region.isActive())
+				continue;
+
 			if(region.intersects(location.getBlockPosition()))
 			{
-				shouldRestore = true;
 				affectedRegion = region;
 				break;
 			}
 		}
 
-		if(!shouldRestore)
+		if (affectedRegion == null)
 			return;
 
 		super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildEntityTask(new RebuildEntityTask(worldUUID, entity), affectedRegion.getRestoreTime());

@@ -18,6 +18,7 @@ import org.spongepowered.api.world.World;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class BlockBreakListener extends AbstractListener
 {
@@ -55,19 +56,26 @@ public class BlockBreakListener extends AbstractListener
 	{
 		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
 		final List<BlockSnapshot> blocksToRestore = new LinkedList<>();
+		Region affectedRegion = null;
 
 		for(final Region region : regions)
 		{
+			if (!region.isActive())
+				continue;
+
 			for(final Transaction<BlockSnapshot> transaction : transactions)
 			{
 				if(region.intersects(transaction.getOriginal().getPosition()))
 				{
 					blocksToRestore.add(transaction.getOriginal());
+					affectedRegion = region;
 				}
 			}
 		}
 
-		final Region region = regions.stream().filter(x->x.intersects(transactions.get(0).getOriginal().getPosition())).findFirst().get();
-		super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(new RebuildBlocksTask(worldUUID, blocksToRestore), region.getRestoreTime());
+		if (affectedRegion == null)
+			return;
+
+		super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(new RebuildBlocksTask(worldUUID, blocksToRestore), affectedRegion.getRestoreTime());
 	}
 }

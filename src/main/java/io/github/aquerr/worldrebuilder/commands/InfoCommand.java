@@ -40,7 +40,8 @@ public class InfoCommand extends WRCommand
 				.append(Text.of(TextColors.BLUE, " - World Name: ", TextColors.GOLD, worldName, "\n"))
 				.append(Text.of(TextColors.BLUE, " - First Point: ", TextColors.GOLD, region.getFirstPoint(), "\n"))
 				.append(Text.of(TextColors.BLUE, " - Second Point: ", TextColors.GOLD, region.getSecondPoint(), "\n"))
-				.append(Text.of(TextColors.BLUE, " - Restore Time: ", TextColors.GOLD, region.getRestoreTime()));
+				.append(Text.of(TextColors.BLUE, " - Restore Time: ", TextColors.GOLD, region.getRestoreTime(), "\n"))
+				.append(Text.of(TextColors.BLUE, " - Active: ", (region.isActive() ? TextColors.GREEN : TextColors.RED), region.isActive()));
 
 		helpList.add(textBuilder.build());
 		final PaginationList paginationList = PaginationList.builder().title(Text.of(TextColors.GOLD, "Region Info")).contents(helpList).linesPerPage(14).padding(Text.of(TextColors.BLUE, "-")).build();

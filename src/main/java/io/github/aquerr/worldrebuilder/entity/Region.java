@@ -12,15 +12,18 @@ public class Region
 
 	private final String name;
 
+	private boolean isActive;
+
 	private int restoreTime; //Seconds. Default: 10
 
-	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint, final Vector3i secondPoint, final int restoreTime)
+	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint, final Vector3i secondPoint, final int restoreTime, final boolean isActive)
 	{
 		this.name = name;
 		this.worldUniqueId = worldUniqueId;
 		this.firstPoint = firstPoint;
 		this.secondPoint = secondPoint;
 		this.restoreTime = restoreTime;
+		this.isActive = isActive;
 	}
 
 	public String getName()
@@ -41,6 +44,16 @@ public class Region
 	public Vector3i getSecondPoint()
 	{
 		return this.secondPoint;
+	}
+
+	public boolean isActive()
+	{
+		return this.isActive;
+	}
+
+	public void setActive(final boolean value)
+	{
+		this.isActive = value;
 	}
 
 	public int getRestoreTime()

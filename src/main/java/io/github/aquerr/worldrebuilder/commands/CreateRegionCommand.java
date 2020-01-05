@@ -41,7 +41,7 @@ public class CreateRegionCommand extends WRCommand
 		if (super.getPlugin().getRegionManager().getRegion(name) != null)
 			throw new CommandException(Text.of(WorldRebuilder.PLUGIN_ERROR, TextColors.RED, "Region with such name already exists!"));
 
-		final Region region = new Region(name, world.getUniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 10);
+		final Region region = new Region(name, world.getUniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 10, true);
 		super.getPlugin().getRegionManager().addRegion(region);
 		player.sendMessage(Text.of(WorldRebuilder.PLUGIN_PREFIX, TextColors.GREEN, "Region has been created!"));
 		return CommandResult.success();

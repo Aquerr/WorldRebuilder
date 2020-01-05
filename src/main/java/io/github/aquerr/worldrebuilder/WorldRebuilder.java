@@ -156,6 +156,14 @@ public class WorldRebuilder
 				.arguments(GenericArguments.onlyOne(GenericArguments.integer(Text.of("timeInSeconds"))))
 				.build();
 
+		//Active Command
+		final CommandSpec activeCommand = CommandSpec.builder()
+				.description(Text.of("Activates/Deactivates a region"))
+				.permission(Permissions.ACTIVE_COMMAND)
+				.executor(new ActiveCommand(this))
+				.arguments(GenericArguments.onlyOne(GenericArguments.bool(Text.of("isActive"))))
+				.build();
+
 		//Region Command/s
 		this.subcommands.put(Collections.singletonList("region"), CommandSpec.builder()
 				.description(Text.of("Region commands"))
@@ -163,6 +171,7 @@ public class WorldRebuilder
 				.arguments(GenericArguments.onlyOne(new RegionArgument(this, Text.of("region"))))
 				.child(regionCommand, "info")
 				.child(restoreTimeCommand, "restoretime")
+				.child(activeCommand, "active")
 				.build());
 
 		//WorldRebuilder commands

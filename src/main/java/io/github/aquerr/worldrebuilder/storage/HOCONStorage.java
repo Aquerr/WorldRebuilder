@@ -87,6 +87,7 @@ public class HOCONStorage implements Storage
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "firstPoint").setValue(TypeToken.of(Vector3i.class), region.getFirstPoint());
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "secondName").setValue(TypeToken.of(Vector3i.class), region.getSecondPoint());
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "restoreTime").setValue(region.getRestoreTime());
+		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "active").setValue(region.isActive());
 		saveChanges();
 	}
 
@@ -116,7 +117,8 @@ public class HOCONStorage implements Storage
 		final Vector3i firstPosition = this.configNode.getNode(ROOT_NODE_NAME, name, "firstPoint").getValue(TypeToken.of(Vector3i.class));
 		final Vector3i secondPosition = this.configNode.getNode(ROOT_NODE_NAME, name, "secondName").getValue(TypeToken.of(Vector3i.class));
 		final int restoreTime = this.configNode.getNode(ROOT_NODE_NAME, name, "restoreTime").getInt(10);
-		return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime);
+		final boolean isActive = this.configNode.getNode(ROOT_NODE_NAME, name, "active").getBoolean(true);
+		return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime, isActive);
 	}
 
 	@Override

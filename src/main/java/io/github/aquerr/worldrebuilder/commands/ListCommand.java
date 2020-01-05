@@ -43,7 +43,8 @@ public class ListCommand extends WRCommand
 					.append(Text.of(TextColors.BLUE, "World Name: ", TextColors.GOLD, worldName, "\n"))
 					.append(Text.of(TextColors.BLUE, "First Point: ", TextColors.GOLD, region.getFirstPoint(), "\n"))
 					.append(Text.of(TextColors.BLUE, "Second Point: ", TextColors.GOLD, region.getSecondPoint(), "\n"))
-					.append(Text.of(TextColors.BLUE, "Restore Time: ", TextColors.GOLD, region.getRestoreTime()))
+					.append(Text.of(TextColors.BLUE, "Restore Time: ", (region.isActive() ? TextColors.GREEN : TextColors.RED), region.getRestoreTime(), "\n"))
+					.append(Text.of(TextColors.BLUE, "Active: ", TextColors.GOLD, region.isActive()))
 					.build();
 
 			final Text regionRecord = Text.builder()
