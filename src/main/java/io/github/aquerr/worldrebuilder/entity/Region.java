@@ -66,8 +66,11 @@ public class Region
 		this.restoreTime = restoreTimeInSeconds;
 	}
 
-	public boolean intersects(final Vector3i position)
+	public boolean intersects(final UUID worldUniqueId, final Vector3i position)
 	{
+		if(!this.worldUniqueId.equals(worldUniqueId))
+			return false;
+
 		boolean intersectX = false;
 		boolean intersectY = false;
 		boolean intersectZ = false;

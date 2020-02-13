@@ -51,7 +51,7 @@ public class EntityDestroyListener extends AbstractListener
 			if (!region.isActive())
 				continue;
 
-			if(region.intersects(location.getBlockPosition()))
+			if(region.intersects(worldUUID, location.getBlockPosition()))
 			{
 				affectedRegion = region;
 				break;

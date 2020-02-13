@@ -65,7 +65,7 @@ public class BlockBreakListener extends AbstractListener
 
 			for(final Transaction<BlockSnapshot> transaction : transactions)
 			{
-				if(region.intersects(transaction.getOriginal().getPosition()))
+				if(region.intersects(worldUUID, transaction.getOriginal().getPosition()))
 				{
 					blocksToRestore.add(transaction.getOriginal());
 					affectedRegion = region;
