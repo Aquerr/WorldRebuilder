@@ -2,7 +2,6 @@ package io.github.aquerr.worldrebuilder.managers;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.storage.StorageManager;
 

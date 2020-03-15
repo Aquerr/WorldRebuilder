@@ -3,22 +3,19 @@ package io.github.aquerr.worldrebuilder.listener;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.scheduling.RebuildBlocksTask;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.World;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class BlockBreakListener extends AbstractListener
 {

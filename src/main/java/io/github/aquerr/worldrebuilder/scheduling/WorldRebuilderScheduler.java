@@ -33,4 +33,9 @@ public class WorldRebuilderScheduler
 	{
 		this.spongeScheduler.createTaskBuilder().execute(rebuildEntityTask).delay(delayInSeconds, TimeUnit.SECONDS).name("World Rebuilder - Entity Rebuild Task").submit(WorldRebuilder.getPlugin());
 	}
+
+	public void scheduleRebuildEntityTask(final RebuildEntityContainerTask rebuildEntityContainerTask, final int delayInSeconds)
+	{
+		this.spongeScheduler.createTaskBuilder().execute(rebuildEntityContainerTask).delay(delayInSeconds, TimeUnit.SECONDS).name("World Rebuilder - Entity Rebuild Task").submit(WorldRebuilder.getPlugin());
+	}
 }
