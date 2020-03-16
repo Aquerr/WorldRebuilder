@@ -8,14 +8,18 @@
 
 ## General
 
-**WorldRebuilder** is "protection-like" plugin for SpongeForge. It is inspired by one of plugins for Bukkit.
+**WorldRebuilder** is *protection-like* plugin for SpongeForge. It is inspired by one of plugins for Bukkit.
 
-**What does it do?** WorldRebuilder allows you to **mark and create regions in the world which should be rebuilt after being destroyed**. 
-That means, if anyone destroy something in that region by using a pickaxe, tnt, grenade or anything, all destroyed blocks will be restored in few seconds or minutes (depends on configuration). 
-
-And that is what **WorldRebuilder** is all about. **It simply rebuilds blocks which have been destroyed.**
+**WorldRebuilder** allows you to **mark and create regions in the world which will be rebuilt after being destroyed**. 
+That means, if anyone destroy something in such region by using a pickaxe, tnt, grenade or anything... all destroyed blocks will be restored in few seconds or minutes (depends on how you configure it).
 
 **If you enjoy using World Rebuilder, give this repo a star!**
+
+### Use Cases
+
+This plugin is useful in situations when **you want to let players destroy terrain yet preserve your beautiful buildings.**
+
+For example, you are making a **WWII style RPG map with guns and vehicles** and you would like to **let players destroy bunkers and other building** but you also **don't want to lose your epic creations** that you prepared in that map. In such situation you can use this plugin, mark regions which should be rebuilt and allow players destroy blocks. 
 
 ## Links
 
