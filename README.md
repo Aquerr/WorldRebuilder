@@ -2,7 +2,6 @@
 
 ![License](https://img.shields.io/github/license/aquerr/worldrebuilder.svg?label=License)
 ![Version](https://img.shields.io/github/release/aquerr/worldrebuilder.svg?label=Version)
-[![Downloads](https://img.shields.io/github/downloads/aquerr/worldrebuilder/total.svg?label=Total%20Downloads)](https://github.com/Aquerr/EagleFactions/releases)
 [![Latest build](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.bartlomiejstepien.pl%2Fjob%2FWorldRebuilder-dev-build%2F&label=Latest%20build)](https://jenkins.bartlomiejstepien.pl/job/WorldRebuilder-dev-build/)
 [![Discord](https://img.shields.io/discord/447076657698963466.svg?color=blue&label=Discord&logo=Discord&logoColor=white)](https://discord.gg/Zg3rWta)
 

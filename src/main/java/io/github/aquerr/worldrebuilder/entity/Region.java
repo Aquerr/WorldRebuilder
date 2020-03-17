@@ -16,7 +16,9 @@ public class Region
 
 	private int restoreTime; //Seconds. Default: 10
 
-	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint, final Vector3i secondPoint, final int restoreTime, final boolean isActive)
+	private boolean shouldDropBlocks;
+
+	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint, final Vector3i secondPoint, final int restoreTime, final boolean isActive, final boolean shouldDropBlocks)
 	{
 		this.name = name;
 		this.worldUniqueId = worldUniqueId;
@@ -24,6 +26,7 @@ public class Region
 		this.secondPoint = secondPoint;
 		this.restoreTime = restoreTime;
 		this.isActive = isActive;
+		this.shouldDropBlocks = shouldDropBlocks;
 	}
 
 	public String getName()
@@ -64,6 +67,16 @@ public class Region
 	public void setRestoreTime(int restoreTimeInSeconds)
 	{
 		this.restoreTime = restoreTimeInSeconds;
+	}
+
+	public boolean shouldDropBlocks()
+	{
+		return this.shouldDropBlocks;
+	}
+
+	public void setShouldDropBlocks(boolean shouldDropBlocks)
+	{
+		this.shouldDropBlocks = shouldDropBlocks;
 	}
 
 	public boolean intersects(final UUID worldUniqueId, final Vector3i position)

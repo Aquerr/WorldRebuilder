@@ -55,25 +55,24 @@ public class RebuildEntityTask implements Runnable
 		}
 		else if (newEntity instanceof ArmorStand)
 		{
-			final Vector3d rotation = this.entity.getRotation();
+			final ArmorStand oldArmorStand = (ArmorStand) this.entity;
+			final Vector3d rotation = oldArmorStand.getRotation();
 			newEntity.setRotation(rotation);
 
-			final Optional<Direction> directionalData = this.entity.get(Keys.DIRECTION);
+			final Optional<Direction> directionalData = oldArmorStand.get(Keys.DIRECTION);
 			directionalData.ifPresent(direction -> newEntity.offer(Keys.DIRECTION, direction));
 
-			final Optional<ArmorStandData> optionalArmorStandData = this.entity.get(ArmorStandData.class);
-			if (optionalArmorStandData.isPresent())
-			{
-				final ArmorStandData armorStandData = optionalArmorStandData.get();
-				newEntity.offer(armorStandData);
-			}
+			final ArmorStandData armorStandData = oldArmorStand.getArmorStandData();
+			newEntity.offer(armorStandData);
 
-			final Optional<BodyPartRotationalData> optionalBodyPartRotationalData = this.entity.get(BodyPartRotationalData.class);
-			if (optionalBodyPartRotationalData.isPresent())
-			{
-				final BodyPartRotationalData bodyPartRotationalData = optionalBodyPartRotationalData.get();
-				newEntity.offer(bodyPartRotationalData);
-			}
+			final BodyPartRotationalData bodyPartRotationalData = oldArmorStand.getBodyPartRotationalData();
+			newEntity.offer(bodyPartRotationalData.bodyRotation());
+			newEntity.offer(bodyPartRotationalData.headDirection());
+			newEntity.offer(bodyPartRotationalData.leftArmDirection());
+			newEntity.offer(bodyPartRotationalData.leftLegDirection());
+			newEntity.offer(bodyPartRotationalData.rightArmDirection());
+			newEntity.offer(bodyPartRotationalData.rightLegDirection());
+			newEntity.offer(bodyPartRotationalData.partRotation());
 		}
 
 		boolean didSpawn = world.spawnEntity(newEntity);

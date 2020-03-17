@@ -9,6 +9,13 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
+import org.spongepowered.api.event.entity.HarvestEntityEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.LocatableBlock;
 
 import java.util.Collection;
@@ -47,6 +54,32 @@ public class BlockBreakListener extends AbstractListener
 		final UUID worldUUID = transactions.get(0).getOriginal().getWorldUniqueId();
 
 		CompletableFuture.runAsync(() -> rebuildBlocks(worldUUID, new LinkedList<>(transactions)));
+	}
+
+	@Listener
+	public void onBlockDrop(final SpawnEntityEvent event)
+	{
+		final EventContext eventContext = event.getContext();
+		final Object source = event.getSource();
+		final boolean isBlockSource = source instanceof BlockSnapshot;
+		final boolean isDroppedItem = eventContext.get(EventContextKeys.SPAWN_TYPE).isPresent() && eventContext.get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.DROPPED_ITEM;
+
+		if (!isDroppedItem || !isBlockSource)
+			return;
+
+		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
+		for (final Region region : regions)
+		{
+			event.filterEntities(x-> !region.shouldDropBlocks() && region.intersects(x.getWorld().getUniqueId(), x.getLocation().getBlockPosition()));
+		}
+	}
+
+	@Listener
+	public void onEntityDrop(final DestructEntityEvent event)
+	{
+		final Cause cause = event.getCause();
+		final EventContext eventContext = event.getContext();
+		final Object source = event.getSource();
 	}
 
 	private void rebuildBlocks(final UUID worldUUID, final List<Transaction<BlockSnapshot>> transactions)

@@ -164,6 +164,14 @@ public class WorldRebuilder
 				.arguments(GenericArguments.onlyOne(GenericArguments.bool(Text.of("isActive"))))
 				.build();
 
+		//DropBlocks Command
+		final CommandSpec blockDropCommand = CommandSpec.builder()
+				.description(Text.of("Toggles block drop in region"))
+				.permission(Permissions.BLOCK_DROP_COMMAND)
+				.executor(new BlockDropCommand(this))
+				.arguments(GenericArguments.onlyOne(GenericArguments.bool(Text.of("value"))))
+				.build();
+
 		//Region Command/s
 		this.subcommands.put(Collections.singletonList("region"), CommandSpec.builder()
 				.description(Text.of("Region commands"))
@@ -172,6 +180,7 @@ public class WorldRebuilder
 				.child(regionCommand, "info")
 				.child(restoreTimeCommand, "restoretime")
 				.child(activeCommand, "active")
+				.child(blockDropCommand, "dropblocks")
 				.build());
 
 		//WorldRebuilder commands

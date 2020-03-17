@@ -14,4 +14,5 @@ public class Permissions
 	public static final String INFO_COMMAND = "worldrebuilder.player.command.region.info";
 	public static final String RESTORE_TIME_COMMAND = "worldrebuilder.player.command.region.restoretime";
 	public static final String ACTIVE_COMMAND = "worldrebuilder.player.command.region.active";
+    public static final String BLOCK_DROP_COMMAND = "worldrebuilder.player.command.region.blockdrop";
 }

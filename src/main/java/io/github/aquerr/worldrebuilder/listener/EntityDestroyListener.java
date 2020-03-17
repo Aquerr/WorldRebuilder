@@ -7,9 +7,12 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.hanging.Hanging;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.extent.EntityUniverse;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -23,11 +26,10 @@ public class EntityDestroyListener extends AbstractListener
 	}
 
 	@Listener
-	public void onEntityAttacked(final AttackEntityEvent event)
+	public void onEntityAttacked(final DestructEntityEvent event)
 	{
 		//Used for item frames, paintings and similar.
 		final Entity entity = event.getTargetEntity();
-
 		if(!(entity instanceof Hanging) && !(entity instanceof ArmorStand))
 			return;
 

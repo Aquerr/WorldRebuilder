@@ -88,6 +88,7 @@ public class HOCONStorage implements Storage
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "secondName").setValue(TypeToken.of(Vector3i.class), region.getSecondPoint());
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "restoreTime").setValue(region.getRestoreTime());
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "active").setValue(region.isActive());
+		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "shouldDropBlocks").setValue(region.shouldDropBlocks());
 		saveChanges();
 	}
 
@@ -118,7 +119,8 @@ public class HOCONStorage implements Storage
 		final Vector3i secondPosition = this.configNode.getNode(ROOT_NODE_NAME, name, "secondName").getValue(TypeToken.of(Vector3i.class));
 		final int restoreTime = this.configNode.getNode(ROOT_NODE_NAME, name, "restoreTime").getInt(10);
 		final boolean isActive = this.configNode.getNode(ROOT_NODE_NAME, name, "active").getBoolean(true);
-		return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime, isActive);
+		final boolean shouldDropBlocks = this.configNode.getNode(ROOT_NODE_NAME, name, "shouldDropBlocks").getBoolean(true);
+		return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime, isActive, shouldDropBlocks);
 	}
 
 	@Override
