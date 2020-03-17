@@ -3,9 +3,12 @@ package io.github.aquerr.worldrebuilder.scheduling;
 import com.flowpowered.math.vector.Vector3d;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.ArmorStandData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BodyPartRotationalData;
+import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
+import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.hanging.Hanging;
@@ -56,23 +59,26 @@ public class RebuildEntityTask implements Runnable
 		else if (newEntity instanceof ArmorStand)
 		{
 			final ArmorStand oldArmorStand = (ArmorStand) this.entity;
+			final ArmorStand newArmorStand = (ArmorStand) newEntity;
+
+			final DataContainer dataContainer = oldArmorStand.getArmorStandData().toContainer();
+			final DataContainer dataContainer1 = oldArmorStand.getBodyPartRotationalData().toContainer();
+			final DataContainer dataContainer2 = oldArmorStand.getDamageableData().toContainer();
+			final DataContainer dataContainer3 = oldArmorStand.getHealthData().toContainer();
+
+			newArmorStand.offer(Sponge.getDataManager().getBuilder(ArmorStandData.class).get().build(dataContainer).get());
+			newArmorStand.offer(Sponge.getDataManager().getBuilder(BodyPartRotationalData.class).get().build(dataContainer1).get());
+			newArmorStand.offer(Sponge.getDataManager().getBuilder(DamageableData.class).get().build(dataContainer2).get());
+			newArmorStand.offer(Sponge.getDataManager().getBuilder(HealthData.class).get().build(dataContainer3).get());
+
 			final Vector3d rotation = oldArmorStand.getRotation();
-			newEntity.setRotation(rotation);
+			newArmorStand.setRotation(rotation);
 
 			final Optional<Direction> directionalData = oldArmorStand.get(Keys.DIRECTION);
-			directionalData.ifPresent(direction -> newEntity.offer(Keys.DIRECTION, direction));
+			directionalData.ifPresent(direction -> newArmorStand.offer(Keys.DIRECTION, direction));
 
 			final ArmorStandData armorStandData = oldArmorStand.getArmorStandData();
-			newEntity.offer(armorStandData);
-
-			final BodyPartRotationalData bodyPartRotationalData = oldArmorStand.getBodyPartRotationalData();
-			newEntity.offer(bodyPartRotationalData.bodyRotation());
-			newEntity.offer(bodyPartRotationalData.headDirection());
-			newEntity.offer(bodyPartRotationalData.leftArmDirection());
-			newEntity.offer(bodyPartRotationalData.leftLegDirection());
-			newEntity.offer(bodyPartRotationalData.rightArmDirection());
-			newEntity.offer(bodyPartRotationalData.rightLegDirection());
-			newEntity.offer(bodyPartRotationalData.partRotation());
+			newArmorStand.offer(armorStandData);
 		}
 
 		boolean didSpawn = world.spawnEntity(newEntity);

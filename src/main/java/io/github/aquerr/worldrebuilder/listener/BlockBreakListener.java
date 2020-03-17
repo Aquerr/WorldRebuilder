@@ -6,6 +6,8 @@ import io.github.aquerr.worldrebuilder.scheduling.RebuildBlocksTask;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.hanging.Hanging;
+import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -13,9 +15,10 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.DestructEntityEvent;
-import org.spongepowered.api.event.entity.HarvestEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.LocatableBlock;
 
 import java.util.Collection;
@@ -57,29 +60,63 @@ public class BlockBreakListener extends AbstractListener
 	}
 
 	@Listener
-	public void onBlockDrop(final SpawnEntityEvent event)
+	public void onEntitySpawn(final SpawnEntityEvent event)
 	{
 		final EventContext eventContext = event.getContext();
 		final Object source = event.getSource();
 		final boolean isBlockSource = source instanceof BlockSnapshot;
 		final boolean isDroppedItem = eventContext.get(EventContextKeys.SPAWN_TYPE).isPresent() && eventContext.get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.DROPPED_ITEM;
+		final boolean isDroppedArmorStand = eventContext.get(EventContextKeys.SPAWN_TYPE).isPresent() && eventContext.get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.PLACEMENT;
+		final boolean isPlayerPlace = eventContext.get(EventContextKeys.PLAYER_PLACE).isPresent();
 
-		if (!isDroppedItem || !isBlockSource)
+		if (isPlayerPlace)
+			return;
+
+		if (!isDroppedArmorStand && (!isDroppedItem || !isBlockSource))
 			return;
 
 		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
 		for (final Region region : regions)
 		{
-			event.filterEntities(x-> !region.shouldDropBlocks() && region.intersects(x.getWorld().getUniqueId(), x.getLocation().getBlockPosition()));
+			event.filterEntities(x-> !(!region.shouldDropBlocks() && region.intersects(x.getWorld().getUniqueId(), x.getLocation().getBlockPosition())));
 		}
 	}
 
 	@Listener
-	public void onEntityDrop(final DestructEntityEvent event)
+	public void onHangingDrop(final DropItemEvent.Pre event)
 	{
 		final Cause cause = event.getCause();
-		final EventContext eventContext = event.getContext();
-		final Object source = event.getSource();
+
+		//If it is itemframe/painting
+		final boolean isHanging = cause.first(Hanging.class).isPresent();
+		if (!isHanging)
+			return;
+
+		boolean isItemFrameDropped = false;
+		for (final ItemStackSnapshot item : event.getDroppedItems())
+		{
+			if (item.getType() == ItemTypes.ITEM_FRAME || item.getType() == ItemTypes.PAINTING)
+			{
+				isItemFrameDropped = true;
+				break;
+			}
+		}
+
+		if (!isItemFrameDropped)
+			return;
+
+		final Hanging hanging = cause.first(Hanging.class).get();
+		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
+		for (final Region region : regions)
+		{
+			if (!region.isActive())
+				continue;
+			if (!region.shouldDropBlocks() && region.intersects(hanging.getWorld().getUniqueId(), hanging.getLocation().getBlockPosition()))
+			{
+				event.setCancelled(true);
+				break;
+			}
+		}
 	}
 
 	private void rebuildBlocks(final UUID worldUUID, final List<Transaction<BlockSnapshot>> transactions)

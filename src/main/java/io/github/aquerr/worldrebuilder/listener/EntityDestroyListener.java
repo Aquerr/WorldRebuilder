@@ -7,12 +7,9 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.hanging.Hanging;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.extent.EntityUniverse;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -33,7 +30,6 @@ public class EntityDestroyListener extends AbstractListener
 		if(!(entity instanceof Hanging) && !(entity instanceof ArmorStand))
 			return;
 
-//		CompletableFuture.runAsync(() -> tryRebuildEntity(entity.getWorld().getUniqueId(), event.getTargetEntity().createSnapshot()));
 		CompletableFuture.runAsync(() -> tryRebuildEntity(entity.getWorld().getUniqueId(), event.getTargetEntity()));
 	}
 
@@ -60,32 +56,4 @@ public class EntityDestroyListener extends AbstractListener
 
 		super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildEntityTask(new RebuildEntityTask(worldUUID, entity), affectedRegion.getRestoreTime());
 	}
-
-//	private void tryRebuildEntity(final UUID worldUUID, final EntitySnapshot entity)
-//	{
-//		final Optional<Location<World>> optionalLocation = entity.getLocation();
-//		if(!optionalLocation.isPresent())
-//			return;
-//		final Location<World> location = optionalLocation.get();
-//
-//		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
-//		Region affectedRegion = null;
-//
-//		for(final Region region : regions)
-//		{
-//			if (!region.isActive())
-//				continue;
-//
-//			if(region.intersects(worldUUID, location.getBlockPosition()))
-//			{
-//				affectedRegion = region;
-//				break;
-//			}
-//		}
-//
-//		if (affectedRegion == null)
-//			return;
-//
-//		super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildEntityTask(new RebuildEntityTask(worldUUID, entity), affectedRegion.getRestoreTime());
-//	}
 }
