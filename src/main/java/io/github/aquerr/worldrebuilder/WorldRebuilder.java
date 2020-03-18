@@ -167,7 +167,7 @@ public class WorldRebuilder
 		//DropBlocks Command
 		final CommandSpec blockDropCommand = CommandSpec.builder()
 				.description(Text.of("Toggles block drop in region"))
-				.permission(Permissions.BLOCK_DROP_COMMAND)
+				.permission(Permissions.DROP_BLOCKS_COMMAND)
 				.executor(new BlockDropCommand(this))
 				.arguments(GenericArguments.onlyOne(GenericArguments.bool(Text.of("value"))))
 				.build();

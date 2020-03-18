@@ -41,6 +41,7 @@ public class InfoCommand extends WRCommand
 				.append(Text.of(TextColors.BLUE, " - First Point: ", TextColors.GOLD, region.getFirstPoint(), "\n"))
 				.append(Text.of(TextColors.BLUE, " - Second Point: ", TextColors.GOLD, region.getSecondPoint(), "\n"))
 				.append(Text.of(TextColors.BLUE, " - Restore Time: ", TextColors.GOLD, region.getRestoreTime(), "\n"))
+				.append(Text.of(TextColors.BLUE, " - Drops blocks: ", TextColors.GOLD, region.shouldDropBlocks(), "\n"))
 				.append(Text.of(TextColors.BLUE, " - Active: ", (region.isActive() ? TextColors.GREEN : TextColors.RED), region.isActive()));
 
 		helpList.add(textBuilder.build());
