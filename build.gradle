@@ -1,8 +1,23 @@
+buildscript {
+    repositories {
+        maven {
+            name = 'forge'
+            url = 'https://files.minecraftforge.net/maven'
+        }
+    }
+
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+    }
+}
+
 plugins {
     id 'java'
     id 'idea'
     id 'org.spongepowered.plugin' version '0.9.0'
 }
+
+apply plugin: 'net.minecraftforge.gradle.forge'
 
 group = "io.github.aquerr"
 version = "1.1.0"
@@ -22,6 +37,11 @@ jar {
     } else {
         version = version + "-SNAPSHOT"
     }
+}
+
+minecraft {
+    forgeVersion = '1.12.2-14.23.5.2838'
+    mappings = 'stable_39'
 }
 
 tasks.create("publishBuildOnDiscord") {

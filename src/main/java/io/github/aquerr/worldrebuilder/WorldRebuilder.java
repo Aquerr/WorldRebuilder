@@ -38,9 +38,6 @@ public class WorldRebuilder
 	private final Map<List<String>, CommandCallable> subcommands = new HashMap<>();
 	private final Map<UUID, SelectionPoints> playerSelectionPoints = new HashMap<>();
 
-	@Inject
-	private Logger logger;
-
 	private static WorldRebuilder INSTANCE;
 
 	private final CommandManager commandManager;
