@@ -3,15 +3,11 @@ package io.github.aquerr.worldrebuilder.listener;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.scheduling.RebuildBlocksTask;
-import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.item.ItemHangingEntity;
-import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.hanging.Hanging;
-import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -20,10 +16,8 @@ import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.LocatableBlock;
 
@@ -153,7 +147,7 @@ public class BlockBreakListener extends AbstractListener
 		{
 			if (!region.isActive())
 				continue;
-			if (!region.shouldDropBlocks() && region.intersects(hanging.getWorld().getUniqueId(), hanging.getLocation().getBlockPosition()))
+			if (!region.shouldDropBlocks() && region.intersects(hanging.getWorld().getUniqueId(), hanging.getLocation().getBlockPosition()) && region.isEntityIgnored(hanging))
 			{
 				event.setCancelled(true);
 				break;
@@ -164,11 +158,12 @@ public class BlockBreakListener extends AbstractListener
 	private void rebuildBlocks(final UUID worldUUID, final List<Transaction<BlockSnapshot>> transactions)
 	{
 		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
-		final List<BlockSnapshot> blocksToRestore = new LinkedList<>();
-		Region affectedRegion = null;
+		List<BlockSnapshot> blocksToRestore = new ArrayList<>();
 
 		for(final Region region : regions)
 		{
+			boolean shouldRebuild = false;
+
 			if (!region.isActive())
 				continue;
 
@@ -176,15 +171,20 @@ public class BlockBreakListener extends AbstractListener
 			{
 				if(region.intersects(worldUUID, transaction.getOriginal().getPosition()))
 				{
+					// Check ignored blocks
+					if (region.isBlockIgnored(transaction.getOriginal()))
+						continue;
+
 					blocksToRestore.add(transaction.getOriginal());
-					affectedRegion = region;
+					shouldRebuild = true;
 				}
 			}
+
+			if (shouldRebuild)
+			{
+				super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(new RebuildBlocksTask(worldUUID, blocksToRestore), region.getRestoreTime());
+				blocksToRestore = new ArrayList<>();
+			}
 		}
-
-		if (affectedRegion == null)
-			return;
-
-		super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(new RebuildBlocksTask(worldUUID, blocksToRestore), affectedRegion.getRestoreTime());
 	}
 }

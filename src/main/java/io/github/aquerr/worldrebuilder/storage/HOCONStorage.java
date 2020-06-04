@@ -15,7 +15,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.config.ConfigDir;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -89,6 +89,32 @@ public class HOCONStorage implements Storage
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "restoreTime").setValue(region.getRestoreTime());
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "active").setValue(region.isActive());
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "shouldDropBlocks").setValue(region.shouldDropBlocks());
+
+		//Serialize block snapshots
+//		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//		try
+//		{
+//			final ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+//			objectOutputStream.writeObject(region.getBlockSnapshotsExceptions());
+//
+//			final byte[] blockBytes = byteArrayOutputStream.toByteArray();
+//			byteArrayOutputStream.reset();
+//			objectOutputStream.reset();
+//
+//			objectOutputStream.writeObject(region.getEntitySnapshotsExceptions());
+//			final byte[] entityBytes = byteArrayOutputStream.toByteArray();
+
+			this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "blockSnapshotsExceptions").setValue(region.getBlockSnapshotsExceptions());
+			this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "entitySnapshotsExceptions").setValue(region.getEntitySnapshotsExceptions());
+
+//			byteArrayOutputStream.reset();
+//			objectOutputStream.close();
+//		}
+//		catch (IOException e)
+//		{
+//			e.printStackTrace();
+//		}
+
 		saveChanges();
 	}
 
@@ -120,7 +146,36 @@ public class HOCONStorage implements Storage
 		final int restoreTime = this.configNode.getNode(ROOT_NODE_NAME, name, "restoreTime").getInt(10);
 		final boolean isActive = this.configNode.getNode(ROOT_NODE_NAME, name, "active").getBoolean(true);
 		final boolean shouldDropBlocks = this.configNode.getNode(ROOT_NODE_NAME, name, "shouldDropBlocks").getBoolean(true);
-		return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime, isActive, shouldDropBlocks);
+
+		final Object object1 = this.configNode.getNode(ROOT_NODE_NAME, name, "blockSnapshotsExceptions").getValue();
+		final Object object2 = this.configNode.getNode(ROOT_NODE_NAME, name, "entitySnapshotsExceptions").getValue();
+
+//		//Deserialize block snapshots
+//		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayInputStream();
+//		try
+//		{
+//			final ObjectInputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+//			final Object object = objectOutputStream.readObject();
+//
+//			final byte[] blockBytes = byteArrayOutputStream.toByteArray();
+//			byteArrayOutputStream.reset();
+//			objectOutputStream.reset();
+//
+//			objectOutputStream.writeObject(region.getEntitySnapshotsExceptions());
+//			final byte[] entityBytes = byteArrayOutputStream.toByteArray();
+//
+//
+//
+//			byteArrayOutputStream.reset();
+//			objectOutputStream.close();
+//		}
+//		catch (IOException e)
+//		{
+//			e.printStackTrace();
+//		}
+
+
+		return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime, isActive, shouldDropBlocks, new HashMap<>(), new ArrayList<>());
 	}
 
 	@Override

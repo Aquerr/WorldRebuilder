@@ -1,8 +1,17 @@
 package io.github.aquerr.worldrebuilder.entity;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.inject.internal.cglib.core.$ObjectSwitchCallback;
+import io.github.aquerr.worldrebuilder.util.RegionUtil;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
-import java.util.UUID;
+import java.util.*;
 
 public class Region
 {
@@ -18,15 +27,32 @@ public class Region
 
 	private boolean shouldDropBlocks;
 
-	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint, final Vector3i secondPoint, final int restoreTime, final boolean isActive, final boolean shouldDropBlocks)
+	// Position (x, y, z) --> Block Snapshot
+
+	// Placed in the territory by mob/player after the region was created.
+	private Map<Vector3i, BlockSnapshot> blockSnapshotsExceptions;
+
+	// Placed in the territory by mob/player after the region was created.
+	private List<EntitySnapshot> entitySnapshotsException;
+
+	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint, final Vector3i secondPoint, final int restoreTime, final boolean isActive, final boolean shouldDropBlocks
+		, final Map<Vector3i, BlockSnapshot> blockSnapshotsExceptions, final List<EntitySnapshot> entitySnapshotsException)
 	{
 		this.name = name;
 		this.worldUniqueId = worldUniqueId;
 		this.firstPoint = firstPoint;
 		this.secondPoint = secondPoint;
+
 		this.restoreTime = restoreTime;
 		this.isActive = isActive;
 		this.shouldDropBlocks = shouldDropBlocks;
+
+		this.blockSnapshotsExceptions = blockSnapshotsExceptions;
+		this.entitySnapshotsException = entitySnapshotsException;
+
+//		this.blockSnapshotsExceptions = RegionUtil.getBlockSnapshots(worldUniqueId, firstPoint, secondPoint);
+//		this.entitySnapshotsException = RegionUtil.getEntitySnapshots(worldUniqueId, firstPoint, secondPoint);
+
 	}
 
 	public String getName()
@@ -120,4 +146,44 @@ public class Region
 
 		return intersectX && intersectY && intersectZ;
 	}
+
+	public Map<Vector3i, BlockSnapshot> getBlockSnapshotsExceptions()
+	{
+		return this.blockSnapshotsExceptions;
+	}
+
+	public List<EntitySnapshot> getEntitySnapshotsExceptions()
+	{
+		return this.entitySnapshotsException;
+	}
+
+	public boolean isEntityIgnored(final Entity entity)
+	{
+		for (final EntitySnapshot entitySnapshot : this.entitySnapshotsException)
+		{
+			if (entity.getLocation().getBlockPosition().equals(entitySnapshot.getPosition()) && entity.getType().equals(entitySnapshot.getType()))
+				return true;
+		}
+		return false;
+	}
+
+	public boolean isBlockIgnored(final BlockSnapshot blockSnapshot)
+	{
+		for (final Map.Entry<Vector3i, BlockSnapshot> blockExceptionEntry : this.getBlockSnapshotsExceptions().entrySet())
+		{
+			if (blockExceptionEntry.getKey().equals(blockSnapshot.getPosition()) && blockExceptionEntry.getValue().getState().getType().equals(blockSnapshot.getState().getType()))
+				return true;
+		}
+		return false;
+	}
+
+//	public Map<Vector3i, BlockSnapshot> getBlockSnapshots()
+//	{
+//		return this.blockSnapshots;
+//	}
+//
+//	public List<EntitySnapshot> getEntitySnapshots()
+//	{
+//		return this.entitySnapshots;
+//	}
 }
