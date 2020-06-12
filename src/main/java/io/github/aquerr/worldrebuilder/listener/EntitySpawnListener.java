@@ -49,7 +49,7 @@ public class EntitySpawnListener extends AbstractListener
                     if(!(entity instanceof EntityHanging) && !(entity instanceof ArmorStand))
                         continue;
 
-                    if (region.intersects(entity.getUniqueId(), entity.getLocation().getBlockPosition()))
+                    if (region.intersects(entity.getWorld().getUniqueId(), entity.getLocation().getBlockPosition()))
                     {
                         region.getEntitySnapshotsExceptions().add(entity.createSnapshot());
                         super.getPlugin().getRegionManager().updateRegion(region);

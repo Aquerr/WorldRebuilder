@@ -130,10 +130,10 @@ public class HOCONStorage implements Storage
 		final boolean shouldDropBlocks = this.configNode.getNode(ROOT_NODE_NAME, name, "shouldDropBlocks").getBoolean(true);
 
 		//TODO: Create custom TypeSerializer
-		final List<BlockSnapshot> blockSnapshotsExceptions = this.configNode.getNode(ROOT_NODE_NAME, name, "blockSnapshotsExceptions").getValue(BLOCKSNAPSHOT_TYPE_TOKEN);
-		final List<EntitySnapshot> entitySnapshotsExceptions = this.configNode.getNode(ROOT_NODE_NAME, name, "entitySnapshotsExceptions").getList(TypeTokens.ENTITY_TOKEN);
+		final List<BlockSnapshot> blockSnapshotsExceptions = this.configNode.getNode(ROOT_NODE_NAME, name, "blockSnapshotsExceptions").getValue(BLOCKSNAPSHOT_TYPE_TOKEN, Collections.emptyList());
+		final List<EntitySnapshot> entitySnapshotsExceptions = this.configNode.getNode(ROOT_NODE_NAME, name, "entitySnapshotsExceptions").getList(TypeTokens.ENTITY_TOKEN, Collections.emptyList());
 
-		return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime, isActive, shouldDropBlocks, blockSnapshotsExceptions, entitySnapshotsExceptions);
+		return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime, isActive, shouldDropBlocks, new LinkedList<>(blockSnapshotsExceptions), new LinkedList<>(entitySnapshotsExceptions));
 	}
 
 	@Override
