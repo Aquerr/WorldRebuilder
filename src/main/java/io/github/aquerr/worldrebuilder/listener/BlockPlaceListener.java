@@ -34,7 +34,7 @@ public class BlockPlaceListener extends AbstractListener
                 //All new blocks that are placed in a region should be treated as ignored blocks.
                 if (region.intersects(blockSnapshot.getWorldUniqueId(), blockSnapshot.getPosition()))
                 {
-                    region.getBlockSnapshotsExceptions().put(blockSnapshot.getPosition(), blockSnapshot);
+                    region.getBlockSnapshotsExceptions().add(blockSnapshot);
                     super.getPlugin().getRegionManager().updateRegion(region);
                 }
             }

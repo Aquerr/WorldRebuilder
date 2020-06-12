@@ -2,6 +2,7 @@ package io.github.aquerr.worldrebuilder.entity;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.inject.internal.cglib.core.$ObjectSwitchCallback;
+import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.util.RegionUtil;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -12,6 +13,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class Region
 {
@@ -30,13 +32,13 @@ public class Region
 	// Position (x, y, z) --> Block Snapshot
 
 	// Placed in the territory by mob/player after the region was created.
-	private Map<Vector3i, BlockSnapshot> blockSnapshotsExceptions;
+	private List<BlockSnapshot> blockSnapshotsExceptions;
 
 	// Placed in the territory by mob/player after the region was created.
 	private List<EntitySnapshot> entitySnapshotsException;
 
 	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint, final Vector3i secondPoint, final int restoreTime, final boolean isActive, final boolean shouldDropBlocks
-		, final Map<Vector3i, BlockSnapshot> blockSnapshotsExceptions, final List<EntitySnapshot> entitySnapshotsException)
+		, final List<BlockSnapshot> blockSnapshotsExceptions, final List<EntitySnapshot> entitySnapshotsException)
 	{
 		this.name = name;
 		this.worldUniqueId = worldUniqueId;
@@ -147,7 +149,7 @@ public class Region
 		return intersectX && intersectY && intersectZ;
 	}
 
-	public Map<Vector3i, BlockSnapshot> getBlockSnapshotsExceptions()
+	public List<BlockSnapshot> getBlockSnapshotsExceptions()
 	{
 		return this.blockSnapshotsExceptions;
 	}
@@ -162,18 +164,31 @@ public class Region
 		for (final EntitySnapshot entitySnapshot : this.entitySnapshotsException)
 		{
 			if (entity.getLocation().getBlockPosition().equals(entitySnapshot.getPosition()) && entity.getType().equals(entitySnapshot.getType()))
+			{
+				CompletableFuture.runAsync(() -> {
+					entitySnapshotsException.remove(entitySnapshot);
+					WorldRebuilder.getPlugin().getRegionManager().updateRegion(this);
+				});
 				return true;
+			}
 		}
 		return false;
 	}
 
 	public boolean isBlockIgnored(final BlockSnapshot blockSnapshot)
 	{
-		for (final Map.Entry<Vector3i, BlockSnapshot> blockExceptionEntry : this.getBlockSnapshotsExceptions().entrySet())
+		for (final BlockSnapshot blockException : this.getBlockSnapshotsExceptions())
 		{
-			if (blockExceptionEntry.getKey().equals(blockSnapshot.getPosition()) && blockExceptionEntry.getValue().getState().getType().equals(blockSnapshot.getState().getType()))
+			if (blockException.getPosition().equals(blockSnapshot.getPosition()) && blockException.getState().getType().equals(blockSnapshot.getState().getType()))
+			{
+				CompletableFuture.runAsync(() -> {
+					blockSnapshotsExceptions.remove(blockException);
+					WorldRebuilder.getPlugin().getRegionManager().updateRegion(this);
+				});
 				return true;
+			}
 		}
+
 		return false;
 	}
 
