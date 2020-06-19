@@ -3,10 +3,12 @@ package io.github.aquerr.worldrebuilder.listener;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
 import net.minecraft.entity.EntityHanging;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -26,6 +28,11 @@ public class EntitySpawnListener extends AbstractListener
     @Listener
     public void onEntitySpawn(final SpawnEntityEvent event)
     {
+        // If it is WorldRebuilder that is spawning an entity then don't execute code below.
+        final Cause cause = event.getCause();
+        if (cause.contains(Sponge.getPluginManager().fromInstance(super.getPlugin()).get()))
+            return;
+
         //DropItemEvent is handled in separate method.
         //However, this method is still triggered by broken armor stands.
         if (event instanceof DropItemEvent)

@@ -103,6 +103,14 @@ public class BlockBreakListener extends AbstractListener
 
 				if (region.intersects(x.getWorld().getUniqueId(), x.getLocation().getBlockPosition()))
 				{
+					for (final BlockSnapshot blockSnapshot : region.getBlockSnapshotsExceptions())
+					{
+						if (blockSnapshot.getPosition().equals(x.getLocation().getBlockPosition()))
+						{
+							return true;
+						}
+					}
+
 					return false;
 				}
 			}
@@ -147,7 +155,11 @@ public class BlockBreakListener extends AbstractListener
 		{
 			if (!region.isActive())
 				continue;
-			if (!region.shouldDropBlocks() && region.intersects(hanging.getWorld().getUniqueId(), hanging.getLocation().getBlockPosition()) && region.isEntityIgnored(hanging))
+
+			if (region.shouldDropBlocks())
+				continue;
+
+			if (region.intersects(hanging.getWorld().getUniqueId(), hanging.getLocation().getBlockPosition()) && !region.isEntityIgnored(hanging))
 			{
 				event.setCancelled(true);
 				break;
@@ -173,7 +185,10 @@ public class BlockBreakListener extends AbstractListener
 				{
 					// Check ignored blocks
 					if (region.isBlockIgnored(transaction.getOriginal()))
+					{
+						region.removeIgnoredBlock(transaction.getOriginal());
 						continue;
+					}
 
 					blocksToRestore.add(transaction.getOriginal());
 					shouldRebuild = true;

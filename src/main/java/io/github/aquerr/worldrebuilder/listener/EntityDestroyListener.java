@@ -48,7 +48,10 @@ public class EntityDestroyListener extends AbstractListener
 
 			// If it is an entity that we should ignore, then return.
 			if (region.isEntityIgnored(entity))
+			{
+				region.removeIgnoredEntity(entity);
 				break;
+			}
 
 			if (region.intersects(worldUUID, entity.getLocation().getBlockPosition()))
 			{

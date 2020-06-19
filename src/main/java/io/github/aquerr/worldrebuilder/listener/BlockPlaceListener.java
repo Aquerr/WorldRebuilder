@@ -2,14 +2,21 @@ package io.github.aquerr.worldrebuilder.listener;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.scheduling.RebuildBlocksTask;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.plugin.PluginContainer;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class BlockPlaceListener extends AbstractListener
 {
@@ -21,23 +28,47 @@ public class BlockPlaceListener extends AbstractListener
     @Listener
     public void onBlockPlace(final ChangeBlockEvent.Place event)
     {
-        // We should probably check here if it the WorldRebuilder that places blocks. If it is then we should not execute code below.
+        // If it is the WorldRebuilder that is placing (restoring) a block then don't execute code below.
+        final Cause cause = event.getCause();
+        if (cause.contains(Sponge.getPluginManager().fromInstance(super.getPlugin()).get()))
+            return;
 
         final List<Transaction<BlockSnapshot>> transactions = event.getTransactions();
-        final Collection<Region> regions = new ArrayList<>(super.getPlugin().getRegionManager().getRegions());
+        if (transactions.size() == 0)
+            return;
 
-        for (final Transaction<BlockSnapshot> transaction : transactions)
-        {
-            final BlockSnapshot blockSnapshot = transaction.getFinal();
+        CompletableFuture.runAsync(() -> {
+            final Collection<Region> regions = new ArrayList<>(super.getPlugin().getRegionManager().getRegions());
             for (final Region region : regions)
             {
-                //All new blocks that are placed in a region should be treated as ignored blocks.
-                if (region.intersects(blockSnapshot.getWorldUniqueId(), blockSnapshot.getPosition()))
+                final List<BlockSnapshot> blocksToRestore = new LinkedList<>();
+                for (final Transaction<BlockSnapshot> transaction : transactions)
                 {
-                    region.getBlockSnapshotsExceptions().add(blockSnapshot);
-                    super.getPlugin().getRegionManager().updateRegion(region);
+                    if (region.intersects(transaction.getOriginal().getWorldUniqueId(), transaction.getOriginal().getPosition()))
+                    {
+                        if (!region.isActive())
+                        {
+                            continue;
+                        }
+
+                        // If block was placed on air block.
+                        if (transaction.getOriginal().getState().getType() == BlockTypes.AIR)
+                        {
+                            region.getBlockSnapshotsExceptions().add(transaction.getFinal());
+                            super.getPlugin().getRegionManager().updateRegion(region);
+                        }
+                        else // Happens when dirt is converted to farmland and vice versa
+                        {
+                            blocksToRestore.add(transaction.getOriginal());
+                        }
+                    }
+                }
+
+                if (blocksToRestore.size() > 0)
+                {
+                    super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(new RebuildBlocksTask(transactions.get(0).getOriginal().getWorldUniqueId(), blocksToRestore), region.getRestoreTime());
                 }
             }
-        }
+        });
     }
 }

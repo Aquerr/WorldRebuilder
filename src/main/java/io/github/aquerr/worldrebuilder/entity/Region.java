@@ -1,19 +1,16 @@
 package io.github.aquerr.worldrebuilder.entity;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.inject.internal.cglib.core.$ObjectSwitchCallback;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
-import io.github.aquerr.worldrebuilder.util.RegionUtil;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class Region
 {
@@ -165,14 +162,30 @@ public class Region
 		{
 			if (entity.getLocation().getBlockPosition().equals(entitySnapshot.getPosition()) && entity.getType().equals(entitySnapshot.getType()))
 			{
-				CompletableFuture.runAsync(() -> {
-					entitySnapshotsException.remove(entitySnapshot);
-					WorldRebuilder.getPlugin().getRegionManager().updateRegion(this);
-				});
 				return true;
 			}
 		}
 		return false;
+	}
+
+	public void removeIgnoredEntity(final Entity entity)
+	{
+		CompletableFuture.runAsync(() -> {
+			EntitySnapshot entityToRemove = null;
+			for (final EntitySnapshot entitySnapshot : this.entitySnapshotsException)
+			{
+				if (entity.getLocation().getBlockPosition().equals(entitySnapshot.getPosition()) && entity.getType().equals(entitySnapshot.getType()))
+				{
+					entityToRemove = entitySnapshot;
+					break;
+				}
+			}
+			if (entityToRemove == null)
+				return;
+
+			entitySnapshotsException.remove(entityToRemove);
+			WorldRebuilder.getPlugin().getRegionManager().updateRegion(this);
+		});
 	}
 
 	public boolean isBlockIgnored(final BlockSnapshot blockSnapshot)
@@ -181,15 +194,30 @@ public class Region
 		{
 			if (blockException.getPosition().equals(blockSnapshot.getPosition()) && blockException.getState().getType().equals(blockSnapshot.getState().getType()))
 			{
-				CompletableFuture.runAsync(() -> {
-					blockSnapshotsExceptions.remove(blockException);
-					WorldRebuilder.getPlugin().getRegionManager().updateRegion(this);
-				});
 				return true;
 			}
 		}
-
 		return false;
+	}
+
+	public void removeIgnoredBlock(final BlockSnapshot blockSnapshot)
+	{
+		Sponge.getScheduler().createTaskBuilder().async().execute(()->{
+			BlockSnapshot blockToRemove = null;
+			for (final BlockSnapshot blockException : getBlockSnapshotsExceptions())
+			{
+				if (blockException.getPosition().equals(blockSnapshot.getPosition()) && blockException.getState().getType().equals(blockSnapshot.getState().getType()))
+				{
+					blockToRemove = blockException;
+					break;
+				}
+			}
+			if (blockToRemove == null)
+				return;
+
+			blockSnapshotsExceptions.remove(blockToRemove);
+			WorldRebuilder.getPlugin().getRegionManager().updateRegion(this);
+		}).delay(2, TimeUnit.SECONDS).submit(WorldRebuilder.getPlugin());
 	}
 
 //	public Map<Vector3i, BlockSnapshot> getBlockSnapshots()
