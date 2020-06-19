@@ -83,37 +83,4 @@ public class WandUsageListener extends AbstractListener
         player.sendMessage(Text.of(TextColors.GOLD, "First point", TextColors.BLUE, " has been selected at ", TextColors.GOLD, event.getTargetBlock().getPosition()));
         event.setCancelled(true);
     }
-
-//    @Listener
-//    public void onRightClickTest(final InteractBlockEvent.Secondary event, final @Root Player player)
-//    {
-//        if(event.getHandType() == HandTypes.MAIN_HAND)
-//            return;
-//
-//        if(event.getTargetBlock() == BlockSnapshot.NONE)
-//            return;
-//
-//        final World world = player.getWorld();
-//        final Direction direction = event.getTargetSide();
-//        final Entity itemFrame = world.createEntity(EntityTypes.ITEM_FRAME, getPaintingLocation(event.getInteractionPoint().get(), direction));
-//        itemFrame.offer(Keys.DIRECTION, direction);
-//        world.spawnEntity(itemFrame);
-//    }
-//
-//    private Vector3d getPaintingLocation(final Vector3d blockPosition, final Direction direction)
-//    {
-//        switch(direction)
-//        {
-//            case EAST:
-//                return blockPosition.add(0.1, 0, 0);
-//            case WEST:
-//                return blockPosition.add(-0.1, 0, 0);
-//            case NORTH:
-//                return blockPosition.add(0, 0, -0.1);
-//            case SOUTH:
-//                return blockPosition.add(0.1, 0, 0.1);
-//        }
-//
-//        return Vector3d.ZERO;
-//    }
 }

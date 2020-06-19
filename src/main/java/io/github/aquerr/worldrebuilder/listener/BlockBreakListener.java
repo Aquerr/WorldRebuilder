@@ -3,11 +3,11 @@ package io.github.aquerr.worldrebuilder.listener;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.scheduling.RebuildBlocksTask;
+import net.minecraft.item.ItemHangingEntity;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.hanging.Hanging;
-import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -17,14 +17,11 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.LocatableBlock;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class BlockBreakListener extends AbstractListener
@@ -62,6 +59,11 @@ public class BlockBreakListener extends AbstractListener
 	@Listener
 	public void onEntitySpawn(final SpawnEntityEvent event)
 	{
+		//DropItemEvent is handled in separate method.
+		//However, this method is still triggered by broken armor stands.
+		if (event instanceof DropItemEvent)
+			return;
+
 		final EventContext eventContext = event.getContext();
 		final Object source = event.getSource();
 		final boolean isBlockSource = source instanceof BlockSnapshot;
@@ -82,36 +84,70 @@ public class BlockBreakListener extends AbstractListener
 		}
 	}
 
-	@Listener
-	public void onHangingDrop(final DropItemEvent.Pre event)
+	/*
+	 * Handles all block drops. (Does not include armor stands, item frames and paintings)
+	 */
+	@Listener(order = Order.FIRST, beforeModifications = true)
+	public void onBlockDrop(final DropItemEvent.Destruct event)
+	{
+		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
+		event.filterEntities(x->
+		{
+			for (final Region region : regions)
+			{
+				if (!region.isActive())
+					continue;
+
+				if (region.shouldDropBlocks())
+					continue;
+
+				if (region.intersects(x.getWorld().getUniqueId(), x.getLocation().getBlockPosition()))
+				{
+					return false;
+				}
+			}
+			return true;
+		});
+	}
+
+	/*
+	 * Handles dropped hanging entities.
+	 */
+	@Listener(order = Order.FIRST, beforeModifications = true)
+    public void onHangingDrop(final DropItemEvent.Pre event)
 	{
 		final Cause cause = event.getCause();
 
 		//If it is itemframe/painting
-		final boolean isHanging = cause.first(Hanging.class).isPresent();
-		if (!isHanging)
+		Optional<Hanging> optionalHanging = cause.first(Hanging.class);
+		if (!optionalHanging.isPresent())
 			return;
 
-		boolean isItemFrameDropped = false;
+		//Dropped item from inside item frame bypasses the above code and we need to preform additional
+		//check if the dropped item is really hanging entity.
+		boolean isHangingItemDropped = false;
 		for (final ItemStackSnapshot item : event.getDroppedItems())
 		{
-			if (item.getType() == ItemTypes.ITEM_FRAME || item.getType() == ItemTypes.PAINTING)
+			final ItemType itemType = item.getType();
+			if (itemType instanceof ItemHangingEntity)
 			{
-				isItemFrameDropped = true;
+				isHangingItemDropped = true;
 				break;
 			}
 		}
 
-		if (!isItemFrameDropped)
+		//Items that were put inside item frames can be dropped. The question is... is that correct or should be block it as well?
+		if (!isHangingItemDropped)
 			return;
 
-		final Hanging hanging = cause.first(Hanging.class).get();
+		//At this point we are sure that hanging entity is dropped.
+		final Hanging hanging = optionalHanging.get();
 		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
 		for (final Region region : regions)
 		{
 			if (!region.isActive())
 				continue;
-			if (!region.shouldDropBlocks() && region.intersects(hanging.getWorld().getUniqueId(), hanging.getLocation().getBlockPosition()))
+			if (!region.shouldDropBlocks() && region.intersects(hanging.getWorld().getUniqueId(), hanging.getLocation().getBlockPosition()) && region.isEntityIgnored(hanging))
 			{
 				event.setCancelled(true);
 				break;
@@ -122,11 +158,12 @@ public class BlockBreakListener extends AbstractListener
 	private void rebuildBlocks(final UUID worldUUID, final List<Transaction<BlockSnapshot>> transactions)
 	{
 		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
-		final List<BlockSnapshot> blocksToRestore = new LinkedList<>();
-		Region affectedRegion = null;
+		List<BlockSnapshot> blocksToRestore = new ArrayList<>();
 
 		for(final Region region : regions)
 		{
+			boolean shouldRebuild = false;
+
 			if (!region.isActive())
 				continue;
 
@@ -134,15 +171,20 @@ public class BlockBreakListener extends AbstractListener
 			{
 				if(region.intersects(worldUUID, transaction.getOriginal().getPosition()))
 				{
+					// Check ignored blocks
+					if (region.isBlockIgnored(transaction.getOriginal()))
+						continue;
+
 					blocksToRestore.add(transaction.getOriginal());
-					affectedRegion = region;
+					shouldRebuild = true;
 				}
 			}
+
+			if (shouldRebuild)
+			{
+				super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(new RebuildBlocksTask(worldUUID, blocksToRestore), region.getRestoreTime());
+				blocksToRestore = new ArrayList<>();
+			}
 		}
-
-		if (affectedRegion == null)
-			return;
-
-		super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(new RebuildBlocksTask(worldUUID, blocksToRestore), affectedRegion.getRestoreTime());
 	}
 }

@@ -4,25 +4,29 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.typesafe.config.ConfigParseOptions;
-import com.typesafe.config.ConfigSyntax;
-import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.util.TypeTokens;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Singleton
 public class HOCONStorage implements Storage
 {
+	private static final TypeToken<List<BlockSnapshot>> BLOCKSNAPSHOT_TYPE_TOKEN = new TypeToken<List<BlockSnapshot>>() {};
+	private static final TypeToken<List<EntitySnapshot>> ENTITY_SNAPSHOT_LIST_TYPE_TOKEN = new TypeToken<List<EntitySnapshot>>() {};
+
 	private static final String ROOT_NODE_NAME = "regions";
 
 	private final Path regionsFilePath;
@@ -89,6 +93,10 @@ public class HOCONStorage implements Storage
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "restoreTime").setValue(region.getRestoreTime());
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "active").setValue(region.isActive());
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "shouldDropBlocks").setValue(region.shouldDropBlocks());
+
+		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "blockSnapshotsExceptions").setValue(BLOCKSNAPSHOT_TYPE_TOKEN, region.getBlockSnapshotsExceptions());
+		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "entitySnapshotsExceptions").setValue(ENTITY_SNAPSHOT_LIST_TYPE_TOKEN, region.getEntitySnapshotsExceptions());
+
 		saveChanges();
 	}
 
@@ -120,7 +128,12 @@ public class HOCONStorage implements Storage
 		final int restoreTime = this.configNode.getNode(ROOT_NODE_NAME, name, "restoreTime").getInt(10);
 		final boolean isActive = this.configNode.getNode(ROOT_NODE_NAME, name, "active").getBoolean(true);
 		final boolean shouldDropBlocks = this.configNode.getNode(ROOT_NODE_NAME, name, "shouldDropBlocks").getBoolean(true);
-		return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime, isActive, shouldDropBlocks);
+
+		//TODO: Create custom TypeSerializer
+		final List<BlockSnapshot> blockSnapshotsExceptions = this.configNode.getNode(ROOT_NODE_NAME, name, "blockSnapshotsExceptions").getValue(BLOCKSNAPSHOT_TYPE_TOKEN, Collections.emptyList());
+		final List<EntitySnapshot> entitySnapshotsExceptions = this.configNode.getNode(ROOT_NODE_NAME, name, "entitySnapshotsExceptions").getList(TypeTokens.ENTITY_TOKEN, Collections.emptyList());
+
+		return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime, isActive, shouldDropBlocks, new LinkedList<>(blockSnapshotsExceptions), new LinkedList<>(entitySnapshotsExceptions));
 	}
 
 	@Override

@@ -5,9 +5,7 @@ import com.google.inject.Inject;
 import io.github.aquerr.worldrebuilder.commands.*;
 import io.github.aquerr.worldrebuilder.commands.args.RegionArgument;
 import io.github.aquerr.worldrebuilder.entity.SelectionPoints;
-import io.github.aquerr.worldrebuilder.listener.BlockBreakListener;
-import io.github.aquerr.worldrebuilder.listener.EntityDestroyListener;
-import io.github.aquerr.worldrebuilder.listener.WandUsageListener;
+import io.github.aquerr.worldrebuilder.listener.*;
 import io.github.aquerr.worldrebuilder.managers.RegionManager;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
 import org.slf4j.Logger;
@@ -37,9 +35,6 @@ public class WorldRebuilder
 
 	private final Map<List<String>, CommandCallable> subcommands = new HashMap<>();
 	private final Map<UUID, SelectionPoints> playerSelectionPoints = new HashMap<>();
-
-	@Inject
-	private Logger logger;
 
 	private static WorldRebuilder INSTANCE;
 
@@ -196,5 +191,7 @@ public class WorldRebuilder
 		this.eventManager.registerListeners(this, new WandUsageListener(this));
 		this.eventManager.registerListeners(this, new BlockBreakListener(this));
 		this.eventManager.registerListeners(this, new EntityDestroyListener(this));
+		this.eventManager.registerListeners(this, new EntitySpawnListener(this));
+		this.eventManager.registerListeners(this, new BlockPlaceListener(this));
 	}
 }
