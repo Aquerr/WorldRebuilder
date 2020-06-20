@@ -5,7 +5,6 @@ import com.google.inject.Singleton;
 import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.storage.StorageManager;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +58,7 @@ public class RegionManager
 		this.regions.remove(name);
 	}
 
-	public @Nullable Region getRegion(final String name)
+	public Region getRegion(final String name)
 	{
 		return this.regions.get(name);
 	}

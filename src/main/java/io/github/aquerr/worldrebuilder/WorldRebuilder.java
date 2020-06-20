@@ -8,7 +8,6 @@ import io.github.aquerr.worldrebuilder.entity.SelectionPoints;
 import io.github.aquerr.worldrebuilder.listener.*;
 import io.github.aquerr.worldrebuilder.managers.RegionManager;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
-import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandManager;
@@ -19,7 +18,6 @@ import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
