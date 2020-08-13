@@ -29,7 +29,7 @@ public class RebuildBlocksTask implements Runnable
 
 		for(final BlockSnapshot blockSnapshot : this.blocks)
 		{
-			world.setBlock(blockSnapshot.getPosition(), blockSnapshot.getState());
+			world.setBlock(blockSnapshot.getPosition(), blockSnapshot.getExtendedState());
 		}
 	}
 }
