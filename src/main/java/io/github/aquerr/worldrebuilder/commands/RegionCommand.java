@@ -16,8 +16,6 @@ public class RegionCommand extends WRCommand
 	@Override
 	public CommandResult execute(final CommandSource source, CommandContext args) throws CommandException
 	{
-//		final Region region = args.requireOne(Text.of("region"));
-
 		return CommandResult.success();
 	}
 }

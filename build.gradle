@@ -27,8 +27,8 @@ sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
 dependencies {
-    api 'org.spongepowered:spongeapi:7.2.0'
-    annotationProcessor 'org.spongepowered:spongeapi:7.2.0'
+    api 'org.spongepowered:spongeapi:7.3.0'
+    annotationProcessor 'org.spongepowered:spongeapi:7.3.0'
 }
 
 jar {
