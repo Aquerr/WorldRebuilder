@@ -1,6 +1,7 @@
 package io.github.aquerr.worldrebuilder.scheduling;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
@@ -14,20 +15,23 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.hanging.Hanging;
 import org.spongepowered.api.entity.hanging.Painting;
 import org.spongepowered.api.entity.living.ArmorStand;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.World;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
-public class RebuildEntityTask implements Runnable
+public class RebuildEntityTask implements WorldRebuilderTask
 {
+	private final String regionName;
 	private final UUID worldUUID;
 	private final Entity entity;
+	private Task task;
 
-	public RebuildEntityTask(final UUID worldUUID, final Entity entity)
+	RebuildEntityTask(String regionName, final UUID worldUUID, final Entity entity)
 	{
+		this.regionName = regionName;
 		this.worldUUID = worldUUID;
 		this.entity = entity;
 	}
@@ -40,7 +44,7 @@ public class RebuildEntityTask implements Runnable
 			return;
 
 		final Optional<World> optionalWorld = Sponge.getServer().getWorld(worldUUID);
-		if(!optionalWorld.isPresent())
+		if (!optionalWorld.isPresent())
 			return;
 		final World world = optionalWorld.get();
 
@@ -86,5 +90,36 @@ public class RebuildEntityTask implements Runnable
 		{
 			Sponge.getServer().getConsole().sendMessage(WorldRebuilder.PLUGIN_ERROR.concat(Text.of("Could not restore entity " + entity)));
 		}
+
+		WorldRebuilderScheduler.getInstance().removeTaskForRegion(regionName, this);
+	}
+
+	@Override
+	public String getRegionName()
+	{
+		return this.regionName;
+	}
+
+	@Override
+	public List<Vector3i> getAffectedPositions()
+	{
+		return Collections.singletonList(this.entity.getLocation().getBlockPosition());
+	}
+
+	@Override
+	public UUID getWorldUniqueId()
+	{
+		return this.worldUUID;
+	}
+
+	@Override
+	public boolean cancel()
+	{
+		return this.task.cancel();
+	}
+
+	public void setTask(Task task)
+	{
+		this.task = task;
 	}
 }

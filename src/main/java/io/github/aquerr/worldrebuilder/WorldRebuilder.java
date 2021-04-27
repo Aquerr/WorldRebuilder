@@ -27,7 +27,7 @@ import java.util.*;
 @Plugin(id = "worldrebuilder", name = "Worldrebuilder", version = WorldRebuilder.VERSION, description = "Rebuilds destroyed blocks after specified time.", authors = {"Aquerr"})
 public class WorldRebuilder
 {
-	public static final String VERSION = "1.1.1";
+	public static final String VERSION = "1.2.0";
 
 	public static final Text PLUGIN_ERROR = Text.of(TextColors.RED, "[WR] ");
 	public static final Text PLUGIN_PREFIX = Text.of(TextColors.GREEN, "[WR] ");
@@ -166,6 +166,13 @@ public class WorldRebuilder
 				.arguments(GenericArguments.onlyOne(GenericArguments.bool(Text.of("value"))))
 				.build();
 
+		//ForceRebuild Command
+		final CommandSpec forceRebuildCommand = CommandSpec.builder()
+				.description(Text.of("Force rebuilds region"))
+				.permission(Permissions.FORCE_REBUILD_COMMAND)
+				.executor(new ForceRebuildCommand(this))
+				.build();
+
 		//Region Command/s
 		this.subcommands.put(Collections.singletonList("region"), CommandSpec.builder()
 				.description(Text.of("Region commands"))
@@ -175,6 +182,7 @@ public class WorldRebuilder
 				.child(restoreTimeCommand, "restoretime")
 				.child(activeCommand, "active")
 				.child(blockDropCommand, "dropblocks")
+				.child(forceRebuildCommand, "rebuild")
 				.build());
 
 		//WorldRebuilder commands

@@ -1,8 +1,12 @@
 buildscript {
     repositories {
         maven {
-            name = 'forge'
-            url = 'https://files.minecraftforge.net/maven'
+            name = "forge"
+            url = "https://sizableshrimp.me/maven"
+        }
+        mavenCentral()
+        maven {
+            url = "https://maven.minecraftforge.net"
         }
     }
 
@@ -21,14 +25,14 @@ plugins {
 apply plugin: 'net.minecraftforge.gradle.forge'
 
 group = "io.github.aquerr"
-version = "1.1.1"
+version = "1.2.0"
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
 dependencies {
-    api 'org.spongepowered:spongeapi:7.3.0'
-    annotationProcessor 'org.spongepowered:spongeapi:7.3.0'
+    api 'org.spongepowered:spongeapi:7.2.0'
+    annotationProcessor 'org.spongepowered:spongeapi:7.2.0'
 }
 
 jar {

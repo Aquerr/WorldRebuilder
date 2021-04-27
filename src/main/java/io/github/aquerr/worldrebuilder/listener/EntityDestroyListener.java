@@ -2,7 +2,6 @@ package io.github.aquerr.worldrebuilder.listener;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
-import io.github.aquerr.worldrebuilder.scheduling.RebuildEntityTask;
 import net.minecraft.entity.EntityHanging;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
@@ -63,6 +62,6 @@ public class EntityDestroyListener extends AbstractListener
 		if (affectedRegion == null)
 			return;
 
-		super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildEntityTask(new RebuildEntityTask(worldUUID, entity), affectedRegion.getRestoreTime());
+		super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildEntityTask(affectedRegion.getName(), worldUUID, entity, affectedRegion.getRestoreTime());
 	}
 }

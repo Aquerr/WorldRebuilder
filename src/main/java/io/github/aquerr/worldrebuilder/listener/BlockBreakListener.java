@@ -2,7 +2,6 @@ package io.github.aquerr.worldrebuilder.listener;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
-import io.github.aquerr.worldrebuilder.scheduling.RebuildBlocksTask;
 import net.minecraft.item.ItemHangingEntity;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
@@ -197,7 +196,7 @@ public class BlockBreakListener extends AbstractListener
 
 			if (shouldRebuild)
 			{
-				super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(new RebuildBlocksTask(worldUUID, blocksToRestore), region.getRestoreTime());
+				super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(region.getName(), worldUUID, blocksToRestore, region.getRestoreTime());
 				blocksToRestore = new ArrayList<>();
 			}
 		}

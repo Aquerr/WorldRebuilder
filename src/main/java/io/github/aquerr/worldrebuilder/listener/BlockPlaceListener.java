@@ -2,7 +2,6 @@ package io.github.aquerr.worldrebuilder.listener;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
-import io.github.aquerr.worldrebuilder.scheduling.RebuildBlocksTask;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
@@ -10,7 +9,6 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.plugin.PluginContainer;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,7 +64,7 @@ public class BlockPlaceListener extends AbstractListener
 
                 if (blocksToRestore.size() > 0)
                 {
-                    super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(new RebuildBlocksTask(transactions.get(0).getOriginal().getWorldUniqueId(), blocksToRestore), region.getRestoreTime());
+                    super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(region.getName(), transactions.get(0).getOriginal().getWorldUniqueId(), blocksToRestore, region.getRestoreTime());
                 }
             }
         });
