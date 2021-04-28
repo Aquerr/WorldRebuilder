@@ -3,7 +3,9 @@ package io.github.aquerr.worldrebuilder.scheduling;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.List;
@@ -36,6 +38,12 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 		for(final BlockSnapshot blockSnapshot : this.blocks)
 		{
 			world.setBlock(blockSnapshot.getPosition(), blockSnapshot.getExtendedState());
+
+			// Will the block spawn where player stands?
+			// If so, teleport the player to safe location.
+			Sponge.getServer().getOnlinePlayers().stream()
+					.filter(player -> isPlayerAtBlock(player, blockSnapshot))
+					.forEach(this::safeTeleportPlayer);
 		}
 
 		WorldRebuilderScheduler.getInstance().removeTaskForRegion(regionName, this);
@@ -70,5 +78,15 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 	public void setTask(Task task)
 	{
 		this.task = task;
+	}
+
+	private boolean isPlayerAtBlock(final Player player, BlockSnapshot blockSnapshot)
+	{
+		return player.getPosition().toInt().equals(blockSnapshot.getPosition());
+	}
+
+	private void safeTeleportPlayer(Player player)
+	{
+		player.setLocationAndRotationSafely(new Location<>(player.getWorld(), player.getPosition()), player.getRotation());
 	}
 }
