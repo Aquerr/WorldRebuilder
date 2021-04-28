@@ -120,7 +120,7 @@ public class WorldRebuilder
 				.build());
 
 		//Create Region Command
-		this.subcommands.put(Collections.singletonList("createregion"), CommandSpec.builder()
+		this.subcommands.put(Collections.singletonList("create_region"), CommandSpec.builder()
 				.description(Text.of("Creates a region from selected points"))
 				.permission(Permissions.CREATE_REGION_COMMAND)
 				.executor(new CreateRegionCommand(this))
@@ -128,7 +128,7 @@ public class WorldRebuilder
 				.build());
 
 		//Delete Region Command
-		this.subcommands.put(Collections.singletonList("deleteregion"), CommandSpec.builder()
+		this.subcommands.put(Collections.singletonList("delete_region"), CommandSpec.builder()
 				.description(Text.of("Deletes a region"))
 				.permission(Permissions.DELETE_COMMAND)
 				.executor(new DeleteRegionCommand(this))
@@ -179,10 +179,10 @@ public class WorldRebuilder
 				.permission(Permissions.REGION_COMMANDS)
 				.arguments(GenericArguments.onlyOne(new RegionArgument(this, Text.of("region"))))
 				.child(regionCommand, "info")
-				.child(restoreTimeCommand, "restoretime")
+				.child(restoreTimeCommand, "restore_time")
 				.child(activeCommand, "active")
-				.child(blockDropCommand, "dropblocks")
-				.child(forceRebuildCommand, "rebuild")
+				.child(blockDropCommand, "drop_blocks")
+				.child(forceRebuildCommand, "force_rebuild")
 				.build());
 
 		//WorldRebuilder commands
