@@ -89,7 +89,7 @@ public class HOCONStorage implements Storage
 	{
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "worldUUID").setValue(TypeToken.of(UUID.class), region.getWorldUniqueId());
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "firstPoint").setValue(TypeToken.of(Vector3i.class), region.getFirstPoint());
-		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "secondName").setValue(TypeToken.of(Vector3i.class), region.getSecondPoint());
+		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "secondPoint").setValue(TypeToken.of(Vector3i.class), region.getSecondPoint());
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "restoreTime").setValue(region.getRestoreTime());
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "active").setValue(region.isActive());
 		this.configNode.getNode(ROOT_NODE_NAME, region.getName(), "shouldDropBlocks").setValue(region.shouldDropBlocks());
@@ -124,7 +124,7 @@ public class HOCONStorage implements Storage
 	{
 		final UUID worldUUID = this.configNode.getNode(ROOT_NODE_NAME, name, "worldUUID").getValue(TypeToken.of(UUID.class));
 		final Vector3i firstPosition = this.configNode.getNode(ROOT_NODE_NAME, name, "firstPoint").getValue(TypeToken.of(Vector3i.class));
-		final Vector3i secondPosition = this.configNode.getNode(ROOT_NODE_NAME, name, "secondName").getValue(TypeToken.of(Vector3i.class));
+		final Vector3i secondPosition = this.configNode.getNode(ROOT_NODE_NAME, name, "secondPoint").getValue(TypeToken.of(Vector3i.class));
 		final int restoreTime = this.configNode.getNode(ROOT_NODE_NAME, name, "restoreTime").getInt(10);
 		final boolean isActive = this.configNode.getNode(ROOT_NODE_NAME, name, "active").getBoolean(true);
 		final boolean shouldDropBlocks = this.configNode.getNode(ROOT_NODE_NAME, name, "shouldDropBlocks").getBoolean(true);
