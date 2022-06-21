@@ -21,7 +21,6 @@ public class RegionManager
 	public RegionManager(final StorageManager storageManager)
 	{
 		this.storageManager = storageManager;
-		loadRegions();
 	}
 
 	public Collection<Region> getRegions()
@@ -70,5 +69,10 @@ public class RegionManager
 		{
 			worldRebuilderTask.run();
 		}
+	}
+
+	public void init() {
+		this.storageManager.init();
+		loadRegions();
 	}
 }

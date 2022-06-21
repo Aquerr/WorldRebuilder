@@ -8,6 +8,10 @@ import io.github.aquerr.worldrebuilder.entity.SelectionPoints;
 import io.github.aquerr.worldrebuilder.listener.*;
 import io.github.aquerr.worldrebuilder.managers.RegionManager;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
+import io.github.aquerr.worldrebuilder.storage.serializer.BlockExceptionListTypeSerializer;
+import io.github.aquerr.worldrebuilder.storage.serializer.BlockExceptionTypeSerializer;
+import io.github.aquerr.worldrebuilder.storage.serializer.WRTypeTokens;
+import ninja.leaping.configurate.ConfigurationOptions;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandManager;
@@ -27,7 +31,7 @@ import java.util.*;
 @Plugin(id = "worldrebuilder", name = "Worldrebuilder", version = WorldRebuilder.VERSION, description = "Rebuilds destroyed blocks after specified time.", authors = {"Aquerr"})
 public class WorldRebuilder
 {
-	public static final String VERSION = "1.2.0";
+	public static final String VERSION = "1.3.0";
 
 	public static final Text PLUGIN_ERROR = Text.of(TextColors.RED, "[WR] ");
 	public static final Text PLUGIN_PREFIX = Text.of(TextColors.GREEN, "[WR] ");
@@ -64,10 +68,39 @@ public class WorldRebuilder
 	@Listener
 	public void onInit(final GameInitializationEvent event)
 	{
-		Sponge.getServer().getConsole().sendMessage(Text.of(PLUGIN_PREFIX, TextColors.YELLOW, "Initializing WorldRebuilder..."));
-		registerCommands();
-		registerListeners();
-		Sponge.getServer().getConsole().sendMessage(Text.of(PLUGIN_PREFIX, TextColors.GREEN, "Loading completed. Plugin is ready to use!"));
+		try
+		{
+			Sponge.getServer().getConsole().sendMessage(Text.of(PLUGIN_PREFIX, TextColors.YELLOW, "Initializing WorldRebuilder..."));
+			registerTypeSerializers();
+			setupManagers();
+			registerCommands();
+			registerListeners();
+			Sponge.getServer().getConsole().sendMessage(Text.of(PLUGIN_PREFIX, TextColors.GREEN, "Loading completed. Plugin is ready to use!"));
+		}
+		catch (Exception exception)
+		{
+			Sponge.getServer().getConsole().sendMessage(Text.of(PLUGIN_ERROR, TextColors.RED, "Error during initialization of WorldRebuilder. Plugin will become disabled. Reason: " + exception.getMessage()));
+			disablePlugin();
+		}
+	}
+
+	private void disablePlugin()
+	{
+		this.commandManager.getOwnedBy(this)
+				.forEach(commandManager::removeMapping);
+		this.eventManager.unregisterPluginListeners(this);
+	}
+
+	private void registerTypeSerializers()
+	{
+		ConfigurationOptions.defaults().getSerializers()
+				.register(WRTypeTokens.BLOCK_EXCEPTION, new BlockExceptionTypeSerializer())
+				.register(WRTypeTokens.BLOCK_EXCEPTION_LIST, new BlockExceptionListTypeSerializer());
+	}
+
+	private void setupManagers()
+	{
+		this.regionManager.init();
 	}
 
 	public Path getConfigDir()

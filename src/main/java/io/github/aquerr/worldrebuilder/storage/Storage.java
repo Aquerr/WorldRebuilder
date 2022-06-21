@@ -16,4 +16,6 @@ public interface Storage
 	Region getRegion(String name) throws ObjectMappingException;
 
 	List<Region> getRegions() throws ObjectMappingException;
+
+    void init();
 }

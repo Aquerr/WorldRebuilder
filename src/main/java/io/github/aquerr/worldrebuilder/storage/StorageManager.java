@@ -76,4 +76,8 @@ public class StorageManager
 	{
 		this.storage.deleteRegion(name);
 	}
+
+	public void init() {
+		this.storage.init();
+	}
 }
