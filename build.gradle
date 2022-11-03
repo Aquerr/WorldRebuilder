@@ -1,17 +1,12 @@
+import org.spongepowered.gradle.plugin.config.PluginLoaders
+
 buildscript {
     repositories {
-        maven {
-            name = "forge"
-            url = "https://sizableshrimp.me/maven"
-        }
+        maven { url = 'https://maven.minecraftforge.net' }
         mavenCentral()
-        maven {
-            url = "https://maven.minecraftforge.net"
-        }
     }
-
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
 
@@ -19,10 +14,11 @@ plugins {
     id 'java'
     id 'java-library'
     id 'idea'
-    id 'org.spongepowered.plugin' version '0.9.0'
+    id 'org.spongepowered.gradle.plugin' version '2.1.1'
+    id 'org.spongepowered.gradle.ore' version '2.1.1' // for Ore publishing
 }
 
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'net.minecraftforge.gradle'
 
 group = "io.github.aquerr"
 version = "1.3.0"
@@ -31,8 +27,8 @@ sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
 dependencies {
-    api 'org.spongepowered:spongeapi:7.4.0'
-    annotationProcessor 'org.spongepowered:spongeapi:7.4.0'
+    minecraft 'net.minecraftforge:forge:1.16.5-36.2.39'
+    api 'org.spongepowered:spongeapi:8.1.0'
 }
 
 jar {
@@ -45,8 +41,34 @@ jar {
 }
 
 minecraft {
-    forgeVersion = '1.12.2-14.23.5.2838'
-    mappings = 'stable_39'
+    mappings channel: 'official', version: '1.16.5'
+}
+
+sponge {
+    apiVersion("8.1.0")
+    license("MIT")
+    loader {
+        name(PluginLoaders.JAVA_PLAIN)
+        version("1.0")
+    }
+    plugin("worldrebuilder") {
+        displayName("World Rebuilder")
+        version("1.3.0")
+        entrypoint("io.github.aquerr.worldrebuilder.WorldRebuilder")
+        description("Rebuilds destroyed blocks after specified time.")
+        links {
+            homepage("https://github.com/Aquerr/WorldRebuilder")
+            source("https://github.com/Aquerr/WorldRebuilder")
+            issues("https://github.com/Aquerr/WorldRebuilder/issues")
+        }
+        contributor("Aquerr") {
+            description("Lead Developer")
+        }
+//        dependency("spongeapi") {
+//            loadOrder(PluginDependency.LoadOrder.AFTER)
+//            optional(false)
+//        }
+    }
 }
 
 tasks.create("publishBuildOnDiscord") {
@@ -68,4 +90,17 @@ tasks.create("publishBuildOnDiscord") {
             }
         }
     }
+}
+
+jar.finalizedBy('reobfJar')
+
+oreDeployment {
+    // The default publication here is automatically configured by SpongeGradle
+    // using the first-created plugin's ID as the project ID
+    // A version body is optional, to provide additional information about the release
+    /*
+    defaultPublication {
+        // Read the version body from the file whose path is provided to the changelog gradle property
+        versionBody.set(providers.gradleProperty("changelog").map { file(it).readText(Charsets.UTF_8) }.orElse(""))
+    }*/
 }

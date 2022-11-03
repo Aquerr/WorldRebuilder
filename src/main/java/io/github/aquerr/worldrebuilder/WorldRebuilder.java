@@ -2,62 +2,82 @@
 package io.github.aquerr.worldrebuilder;
 
 import com.google.inject.Inject;
-import io.github.aquerr.worldrebuilder.commands.*;
-import io.github.aquerr.worldrebuilder.commands.args.RegionArgument;
+import io.github.aquerr.worldrebuilder.commands.ActiveCommand;
+import io.github.aquerr.worldrebuilder.commands.BlockDropCommand;
+import io.github.aquerr.worldrebuilder.commands.CreateRegionCommand;
+import io.github.aquerr.worldrebuilder.commands.DeleteRegionCommand;
+import io.github.aquerr.worldrebuilder.commands.ForceRebuildCommand;
+import io.github.aquerr.worldrebuilder.commands.HelpCommand;
+import io.github.aquerr.worldrebuilder.commands.InfoCommand;
+import io.github.aquerr.worldrebuilder.commands.ListCommand;
+import io.github.aquerr.worldrebuilder.commands.RegionCommand;
+import io.github.aquerr.worldrebuilder.commands.RestoreTimeCommand;
+import io.github.aquerr.worldrebuilder.commands.WandCommand;
+import io.github.aquerr.worldrebuilder.commands.args.WorldRebuilderCommandParameters;
 import io.github.aquerr.worldrebuilder.entity.SelectionPoints;
-import io.github.aquerr.worldrebuilder.listener.*;
+import io.github.aquerr.worldrebuilder.listener.BlockBreakListener;
+import io.github.aquerr.worldrebuilder.listener.BlockPlaceListener;
+import io.github.aquerr.worldrebuilder.listener.EntityDestroyListener;
+import io.github.aquerr.worldrebuilder.listener.EntitySpawnListener;
+import io.github.aquerr.worldrebuilder.listener.WandUsageListener;
 import io.github.aquerr.worldrebuilder.managers.RegionManager;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
-import io.github.aquerr.worldrebuilder.storage.serializer.BlockExceptionListTypeSerializer;
-import io.github.aquerr.worldrebuilder.storage.serializer.BlockExceptionTypeSerializer;
-import io.github.aquerr.worldrebuilder.storage.serializer.WRTypeTokens;
-import ninja.leaping.configurate.ConfigurationOptions;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandCallable;
-import org.spongepowered.api.command.CommandManager;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
+import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
+import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-@Plugin(id = "worldrebuilder", name = "Worldrebuilder", version = WorldRebuilder.VERSION, description = "Rebuilds destroyed blocks after specified time.", authors = {"Aquerr"})
+@Plugin("worldrebuilder")
 public class WorldRebuilder
 {
 	public static final String VERSION = "1.3.0";
 
-	public static final Text PLUGIN_ERROR = Text.of(TextColors.RED, "[WR] ");
-	public static final Text PLUGIN_PREFIX = Text.of(TextColors.GREEN, "[WR] ");
+	public static final TextComponent PLUGIN_ERROR = Component.text("[WR] ", NamedTextColor.RED);
+	public static final TextComponent PLUGIN_PREFIX = Component.text("[WR] ", NamedTextColor.GREEN);
 
-	private final Map<List<String>, CommandCallable> subcommands = new HashMap<>();
+	private final Map<List<String>, Command.Parameterized> subcommands = new HashMap<>();
 	private final Map<UUID, SelectionPoints> playerSelectionPoints = new HashMap<>();
 
 	private static WorldRebuilder INSTANCE;
 
-	private final CommandManager commandManager;
-	private final EventManager eventManager;
 	private final Path configDir;
 
-	private final WorldRebuilderScheduler worldRebuilderScheduler;
+	private WorldRebuilderScheduler worldRebuilderScheduler;
 	private final RegionManager regionManager;
 
+	private final PluginContainer pluginContainer;
+
+	private final Logger logger;
+	private boolean isDisabled;
+
 	@Inject
-	public WorldRebuilder(final CommandManager commandManager, final EventManager eventManager, final RegionManager regionManager, final WorldRebuilderScheduler worldRebuilderScheduler, final @ConfigDir(sharedRoot = false) Path configDir)
+	public WorldRebuilder(final PluginContainer pluginContainer,
+						  final RegionManager regionManager,
+						  final @ConfigDir(sharedRoot = false) Path configDir)
 	{
 		INSTANCE = this;
-		this.commandManager = commandManager;
-		this.eventManager = eventManager;
 		this.configDir = configDir;
-
+		this.pluginContainer = pluginContainer;
+		this.logger = pluginContainer.logger();
 		this.regionManager = regionManager;
-		this.worldRebuilderScheduler = worldRebuilderScheduler;
 	}
 
 	public static WorldRebuilder getPlugin()
@@ -66,36 +86,43 @@ public class WorldRebuilder
 	}
 
 	@Listener
-	public void onInit(final GameInitializationEvent event)
+	public void onPluginConstruct(final ConstructPluginEvent event)
 	{
 		try
 		{
-			Sponge.getServer().getConsole().sendMessage(Text.of(PLUGIN_PREFIX, TextColors.YELLOW, "Initializing WorldRebuilder..."));
-			registerTypeSerializers();
+			this.logger.info(PLUGIN_PREFIX.content() + "Initializing World Rebuilder...");
 			setupManagers();
-			registerCommands();
-			registerListeners();
-			Sponge.getServer().getConsole().sendMessage(Text.of(PLUGIN_PREFIX, TextColors.GREEN, "Loading completed. Plugin is ready to use!"));
+			this.logger.info(PLUGIN_PREFIX.content() + "Loading completed. Plugin is ready to use!");
 		}
 		catch (Exception exception)
 		{
-			Sponge.getServer().getConsole().sendMessage(Text.of(PLUGIN_ERROR, TextColors.RED, "Error during initialization of WorldRebuilder. Plugin will become disabled. Reason: " + exception.getMessage()));
+			this.logger.error(PLUGIN_ERROR.content() + "Error during initialization of WorldRebuilder. Plugin will become disabled.", exception);
 			disablePlugin();
 		}
 	}
 
-	private void disablePlugin()
+	@Listener
+	public void onPluginLoad(final LoadedGameEvent event)
 	{
-		this.commandManager.getOwnedBy(this)
-				.forEach(commandManager::removeMapping);
-		this.eventManager.unregisterPluginListeners(this);
+		this.worldRebuilderScheduler = new WorldRebuilderScheduler(Sponge.server().scheduler());
+		registerListeners();
 	}
 
-	private void registerTypeSerializers()
+	@Listener
+	public void onCommandRegister(final RegisterCommandEvent<Command.Parameterized> event)
 	{
-		ConfigurationOptions.defaults().getSerializers()
-				.register(WRTypeTokens.BLOCK_EXCEPTION, new BlockExceptionTypeSerializer())
-				.register(WRTypeTokens.BLOCK_EXCEPTION_LIST, new BlockExceptionListTypeSerializer());
+		if (this.isDisabled)
+			return;
+
+		//Register commands...
+		registerCommands(event);
+		this.logger.info(PLUGIN_PREFIX.content() + "Commands loaded!");
+	}
+
+	private void disablePlugin()
+	{
+		this.isDisabled = true;
+		Sponge.eventManager().unregisterListeners(this);
 	}
 
 	private void setupManagers()
@@ -123,115 +150,132 @@ public class WorldRebuilder
 		return this.worldRebuilderScheduler;
 	}
 
-	public Map<List<String>, CommandCallable> getSubcommands()
+	public Map<List<String>, Command.Parameterized> getSubcommands()
 	{
 		return this.subcommands;
 	}
 
-	private void registerCommands()
+
+
+	private void registerCommands(RegisterCommandEvent<Command.Parameterized> event)
 	{
+		WorldRebuilderCommandParameters.init(this.regionManager);
+
 		//Help Command
-		this.subcommands.put(Collections.singletonList("help"), CommandSpec.builder()
-				.description(Text.of("Shows all available commands"))
+		this.subcommands.put(Collections.singletonList("help"), Command.builder()
+				.shortDescription(Component.text("Shows all available commands"))
 				.permission(Permissions.HELP_COMMAND)
 				.executor(new HelpCommand(this))
-				.arguments(GenericArguments.optional(GenericArguments.integer(Text.of("page"))))
+				.addParameter(Parameter.integerNumber().key("page").optional().build())
 				.build());
 
 		//Wand Command
-		this.subcommands.put(Collections.singletonList("wand"), CommandSpec.builder()
-				.description(Text.of("Gives WorldRebuilder wand"))
+		this.subcommands.put(Collections.singletonList("wand"), Command.builder()
+				.shortDescription(Component.text("Gives WorldRebuilder wand"))
 				.permission(Permissions.WAND_COMMAND)
 				.executor(new WandCommand(this))
 				.build());
 
 		//List Command
-		this.subcommands.put(Collections.singletonList("list"), CommandSpec.builder()
-				.description(Text.of("Shows a list of all regions"))
+		this.subcommands.put(Collections.singletonList("list"), Command.builder()
+				.shortDescription(Component.text("Shows a list of all regions"))
 				.permission(Permissions.LIST_COMMAND)
 				.executor(new ListCommand(this))
 				.build());
 
 		//Create Region Command
-		this.subcommands.put(Collections.singletonList("create_region"), CommandSpec.builder()
-				.description(Text.of("Creates a region from selected points"))
+		this.subcommands.put(Collections.singletonList("create_region"), Command.builder()
+				.shortDescription(Component.text("Creates a region from selected points"))
 				.permission(Permissions.CREATE_REGION_COMMAND)
 				.executor(new CreateRegionCommand(this))
-				.arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))))
+				.addParameter(Parameter.string().key("name").build())
 				.build());
 
 		//Delete Region Command
-		this.subcommands.put(Collections.singletonList("delete_region"), CommandSpec.builder()
-				.description(Text.of("Deletes a region"))
+		this.subcommands.put(Collections.singletonList("delete_region"), Command.builder()
+				.shortDescription(Component.text("Deletes a region"))
 				.permission(Permissions.DELETE_COMMAND)
 				.executor(new DeleteRegionCommand(this))
-				.arguments(GenericArguments.onlyOne(new RegionArgument(this, Text.of("region"))))
+				.addParameter(WorldRebuilderCommandParameters.region())
 				.build());
 
 		//Info Command
-		final CommandSpec regionCommand = CommandSpec.builder()
-				.description(Text.of("Shows information about the region"))
+		final Command.Parameterized regionCommand = Command.builder()
+				.shortDescription(Component.text("Shows information about the region"))
 				.permission(Permissions.INFO_COMMAND)
 				.executor(new InfoCommand(this))
 				.build();
 
 		//RestoreTime Command
-		final CommandSpec restoreTimeCommand = CommandSpec.builder()
-				.description(Text.of("Sets region restore time"))
+		final Command.Parameterized restoreTimeCommand = Command.builder()
+				.shortDescription(Component.text("Sets region restore time"))
 				.permission(Permissions.RESTORE_TIME_COMMAND)
 				.executor(new RestoreTimeCommand(this))
-				.arguments(GenericArguments.onlyOne(GenericArguments.integer(Text.of("timeInSeconds"))))
+				.addParameter(Parameter.integerNumber().key("timeInSeconds").build())
 				.build();
 
 		//Active Command
-		final CommandSpec activeCommand = CommandSpec.builder()
-				.description(Text.of("Activates/Deactivates a region"))
+		final Command.Parameterized activeCommand = Command.builder()
+				.shortDescription(Component.text("Activates/Deactivates a region"))
 				.permission(Permissions.ACTIVE_COMMAND)
 				.executor(new ActiveCommand(this))
-				.arguments(GenericArguments.onlyOne(GenericArguments.bool(Text.of("isActive"))))
+				.addParameter(Parameter.bool().key("isActive").build())
 				.build();
 
 		//DropBlocks Command
-		final CommandSpec blockDropCommand = CommandSpec.builder()
-				.description(Text.of("Toggles block drop in region"))
+		final Command.Parameterized blockDropCommand = Command.builder()
+				.shortDescription(Component.text("Toggles block drop in region"))
 				.permission(Permissions.DROP_BLOCKS_COMMAND)
 				.executor(new BlockDropCommand(this))
-				.arguments(GenericArguments.onlyOne(GenericArguments.bool(Text.of("value"))))
+				.addParameter(Parameter.bool().key("value").build())
 				.build();
 
 		//ForceRebuild Command
-		final CommandSpec forceRebuildCommand = CommandSpec.builder()
-				.description(Text.of("Force rebuilds region"))
+		final Command.Parameterized forceRebuildCommand = Command.builder()
+				.shortDescription(Component.text("Force rebuilds region"))
 				.permission(Permissions.FORCE_REBUILD_COMMAND)
 				.executor(new ForceRebuildCommand(this))
 				.build();
 
 		//Region Command/s
-		this.subcommands.put(Collections.singletonList("region"), CommandSpec.builder()
-				.description(Text.of("Region commands"))
+		this.subcommands.put(Collections.singletonList("region"), Command.builder()
+				.shortDescription(Component.text("Region commands"))
 				.permission(Permissions.REGION_COMMANDS)
-				.arguments(GenericArguments.onlyOne(new RegionArgument(this, Text.of("region"))))
-				.child(regionCommand, "info")
-				.child(restoreTimeCommand, "restore_time")
-				.child(activeCommand, "active")
-				.child(blockDropCommand, "drop_blocks")
-				.child(forceRebuildCommand, "force_rebuild")
+				.executor(new RegionCommand(this))
+				.addParameters(
+						WorldRebuilderCommandParameters.region(),
+						Parameter.firstOf(
+							Parameter.subcommand(regionCommand, "info"),
+							Parameter.subcommand(restoreTimeCommand, "restore_time"),
+							Parameter.subcommand(activeCommand, "active"),
+							Parameter.subcommand(blockDropCommand, "drop_blocks"),
+							Parameter.subcommand(forceRebuildCommand, "force_rebuild")
+						)
+				)
 				.build());
 
 		//WorldRebuilder commands
-		final CommandSpec wrCommand = CommandSpec.builder()
-				.children(this.subcommands)
+		final Command.Parameterized wrCommand = Command.builder()
+				.executor(new HelpCommand(this))
+				.addChildren(this.subcommands)
 				.build();
 
-		this.commandManager.register(this, wrCommand, "worldrebuilder", "wr");
+		//Register commands
+		event.register(this.pluginContainer, wrCommand, "worldrebuilder", "wr");
 	}
 
 	private void registerListeners()
 	{
-		this.eventManager.registerListeners(this, new WandUsageListener(this));
-		this.eventManager.registerListeners(this, new BlockBreakListener(this));
-		this.eventManager.registerListeners(this, new EntityDestroyListener(this));
-		this.eventManager.registerListeners(this, new EntitySpawnListener(this));
-		this.eventManager.registerListeners(this, new BlockPlaceListener(this));
+		EventManager eventManager = Sponge.eventManager();
+		eventManager.registerListeners(this.pluginContainer, new WandUsageListener(this));
+		eventManager.registerListeners(this.pluginContainer, new BlockBreakListener(this));
+		eventManager.registerListeners(this.pluginContainer, new EntityDestroyListener(this));
+		eventManager.registerListeners(this.pluginContainer, new EntitySpawnListener(this));
+		eventManager.registerListeners(this.pluginContainer, new BlockPlaceListener(this));
+	}
+
+	public PluginContainer getPluginContainer()
+	{
+		return this.pluginContainer;
 	}
 }

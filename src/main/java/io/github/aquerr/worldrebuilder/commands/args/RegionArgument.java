@@ -1,58 +1,64 @@
 package io.github.aquerr.worldrebuilder.commands.args;
 
-import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.ArgumentParseException;
-import org.spongepowered.api.command.args.CommandArgs;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.text.Text;
+import io.github.aquerr.worldrebuilder.managers.RegionManager;
+import net.kyori.adventure.text.Component;
+import org.spongepowered.api.command.CommandCompletion;
+import org.spongepowered.api.command.exception.ArgumentParseException;
+import org.spongepowered.api.command.parameter.ArgumentReader;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.ValueCompleter;
+import org.spongepowered.configurate.util.Strings;
 
-import javax.annotation.Nullable;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class RegionArgument extends CommandElement
+public class RegionArgument
 {
-	private final WorldRebuilder plugin;
-
-	public RegionArgument(final WorldRebuilder plugin, final @Nullable Text key)
+	public static class ValueParser implements org.spongepowered.api.command.parameter.managed.ValueParser<Region>
 	{
-		super(key);
-		this.plugin = plugin;
+		private final RegionManager regionManager;
+
+		public ValueParser(RegionManager regionManager)
+		{
+			this.regionManager = regionManager;
+		}
+
+		@Override
+		public Optional<Region> parseValue(Parameter.Key<? super Region> parameterKey, ArgumentReader.Mutable reader, CommandContext.Builder context) throws ArgumentParseException
+		{
+			if (!reader.canRead())
+				throw reader.createException(Component.text("Argument is not a valid region!"));
+
+			final String regionName = reader.parseUnquotedString();
+			if (Strings.isBlank(regionName))
+				throw reader.createException(Component.text("Argument is not a valid region!"));
+			Region region = Optional.ofNullable(this.regionManager.getRegion(regionName))
+					.orElseThrow(() -> reader.createException(Component.text("Argument is not a valid region!")));
+			return Optional.ofNullable(region);
+		}
 	}
 
-	@Nullable
-	@Override
-	protected Region parseValue(final CommandSource source, final CommandArgs args) throws ArgumentParseException
+	public static class Completer implements ValueCompleter
 	{
-		final Optional<String> optionalArg = args.nextIfPresent();
-		if(optionalArg.isPresent())
-		{
-			final String arg = optionalArg.get(); //Should be the name of the region
-			return this.plugin.getRegionManager().getRegion(arg);
-		}
-		return null;
-	}
+		private final RegionManager regionManager;
 
-	@Override
-	public List<String> complete(final CommandSource src, final CommandArgs args, final CommandContext context)
-	{
-		if(args.getAll().size() > 2)
-			return Collections.emptyList();
-
-		final List<String> regionsList = new LinkedList<>();
-		final Optional<String> optionalArg = args.nextIfPresent();
-		if(optionalArg.isPresent())
+		public Completer(RegionManager regionManager)
 		{
-			final String arg = optionalArg.get();
-			final Collection<Region> regions = this.plugin.getRegionManager().getRegions();
-			for(final Region region : regions)
-			{
-				if(region.getName().contains(arg))
-					regionsList.add(region.getName());
-			}
+			this.regionManager = regionManager;
 		}
-		return regionsList;
+
+		@Override
+		public List<CommandCompletion> complete(CommandContext context, String currentInput)
+		{
+			return this.regionManager.getRegions().stream()
+					.map(Region::getName)
+					.filter(regionName -> regionName.toLowerCase()
+							.contains(currentInput.toLowerCase()))
+					.map(CommandCompletion::of)
+					.collect(Collectors.toList());
+		}
 	}
 }

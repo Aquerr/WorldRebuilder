@@ -1,7 +1,7 @@
 package io.github.aquerr.worldrebuilder.commands;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
-import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.command.CommandExecutor;
 
 public abstract class WRCommand implements CommandExecutor
 {

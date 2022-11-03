@@ -1,11 +1,12 @@
 package io.github.aquerr.worldrebuilder.entity;
 
-import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
 import java.util.UUID;
@@ -114,31 +115,31 @@ public class Region
 		boolean intersectZ = false;
 
 		//Check X
-		if (this.firstPoint.getX() <= this.secondPoint.getX() && (position.getX() <= this.secondPoint.getX() && position.getX() >= this.firstPoint.getX()))
+		if (this.firstPoint.x() <= this.secondPoint.x() && (position.x() <= this.secondPoint.x() && position.x() >= this.firstPoint.x()))
 		{
 			intersectX = true;
 		}
-		else if (this.firstPoint.getX() >= this.secondPoint.getX() && (position.getX() <= this.firstPoint.getX() && position.getX() >= this.secondPoint.getX()))
+		else if (this.firstPoint.x() >= this.secondPoint.x() && (position.x() <= this.firstPoint.x() && position.x() >= this.secondPoint.x()))
 		{
 			intersectX = true;
 		}
 
 		//Check Y
-		if (this.firstPoint.getY() < this.secondPoint.getY() && (position.getY() <= this.secondPoint.getY() && position.getY() >= this.firstPoint.getY()))
+		if (this.firstPoint.y() < this.secondPoint.y() && (position.y() <= this.secondPoint.y() && position.y() >= this.firstPoint.y()))
 		{
 			intersectY = true;
 		}
-		else if (this.firstPoint.getY() >= this.secondPoint.getY() && (position.getY() <= this.firstPoint.getY() && position.getY() >= this.secondPoint.getY()))
+		else if (this.firstPoint.y() >= this.secondPoint.y() && (position.y() <= this.firstPoint.y() && position.y() >= this.secondPoint.y()))
 		{
 			intersectY = true;
 		}
 
 		//Check Z
-		if (this.firstPoint.getZ() <= this.secondPoint.getZ() && (position.getZ() <= this.secondPoint.getZ() && position.getZ() >= this.firstPoint.getZ()))
+		if (this.firstPoint.z() <= this.secondPoint.z() && (position.z() <= this.secondPoint.z() && position.z() >= this.firstPoint.z()))
 		{
 			intersectZ = true;
 		}
-		else if (this.firstPoint.getZ() >= this.secondPoint.getZ() && (position.getZ() <= this.firstPoint.getZ() && position.getZ() >= this.secondPoint.getZ()))
+		else if (this.firstPoint.z() >= this.secondPoint.z() && (position.z() <= this.firstPoint.z() && position.z() >= this.secondPoint.z()))
 		{
 			intersectZ = true;
 		}
@@ -160,7 +161,7 @@ public class Region
 	{
 		for (final EntitySnapshot entitySnapshot : this.entitySnapshotsException)
 		{
-			if (entity.getLocation().getBlockPosition().equals(entitySnapshot.getPosition()) && entity.getType().equals(entitySnapshot.getType()))
+			if (entity.location().blockPosition().equals(entitySnapshot.position()) && entity.type().equals(entitySnapshot.type()))
 			{
 				return true;
 			}
@@ -174,7 +175,7 @@ public class Region
 			EntitySnapshot entityToRemove = null;
 			for (final EntitySnapshot entitySnapshot : this.entitySnapshotsException)
 			{
-				if (entity.getLocation().getBlockPosition().equals(entitySnapshot.getPosition()) && entity.getType().equals(entitySnapshot.getType()))
+				if (entity.location().blockPosition().equals(entitySnapshot.position()) && entity.type().equals(entitySnapshot.type()))
 				{
 					entityToRemove = entitySnapshot;
 					break;
@@ -192,7 +193,7 @@ public class Region
 	{
 		for (final BlockSnapshot blockException : this.getBlockSnapshotsExceptions())
 		{
-			if (blockException.getPosition().equals(blockSnapshot.getPosition()) && blockException.getState().getType().equals(blockSnapshot.getState().getType()))
+			if (blockException.position().equals(blockSnapshot.position()) && blockException.state().type().equals(blockSnapshot.state().type()))
 			{
 				return true;
 			}
@@ -202,31 +203,27 @@ public class Region
 
 	public void removeIgnoredBlock(final BlockSnapshot blockSnapshot)
 	{
-		Sponge.getScheduler().createTaskBuilder().async().execute(()->{
-			BlockSnapshot blockToRemove = null;
-			for (final BlockSnapshot blockException : getBlockSnapshotsExceptions())
-			{
-				if (blockException.getPosition().equals(blockSnapshot.getPosition()) && blockException.getState().getType().equals(blockSnapshot.getState().getType()))
-				{
-					blockToRemove = blockException;
-					break;
-				}
-			}
-			if (blockToRemove == null)
-				return;
+		Sponge.game().asyncScheduler()
+				.submit(Task.builder()
+				.plugin(WorldRebuilder.getPlugin().getPluginContainer())
+				.delay(2, TimeUnit.SECONDS)
+						.execute(() ->
+						{
+							BlockSnapshot blockToRemove = null;
+							for (final BlockSnapshot blockException : getBlockSnapshotsExceptions())
+							{
+								if (blockException.position().equals(blockSnapshot.position()) && blockException.state().type().equals(blockSnapshot.state().type()))
+								{
+									blockToRemove = blockException;
+									break;
+								}
+							}
+							if (blockToRemove == null)
+								return;
 
-			blockSnapshotsExceptions.remove(blockToRemove);
-			WorldRebuilder.getPlugin().getRegionManager().updateRegion(this);
-		}).delay(2, TimeUnit.SECONDS).submit(WorldRebuilder.getPlugin());
+							blockSnapshotsExceptions.remove(blockToRemove);
+							WorldRebuilder.getPlugin().getRegionManager().updateRegion(this);
+						})
+				.build());
 	}
-
-//	public Map<Vector3i, BlockSnapshot> getBlockSnapshots()
-//	{
-//		return this.blockSnapshots;
-//	}
-//
-//	public List<EntitySnapshot> getEntitySnapshots()
-//	{
-//		return this.entitySnapshots;
-//	}
 }

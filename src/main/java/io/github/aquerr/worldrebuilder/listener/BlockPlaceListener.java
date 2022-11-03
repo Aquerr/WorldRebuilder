@@ -5,10 +5,11 @@ import io.github.aquerr.worldrebuilder.entity.Region;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.block.transaction.Operations;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,14 +25,14 @@ public class BlockPlaceListener extends AbstractListener
     }
 
     @Listener
-    public void onBlockPlace(final ChangeBlockEvent.Place event)
+    public void onBlockPlace(final ChangeBlockEvent.All event)
     {
         // If it is the WorldRebuilder that is placing (restoring) a block then don't execute code below.
-        final Cause cause = event.getCause();
-        if (cause.contains(Sponge.getPluginManager().fromInstance(super.getPlugin()).get()))
+        final Cause cause = event.cause();
+        if (cause.contains(Sponge.pluginManager().fromInstance(super.getPlugin()).get()))
             return;
 
-        final List<Transaction<BlockSnapshot>> transactions = event.getTransactions();
+        final List<BlockTransaction> transactions = event.transactions();
         if (transactions.size() == 0)
             return;
 
@@ -40,9 +41,12 @@ public class BlockPlaceListener extends AbstractListener
             for (final Region region : regions)
             {
                 final List<BlockSnapshot> blocksToRestore = new LinkedList<>();
-                for (final Transaction<BlockSnapshot> transaction : transactions)
+                for (final BlockTransaction transaction : transactions)
                 {
-                    if (region.intersects(transaction.getOriginal().getWorldUniqueId(), transaction.getOriginal().getPosition()))
+                    if (!transaction.operation().equals(Operations.PLACE.get()))
+                        continue;
+
+                    if (region.intersects(transaction.original().location().get().world().uniqueId(), transaction.original().position()))
                     {
                         if (!region.isActive())
                         {
@@ -50,21 +54,21 @@ public class BlockPlaceListener extends AbstractListener
                         }
 
                         // If block was placed on air block.
-                        if (transaction.getOriginal().getState().getType() == BlockTypes.AIR)
+                        if (transaction.original().state().type() == BlockTypes.AIR.get())
                         {
-                            region.getBlockSnapshotsExceptions().add(transaction.getFinal());
+                            region.getBlockSnapshotsExceptions().add(transaction.finalReplacement());
                             super.getPlugin().getRegionManager().updateRegion(region);
                         }
                         else // Happens when dirt is converted to farmland and vice versa
                         {
-                            blocksToRestore.add(transaction.getOriginal());
+                            blocksToRestore.add(transaction.original());
                         }
                     }
                 }
 
                 if (blocksToRestore.size() > 0)
                 {
-                    super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(region.getName(), transactions.get(0).getOriginal().getWorldUniqueId(), blocksToRestore, region.getRestoreTime());
+                    super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(region.getName(), transactions.get(0).original().location().get().world().uniqueId(), blocksToRestore, region.getRestoreTime());
                 }
             }
         });

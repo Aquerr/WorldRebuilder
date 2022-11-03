@@ -1,13 +1,14 @@
 package io.github.aquerr.worldrebuilder.scheduling;
 
-import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.worldrebuilder.util.WorldUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +20,7 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 	private final String regionName;
 	private final UUID worldUUID;
 	private final List<BlockSnapshot> blocks;
-	private Task task;
+	private ScheduledTask task;
 
 	public RebuildBlocksTask(final String regionName, final UUID worldUUID, List<BlockSnapshot> blocks)
 	{
@@ -31,10 +32,10 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 	@Override
 	public void run()
 	{
-		final Optional<World> optionalWorld = Sponge.getServer().getWorld(worldUUID);
+		final Optional<ServerWorld> optionalWorld = WorldUtils.getWorldByUUID(worldUUID);
 		if(!optionalWorld.isPresent())
 			return;
-		final World world = optionalWorld.get();
+		final ServerWorld world = optionalWorld.get();
 
 		for(final BlockSnapshot blockSnapshot : this.blocks)
 		{
@@ -42,7 +43,7 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 
 			// Will the block spawn where player stands?
 			// If so, teleport the player to safe location.
-			Sponge.getServer().getOnlinePlayers().stream()
+			Sponge.server().onlinePlayers().stream()
 					.filter(player -> isPlayerAtBlock(player, blockSnapshot))
 					.forEach(this::safeTeleportPlayer);
 		}
@@ -60,7 +61,7 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 	public List<Vector3i> getAffectedPositions()
 	{
 		return this.blocks.stream()
-				.map(BlockSnapshot::getPosition)
+				.map(BlockSnapshot::position)
 				.collect(Collectors.toList());
 	}
 
@@ -76,18 +77,21 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 		return this.task.cancel();
 	}
 
-	public void setTask(Task task)
+	public void setTask(ScheduledTask task)
 	{
 		this.task = task;
 	}
 
-	private boolean isPlayerAtBlock(final Player player, BlockSnapshot blockSnapshot)
+	private boolean isPlayerAtBlock(final ServerPlayer player, BlockSnapshot blockSnapshot)
 	{
-		return player.getPosition().toInt().equals(blockSnapshot.getPosition());
+		return player.position().toInt().equals(blockSnapshot.position());
 	}
 
-	private void safeTeleportPlayer(Player player)
+	private void safeTeleportPlayer(ServerPlayer player)
 	{
-		player.setLocationAndRotationSafely(new Location<>(player.getWorld(), player.getPosition()), player.getRotation());
+		player.setLocationAndRotation(Sponge.server().teleportHelper()
+				.findSafeLocation(ServerLocation.of(player.world(), player.position()))
+				.orElse(player.serverLocation()),
+				player.rotation());
 	}
 }

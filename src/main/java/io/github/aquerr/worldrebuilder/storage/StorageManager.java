@@ -2,10 +2,10 @@ package io.github.aquerr.worldrebuilder.storage;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.config.ConfigManager;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -17,9 +17,9 @@ public class StorageManager
 	private final Storage storage;
 
 	@Inject
-	public StorageManager(final @ConfigDir(sharedRoot = false) Path configDir)
+	public StorageManager(final @ConfigDir(sharedRoot = false) Path configDir, ConfigManager configManager)
 	{
-		this.storage = new HOCONStorage(configDir);
+		this.storage = new HOCONStorage(configDir, configManager);
 	}
 
 	public List<Region> getRegions()
@@ -28,7 +28,7 @@ public class StorageManager
 		{
 			return this.storage.getRegions();
 		}
-		catch(ObjectMappingException e)
+		catch(SerializationException e)
 		{
 			e.printStackTrace();
 		}
@@ -41,7 +41,7 @@ public class StorageManager
 		{
 			this.storage.addRegion(region);
 		}
-		catch(ObjectMappingException e)
+		catch(SerializationException e)
 		{
 			e.printStackTrace();
 		}
@@ -53,7 +53,7 @@ public class StorageManager
 		{
 			this.storage.addRegion(region);
 		}
-		catch(ObjectMappingException e)
+		catch(SerializationException e)
 		{
 			e.printStackTrace();
 		}
@@ -65,7 +65,7 @@ public class StorageManager
 		{
 			return this.storage.getRegion(name);
 		}
-		catch(ObjectMappingException e)
+		catch(SerializationException e)
 		{
 			e.printStackTrace();
 		}

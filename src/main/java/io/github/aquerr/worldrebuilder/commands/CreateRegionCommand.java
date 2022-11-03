@@ -3,17 +3,16 @@ package io.github.aquerr.worldrebuilder.commands;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.entity.SelectionPoints;
-import org.spongepowered.api.command.CommandException;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class CreateRegionCommand extends WRCommand
 {
@@ -24,29 +23,29 @@ public class CreateRegionCommand extends WRCommand
 	}
 
 	@Override
-	public CommandResult execute(final CommandSource source, final CommandContext args) throws CommandException
+	public CommandResult execute(CommandContext context) throws CommandException
 	{
-		final String name = args.requireOne(Text.of("name"));
+		final String name = context.requireOne(Parameter.string().key("name").build());
 
-		if(!(source instanceof Player))
-			throw new CommandException(Text.of(WorldRebuilder.PLUGIN_ERROR, TextColors.RED, "Only in-game players can use this command!"));
+		if(!(context.cause().audience() instanceof ServerPlayer))
+			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(Component.text("Only in-game players can use this command!", NamedTextColor.RED)));
 
-		final Player player = (Player)source;
-		if (!super.getPlugin().getPlayerSelectionPoints().containsKey(player.getUniqueId()))
-			throw new CommandException(Text.of(WorldRebuilder.PLUGIN_ERROR, TextColors.RED, "You must select two points in the world first before creating an arena!"));
+		final ServerPlayer player = (ServerPlayer)context.cause().audience();
+		if (!super.getPlugin().getPlayerSelectionPoints().containsKey(player.uniqueId()))
+			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(Component.text("You must select two points in the world first before creating an arena!", NamedTextColor.RED)));
 
-		final World world = player.getWorld();
-		final SelectionPoints selectionPoints = super.getPlugin().getPlayerSelectionPoints().get(player.getUniqueId());
+		final ServerWorld world = player.world();
+		final SelectionPoints selectionPoints = super.getPlugin().getPlayerSelectionPoints().get(player.uniqueId());
 
 		if (selectionPoints.getFirstPoint() == null || selectionPoints.getSecondPoint() == null)
-			throw new CommandException(Text.of(WorldRebuilder.PLUGIN_ERROR, TextColors.RED, "You must select two points in the world first before creating an arena!"));
+			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(Component.text("You must select two points in the world first before creating an arena!", NamedTextColor.RED)));
 
 		if (super.getPlugin().getRegionManager().getRegion(name) != null)
-			throw new CommandException(Text.of(WorldRebuilder.PLUGIN_ERROR, TextColors.RED, "Region with such name already exists!"));
+			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(Component.text("Region with such name already exists!", NamedTextColor.RED)));
 
-		final Region region = new Region(name, world.getUniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 10, true, true, new ArrayList<>(), new ArrayList<>());
+		final Region region = new Region(name, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 10, true, true, new ArrayList<>(), new ArrayList<>());
 		super.getPlugin().getRegionManager().addRegion(region);
-		player.sendMessage(Text.of(WorldRebuilder.PLUGIN_PREFIX, TextColors.GREEN, "Region has been created!"));
+		player.sendMessage(WorldRebuilder.PLUGIN_PREFIX.append(Component.text("Region has been created!", NamedTextColor.GREEN)));
 		return CommandResult.success();
 	}
 }

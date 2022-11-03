@@ -1,11 +1,14 @@
 package io.github.aquerr.worldrebuilder.scheduling;
 
-import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.worldrebuilder.util.WorldUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +20,7 @@ public class RebuildEntitiesTask implements WorldRebuilderTask
 	private final String regionName;
 	private final UUID worldUUID;
 	private final List<EntitySnapshot> entitySnapshots;
-	private Task task;
+	private ScheduledTask task;
 
 	RebuildEntitiesTask(final String regionName, final UUID worldUUID, final List<EntitySnapshot> entitySnapshots)
 	{
@@ -29,10 +32,10 @@ public class RebuildEntitiesTask implements WorldRebuilderTask
 	@Override
 	public void run()
 	{
-		final Optional<World> optionalWorld = Sponge.getServer().getWorld(worldUUID);
+		final Optional<ServerWorld> optionalWorld = WorldUtils.getWorldByUUID(worldUUID);
 		if(!optionalWorld.isPresent())
 			return;
-		final World world = optionalWorld.get();
+		final ServerWorld world = optionalWorld.get();
 
 		for(final EntitySnapshot entitySnapshot : this.entitySnapshots)
 		{
@@ -53,7 +56,7 @@ public class RebuildEntitiesTask implements WorldRebuilderTask
 	public List<Vector3i> getAffectedPositions()
 	{
 		return this.entitySnapshots.stream()
-				.map(EntitySnapshot::getPosition)
+				.map(EntitySnapshot::position)
 				.collect(Collectors.toList());
 	}
 
@@ -69,7 +72,7 @@ public class RebuildEntitiesTask implements WorldRebuilderTask
 		return this.task.cancel();
 	}
 
-	public void setTask(Task task)
+	public void setTask(ScheduledTask task)
 	{
 		this.task = task;
 	}

@@ -1,7 +1,7 @@
 package io.github.aquerr.worldrebuilder.storage;
 
 import io.github.aquerr.worldrebuilder.entity.Region;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.List;
 
@@ -9,13 +9,13 @@ public interface Storage
 {
 	void reload();
 
-	void addRegion(Region region) throws ObjectMappingException;
+	void addRegion(Region region) throws SerializationException;
 
 	void deleteRegion(String name);
 
-	Region getRegion(String name) throws ObjectMappingException;
+	Region getRegion(String name) throws SerializationException;
 
-	List<Region> getRegions() throws ObjectMappingException;
+	List<Region> getRegions() throws SerializationException;
 
     void init();
 }

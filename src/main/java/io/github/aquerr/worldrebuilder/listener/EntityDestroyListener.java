@@ -2,13 +2,12 @@ package io.github.aquerr.worldrebuilder.listener;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
-import net.minecraft.entity.EntityHanging;
+import net.minecraft.entity.item.HangingEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -24,16 +23,16 @@ public class EntityDestroyListener extends AbstractListener
 	public void onEntityDestruct(final DestructEntityEvent event)
 	{
 		//Used for item frames, paintings and similar.
-		final Entity entity = event.getTargetEntity();
-		if(!(entity instanceof EntityHanging) && !(entity instanceof ArmorStand))
+		final Entity entity = event.entity();
+		if(!(entity instanceof HangingEntity) && !(entity instanceof ArmorStand))
 			return;
 
-		CompletableFuture.runAsync(() -> tryRebuildEntity(entity.getWorld().getUniqueId(), event.getTargetEntity()));
+		CompletableFuture.runAsync(() -> tryRebuildEntity(entity.serverLocation().world().uniqueId(), event.entity()));
 	}
 
 	private void tryRebuildEntity(final UUID worldUUID, final Entity entity)
 	{
-		final Location<World> location = entity.getLocation();
+		final ServerLocation location = entity.serverLocation();
 		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
 		Region affectedRegion = null;
 
@@ -42,7 +41,7 @@ public class EntityDestroyListener extends AbstractListener
 			if (!region.isActive())
 				continue;
 
-			if(!region.intersects(worldUUID, location.getBlockPosition()))
+			if(!region.intersects(worldUUID, location.blockPosition()))
 				continue;
 
 			// If it is an entity that we should ignore, then return.
@@ -52,7 +51,7 @@ public class EntityDestroyListener extends AbstractListener
 				break;
 			}
 
-			if (region.intersects(worldUUID, entity.getLocation().getBlockPosition()))
+			if (region.intersects(worldUUID, entity.serverLocation().blockPosition()))
 			{
 				affectedRegion = region;
 				break;

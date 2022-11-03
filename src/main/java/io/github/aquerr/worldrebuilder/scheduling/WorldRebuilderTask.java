@@ -1,6 +1,6 @@
 package io.github.aquerr.worldrebuilder.scheduling;
 
-import com.flowpowered.math.vector.Vector3i;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
 import java.util.UUID;

@@ -1,20 +1,27 @@
 package io.github.aquerr.worldrebuilder.commands;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
-import org.spongepowered.api.command.CommandCallable;
-import org.spongepowered.api.command.CommandException;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
+import static net.kyori.adventure.text.format.NamedTextColor.WHITE;
 
 public class HelpCommand extends WRCommand
 {
@@ -24,35 +31,34 @@ public class HelpCommand extends WRCommand
 	}
 
 	@Override
-	public CommandResult execute(final CommandSource source, final CommandContext args) throws CommandException
+	public CommandResult execute(CommandContext context) throws CommandException
 	{
-		final Optional<Integer> helpPage = args.getOne(Text.of("page"));
+		final Optional<Integer> helpPage = context.one(Parameter.integerNumber().key("page").build());
 		int pageNumber = helpPage.orElse(1);
-		final Map<List<String>, CommandCallable> subcommands = super.getPlugin().getSubcommands();
-		final List<Text> helpList = new ArrayList<>();
+		final Map<List<String>, Command.Parameterized> subcommands = super.getPlugin().getSubcommands();
+		final List<Component> helpList = new ArrayList<>();
 
-		for (final List<String> aliases: subcommands.keySet())
+		for (final Map.Entry<List<String>, Command.Parameterized> command : subcommands.entrySet())
 		{
-			final CommandCallable commandCallable = subcommands.get(aliases);
-			if(source instanceof Player)
-			{
-				final Player player = (Player)source;
-				if(!commandCallable.testPermission(player))
-				{
-					continue;
-				}
-			}
+			if(context.cause().audience() instanceof Player && !command.getValue().canExecute(context.cause()))
+				continue;
 
-			final Text.Builder textBuilder = Text.builder();
-			textBuilder.append(Text.of(TextColors.GOLD, "/wr " + String.join(", ", aliases) + " " + commandCallable.getUsage(source).toPlain()));
-			textBuilder.append(Text.of(TextColors.WHITE, " - " + commandCallable.getShortDescription(source).get().toPlain()));
-			helpList.add(textBuilder.build());
+			final TextComponent commandHelp = Component.empty()
+					.append(Component.empty()
+							.append(Component.text("/wr " + String.join(", ", command.getKey()), GOLD)))
+					.append(Component.empty()
+							.append(Component.text(" - ").append(command.getValue().shortDescription(CommandCause.create()).get().append(Component.newline())).color(WHITE)));
+			helpList.add(commandHelp);
 		}
 
-		helpList.sort(Text::compareTo);
+		helpList.sort(Comparator.comparing(o -> PlainTextComponentSerializer.plainText().serialize(o)));
 
-		final PaginationList paginationList = PaginationList.builder().linesPerPage(16).padding(Text.of(TextColors.BLUE, "-")).title(Text.of(TextColors.GOLD, "Commands List")).contents(helpList).build();
-		paginationList.sendTo(source, pageNumber);
+		final PaginationList paginationList = PaginationList.builder()
+				.linesPerPage(16)
+				.padding(Component.text("-", NamedTextColor.BLUE))
+				.title(Component.text("Commands List", NamedTextColor.GOLD))
+				.contents(helpList).build();
+		paginationList.sendTo(context.cause().audience(), pageNumber);
 
 		return CommandResult.success();
 	}

@@ -1,13 +1,14 @@
 package io.github.aquerr.worldrebuilder.commands;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
+import io.github.aquerr.worldrebuilder.commands.args.WorldRebuilderCommandParameters;
 import io.github.aquerr.worldrebuilder.entity.Region;
-import org.spongepowered.api.command.CommandException;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 
 public class DeleteRegionCommand extends WRCommand
 {
@@ -17,12 +18,12 @@ public class DeleteRegionCommand extends WRCommand
 	}
 
 	@Override
-	public CommandResult execute(final CommandSource source, CommandContext args) throws CommandException
+	public CommandResult execute(CommandContext context) throws CommandException
 	{
-		final Region region = args.requireOne(Text.of("region"));
+		final Region region = context.requireOne(WorldRebuilderCommandParameters.region());
 
 		super.getPlugin().getRegionManager().deleteRegion(region.getName());
-		source.sendMessage(Text.of(WorldRebuilder.PLUGIN_PREFIX, TextColors.GREEN, "Region has been deleted!"));
+		context.sendMessage(Identity.nil(), WorldRebuilder.PLUGIN_PREFIX.append(Component.text("Region has been deleted!", NamedTextColor.GREEN)));
 		return CommandResult.success();
 	}
 }

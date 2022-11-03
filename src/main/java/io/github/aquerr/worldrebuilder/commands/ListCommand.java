@@ -2,21 +2,27 @@ package io.github.aquerr.worldrebuilder.commands;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
+import io.github.aquerr.worldrebuilder.util.WorldUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.LinearComponents;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+
+import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
+import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class ListCommand extends WRCommand
 {
@@ -26,36 +32,38 @@ public class ListCommand extends WRCommand
 	}
 
 	@Override
-	public CommandResult execute(final CommandSource source, final CommandContext args) throws CommandException
+	public CommandResult execute(CommandContext context) throws CommandException
 	{
 		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
-		final List<Text> helpList = new LinkedList<>();
+		final List<Component> helpList = new LinkedList<>();
 
 		for(final Region region : regions)
 		{
 			String worldName = "Not Found";
-			final Optional<World> optionalWorld = Sponge.getServer().getWorld(region.getWorldUniqueId());
+			final Optional<ServerWorld> optionalWorld = WorldUtils.getWorldByUUID(region.getWorldUniqueId());
 			if(optionalWorld.isPresent())
-				worldName = optionalWorld.get().getName();
+				worldName = optionalWorld.get().properties().name();
 
-			final Text regionTooltipInfo = Text.builder()
-					.append(Text.of(TextColors.BLUE,  "Name: ", TextColors.GOLD, region.getName(), "\n"))
-					.append(Text.of(TextColors.BLUE, "World Name: ", TextColors.GOLD, worldName, "\n"))
-					.append(Text.of(TextColors.BLUE, "First Point: ", TextColors.GOLD, region.getFirstPoint(), "\n"))
-					.append(Text.of(TextColors.BLUE, "Second Point: ", TextColors.GOLD, region.getSecondPoint(), "\n"))
-					.append(Text.of(TextColors.BLUE, "Restore Time: ", (region.isActive() ? TextColors.GREEN : TextColors.RED), region.getRestoreTime(), "\n"))
-					.append(Text.of(TextColors.BLUE, "Active: ", TextColors.GOLD, region.isActive()))
-					.build();
+			final Component regionTooltipInfo = LinearComponents.linear(
+					text("Name: ", BLUE), text(region.getName(), GOLD), newline(),
+					text("World Name: ", BLUE), text(worldName), newline(),
+					text("First Point: ", BLUE), text(region.getFirstPoint().toString()), newline(),
+					text("Second Point: ", BLUE), text(region.getSecondPoint().toString()), newline(),
+					text("Restore Time: ", BLUE), text(region.getRestoreTime(), region.isActive() ? GREEN : RED), newline(),
+					text("Active: ", BLUE), text(region.isActive(), region.isActive() ? GREEN : RED)
+			);
 
-			final Text regionRecord = Text.builder()
-					.append(Text.of(TextActions.showText(regionTooltipInfo), TextColors.BLUE, " - ", TextColors.GOLD, region.getName()))
-					.build();
+			final Component regionRecord = LinearComponents.linear(text(" - ", BLUE), text(region.getName(), GOLD))
+					.hoverEvent(HoverEvent.showText(regionTooltipInfo));
 
 			helpList.add(regionRecord);
 		}
 
-		final PaginationList paginationList = PaginationList.builder().title(Text.of(TextColors.GOLD, "Regions List")).contents(helpList).padding(Text.of(TextColors.BLUE, "-")).build();
-		paginationList.sendTo(source);
-		return CommandResult.success();
-	}
+		final PaginationList paginationList = PaginationList.builder()
+				.title(text("Regions List", GOLD))
+				.contents(helpList)
+				.padding(text("-", BLUE))
+				.build();
+		paginationList.sendTo(context.cause().audience());
+		return CommandResult.success();	}
 }

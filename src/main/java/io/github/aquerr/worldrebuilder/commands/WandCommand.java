@@ -1,17 +1,16 @@
 package io.github.aquerr.worldrebuilder.commands;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
-import org.spongepowered.api.command.CommandException;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,25 +23,25 @@ public class WandCommand extends WRCommand
 	}
 
 	@Override
-	public CommandResult execute(final CommandSource source, final CommandContext args) throws CommandException
+	public CommandResult execute(CommandContext context) throws CommandException
 	{
-		if(!(source instanceof Player))
-			throw new CommandException(Text.of(WorldRebuilder.PLUGIN_ERROR, TextColors.RED, "Only in-game players can use this command!"));
+		if(!(context.cause().audience() instanceof ServerPlayer))
+			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(Component.text("Only in-game players can use this command!", NamedTextColor.RED)));
 
-		final Player player = (Player) source;
-		final Inventory inventory = player.getInventory();
+		final ServerPlayer player = (ServerPlayer) context.cause().audience();
+		final Inventory inventory = player.inventory();
 
-		final List<Text> wandDescriptionLines = new ArrayList<>();
-		final Text firstLine = Text.of("Select first point with your", TextColors.GOLD, " left click.");
-		final Text secondLine = Text.of("Select second point with your", TextColors.GOLD, " right click.");
+		final List<Component> wandDescriptionLines = new ArrayList<>();
+		final Component firstLine = Component.text("Select first point with your", NamedTextColor.GOLD).append(Component.text(" left click."));
+		final Component secondLine = Component.text("Select second point with your", NamedTextColor.GOLD).append(Component.text(" right click."));
 		wandDescriptionLines.add(firstLine);
 		wandDescriptionLines.add(secondLine);
 
 		final ItemStack worldRebuilderWand = ItemStack.builder()
 				.itemType(ItemTypes.IRON_AXE)
 				.quantity(1)
-				.add(Keys.DISPLAY_NAME, Text.of(TextColors.GOLD, "WorldRebuilder Wand"))
-				.add(Keys.ITEM_LORE, wandDescriptionLines)
+				.add(Keys.CUSTOM_NAME, Component.text("WorldRebuilder Wand", NamedTextColor.GOLD))
+				.add(Keys.LORE, wandDescriptionLines)
 				.build();
 
 		inventory.offer(worldRebuilderWand);

@@ -1,16 +1,5 @@
 package io.github.aquerr.worldrebuilder.util;
 
-import com.flowpowered.math.vector.Vector3i;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-
-import java.util.*;
-
 public class RegionUtil
 {
 //    public static Map<Vector3i, BlockSnapshot> getBlockSnapshots(final UUID worldUUID, Vector3i firstCorner, Vector3i secondCorner)
