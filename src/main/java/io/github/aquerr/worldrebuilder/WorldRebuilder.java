@@ -48,8 +48,6 @@ import java.util.UUID;
 @Plugin("worldrebuilder")
 public class WorldRebuilder
 {
-	public static final String VERSION = "1.3.0";
-
 	public static final TextComponent PLUGIN_ERROR = Component.text("[WR] ", NamedTextColor.RED);
 	public static final TextComponent PLUGIN_PREFIX = Component.text("[WR] ", NamedTextColor.GREEN);
 
