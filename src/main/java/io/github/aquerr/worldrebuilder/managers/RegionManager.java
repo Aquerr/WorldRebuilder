@@ -7,8 +7,10 @@ import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderTask;
 import io.github.aquerr.worldrebuilder.storage.StorageManager;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
@@ -28,7 +30,7 @@ public class RegionManager
 		return this.regions.values();
 	}
 
-	public void loadRegions()
+	public void reloadRegions()
 	{
 		final List<Region> regions = this.storageManager.getRegions();
 		for(final Region region : regions)
@@ -39,19 +41,20 @@ public class RegionManager
 
 	public void addRegion(final Region region)
 	{
-		CompletableFuture.runAsync(() -> this.storageManager.addRegion(region));
+		WorldRebuilderScheduler.getInstance().queueStorageTask(() -> this.storageManager.addRegion(region));
 		this.regions.put(region.getName(), region);
 	}
 
 	public void updateRegion(final Region region)
 	{
-		CompletableFuture.runAsync(() -> this.storageManager.updateRegion(region));
+		WorldRebuilderScheduler.getInstance().queueStorageTask(() -> this.storageManager.updateRegion(region));
 		this.regions.put(region.getName(), region);
 	}
 
 	public void deleteRegion(final String name)
 	{
-		CompletableFuture.runAsync(() -> this.storageManager.deleteRegion(name));
+		WorldRebuilderScheduler.getInstance().queueStorageTask(() -> this.storageManager.deleteRegion(name));
+		WorldRebuilderScheduler.getInstance().removeTasksForRegion(name);
 		this.regions.remove(name);
 	}
 
@@ -73,6 +76,5 @@ public class RegionManager
 
 	public void init() {
 		this.storageManager.init();
-		loadRegions();
 	}
 }

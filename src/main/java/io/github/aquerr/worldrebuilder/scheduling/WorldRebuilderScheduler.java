@@ -1,7 +1,6 @@
 package io.github.aquerr.worldrebuilder.scheduling;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
@@ -10,15 +9,19 @@ import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class WorldRebuilderScheduler
 {
+	private static final ExecutorService SINGLE_THREADED_EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 	private static WorldRebuilderScheduler INSTANCE;
 
 	// RegionName => [ScheduledRebuildTasks]
@@ -36,6 +39,11 @@ public class WorldRebuilderScheduler
 	{
 		this.underlyingScheduler = scheduler;
 		INSTANCE = this;
+	}
+
+	public void queueStorageTask(Runnable runnable)
+	{
+		SINGLE_THREADED_EXECUTOR_SERVICE.submit(runnable);
 	}
 
 	public void scheduleRebuildBlocksTask(final String regionName, final UUID worldUUID, List<BlockSnapshot> blocks, final int delayInSeconds)
@@ -121,5 +129,16 @@ public class WorldRebuilderScheduler
 			if (tasks.size() == 0)
 				this.rebuildTasks.remove(regionName);
 		}
+	}
+
+	public void removeTasksForRegion(String regionName)
+	{
+		regionName = regionName.toLowerCase();
+		List<WorldRebuilderTask> tasks = this.rebuildTasks.getOrDefault(regionName, Collections.emptyList());
+		for (WorldRebuilderTask task : tasks)
+		{
+			task.cancel();
+		}
+		this.rebuildTasks.remove(regionName);
 	}
 }

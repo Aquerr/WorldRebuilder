@@ -42,13 +42,13 @@ public class BlockSnapshotExceptionTypeSerializer implements TypeSerializer<Bloc
             exception.printStackTrace();
         }
 
-        final String blockTypeId = dataContainer.get(DataQuery.of("BlockType"))
+        final String blockTypeId = dataContainer.get(DataQuery.of("BlockState").then("BlockState"))
                 .map(String::valueOf)
                 .orElse("");
 
         if ("".equals(blockTypeId))
         {
-            throw new SerializationException(format("BlockType id is empty. Data Container: %s", dataContainer));
+            throw new SerializationException(format("BlockState id is empty. Data Container: %s", dataContainer));
         }
 //        final Optional<BlockType> blockType = Sponge.game().findRegistry(RegistryType.of()).get();
 //        if (!blockType.isPresent())
@@ -82,7 +82,7 @@ public class BlockSnapshotExceptionTypeSerializer implements TypeSerializer<Bloc
                     .build()
                     .load();
 
-            node.set(node);
+            value.set(node);
         }
         catch (Exception exception)
         {

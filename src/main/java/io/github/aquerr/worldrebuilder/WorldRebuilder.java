@@ -104,6 +104,7 @@ public class WorldRebuilder
 	{
 		this.worldRebuilderScheduler = new WorldRebuilderScheduler(Sponge.server().scheduler());
 		registerListeners();
+		this.regionManager.reloadRegions();
 	}
 
 	@Listener
