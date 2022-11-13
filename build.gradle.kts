@@ -130,3 +130,27 @@ oreDeployment {
         versionBody.set(providers.gradleProperty("changelog").map { file(it).readText(Charsets.UTF_8) }.orElse(""))
     }*/
 }
+
+publishing {
+
+    repositories {
+        maven {
+            name = "GithubPackages"
+            url = uri("https://maven.pkg.github.com/Aquerr/WorldRebuilder")
+            credentials {
+                username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_PUBLISHING_USERNAME")
+                password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_PUBLISHING_TOKEN")
+            }
+        }
+    }
+
+    publications {
+        create<MavenPublication>("worldrebuilder")
+        {
+            artifactId = "worldrebuilder"
+            description = project.description
+
+            from(components["java"])
+        }
+    }
+}
