@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class BlockBreakListener extends AbstractListener
 {
@@ -186,36 +187,11 @@ public class BlockBreakListener extends AbstractListener
 	private void rebuildBlocks(final UUID worldUUID, final List<BlockTransaction> transactions)
 	{
 		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
-		List<BlockSnapshot> blocksToRestore = new ArrayList<>();
-
 		for(final Region region : regions)
 		{
-			boolean shouldRebuild = false;
-
-			if (!region.isActive())
-				continue;
-
-			for(final BlockTransaction transaction : transactions)
-			{
-				if(region.intersects(worldUUID, transaction.original().position()))
-				{
-					// Check ignored blocks
-					if (region.isBlockIgnored(transaction.original()))
-					{
-						region.removeIgnoredBlock(transaction.original());
-						continue;
-					}
-
-					blocksToRestore.add(transaction.original());
-					shouldRebuild = true;
-				}
-			}
-
-			if (shouldRebuild)
-			{
-				super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(region.getName(), worldUUID, blocksToRestore, region.getRestoreTime());
-				blocksToRestore = new ArrayList<>();
-			}
+			region.rebuildBlocks(transactions.stream()
+					.map(Transaction::original)
+					.collect(Collectors.toList()));
 		}
 	}
 }

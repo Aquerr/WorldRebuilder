@@ -17,10 +17,12 @@ import java.util.stream.Collectors;
 
 public class RebuildBlocksTask implements WorldRebuilderTask
 {
-	private final String regionName;
-	private final UUID worldUUID;
-	private final List<BlockSnapshot> blocks;
-	private ScheduledTask task;
+	protected final String regionName;
+	protected final UUID worldUUID;
+	protected final List<BlockSnapshot> blocks;
+	protected ScheduledTask task;
+	protected int delay;
+	protected int interval;
 
 	public RebuildBlocksTask(final String regionName, final UUID worldUUID, List<BlockSnapshot> blocks)
 	{
@@ -72,22 +74,47 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 	}
 
 	@Override
-	public boolean cancel()
-	{
-		return this.task.cancel();
-	}
-
 	public void setTask(ScheduledTask task)
 	{
 		this.task = task;
 	}
 
-	private boolean isPlayerAtBlock(final ServerPlayer player, BlockSnapshot blockSnapshot)
+	@Override
+	public ScheduledTask getTask()
+	{
+		return this.task;
+	}
+
+	@Override
+	public int getInterval()
+	{
+		return this.interval;
+	}
+
+	@Override
+	public void setInterval(int intervalInSeconds)
+	{
+		this.interval = intervalInSeconds;
+	}
+
+	@Override
+	public int getDelay()
+	{
+		return this.delay;
+	}
+
+	@Override
+	public void setDelay(int delayInSeconds)
+	{
+		this.delay = delayInSeconds;
+	}
+
+	protected boolean isPlayerAtBlock(final ServerPlayer player, BlockSnapshot blockSnapshot)
 	{
 		return player.position().toInt().equals(blockSnapshot.position());
 	}
 
-	private void safeTeleportPlayer(ServerPlayer player)
+	protected void safeTeleportPlayer(ServerPlayer player)
 	{
 		player.setLocationAndRotation(Sponge.server().teleportHelper()
 				.findSafeLocation(ServerLocation.of(player.world(), player.position()))

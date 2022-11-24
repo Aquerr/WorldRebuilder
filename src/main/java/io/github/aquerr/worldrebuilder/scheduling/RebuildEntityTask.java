@@ -26,8 +26,10 @@ public class RebuildEntityTask implements WorldRebuilderTask
 	private final UUID worldUUID;
 	private final Entity entity;
 	private ScheduledTask task;
+	private int interval;
+	private int delay;
 
-	RebuildEntityTask(String regionName, final UUID worldUUID, final Entity entity)
+	public RebuildEntityTask(String regionName, final UUID worldUUID, final Entity entity)
 	{
 		this.regionName = regionName;
 		this.worldUUID = worldUUID;
@@ -112,14 +114,38 @@ public class RebuildEntityTask implements WorldRebuilderTask
 		return this.worldUUID;
 	}
 
-	@Override
-	public boolean cancel()
-	{
-		return this.task.cancel();
-	}
-
 	public void setTask(ScheduledTask task)
 	{
 		this.task = task;
+	}
+
+	@Override
+	public ScheduledTask getTask()
+	{
+		return this.task;
+	}
+
+	@Override
+	public int getInterval()
+	{
+		return this.interval;
+	}
+
+	@Override
+	public void setInterval(int intervalInSeconds)
+	{
+		this.interval = intervalInSeconds;
+	}
+
+	@Override
+	public int getDelay()
+	{
+		return this.delay;
+	}
+
+	@Override
+	public void setDelay(int delayInSeconds)
+	{
+		this.delay = delayInSeconds;
 	}
 }

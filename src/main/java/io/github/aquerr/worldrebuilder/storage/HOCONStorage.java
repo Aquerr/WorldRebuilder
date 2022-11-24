@@ -7,6 +7,7 @@ import io.github.aquerr.worldrebuilder.storage.serializer.BlockSnapshotException
 import io.github.aquerr.worldrebuilder.storage.serializer.BlockSnapshotExceptionTypeSerializer;
 import io.github.aquerr.worldrebuilder.storage.serializer.Vector3iTypeSerializer;
 import io.github.aquerr.worldrebuilder.storage.serializer.WRTypeTokens;
+import io.github.aquerr.worldrebuilder.strategy.RebuildSameBlockStrategy;
 import io.leangen.geantyref.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,7 +118,7 @@ public class HOCONStorage implements Storage
 
 			final List<BlockSnapshot> blockSnapshotsExceptions = this.configNode.node(ROOT_NODE_NAME, name, "blockSnapshotsExceptions").get(WRTypeTokens.BLOCK_EXCEPTION_LIST_TYPE_TOKEN, Collections.emptyList());
 			final List<EntitySnapshot> entitySnapshotsExceptions = this.configNode.node(ROOT_NODE_NAME, name, "entitySnapshotsExceptions").getList(TypeToken.get(EntitySnapshot.class), Collections.emptyList());
-			return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime, isActive, shouldDropBlocks, new LinkedList<>(blockSnapshotsExceptions), new LinkedList<>(entitySnapshotsExceptions));
+			return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime, isActive, shouldDropBlocks, new LinkedList<>(blockSnapshotsExceptions), new LinkedList<>(entitySnapshotsExceptions), new RebuildSameBlockStrategy());
 		}
 		catch (Exception exception)
 		{

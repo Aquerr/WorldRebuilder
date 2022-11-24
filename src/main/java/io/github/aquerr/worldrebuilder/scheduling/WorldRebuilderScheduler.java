@@ -2,9 +2,6 @@ package io.github.aquerr.worldrebuilder.scheduling;
 
 import com.google.inject.Inject;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
@@ -46,46 +43,16 @@ public class WorldRebuilderScheduler
 		SINGLE_THREADED_EXECUTOR_SERVICE.submit(runnable);
 	}
 
-	public void scheduleRebuildBlocksTask(final String regionName, final UUID worldUUID, List<BlockSnapshot> blocks, final int delayInSeconds)
+	public void scheduleTask(WorldRebuilderTask worldRebuilderTask)
 	{
-		RebuildBlocksTask rebuildBlocksTask = new RebuildBlocksTask(regionName, worldUUID, blocks);
-
 		ScheduledTask scheduledTask = this.underlyingScheduler.submit(Task.builder()
 				.plugin(WorldRebuilder.getPlugin().getPluginContainer())
-				.execute(rebuildBlocksTask)
-				.delay(delayInSeconds, TimeUnit.SECONDS)
+				.execute(worldRebuilderTask)
+				.delay(worldRebuilderTask.getDelay(), TimeUnit.SECONDS)
 				.build(), getNewTaskName());
 
-		rebuildBlocksTask.setTask(scheduledTask);
-		addTaskToList(rebuildBlocksTask);
-	}
-
-	public void scheduleRebuildEntitiesTask(final String regionName, final UUID worldUUID, List<EntitySnapshot> entities, final int delayInSeconds)
-	{
-		RebuildEntitiesTask rebuildEntitiesTask = new RebuildEntitiesTask(regionName, worldUUID, entities);
-
-		ScheduledTask scheduledTask = this.underlyingScheduler.submit(Task.builder()
-				.plugin(WorldRebuilder.getPlugin().getPluginContainer())
-				.delay(delayInSeconds, TimeUnit.SECONDS)
-				.execute(rebuildEntitiesTask)
-				.build(), getNewTaskName());
-
-		rebuildEntitiesTask.setTask(scheduledTask);
-		addTaskToList(rebuildEntitiesTask);
-	}
-
-	public void scheduleRebuildEntityTask(String regionName, final UUID worldUUID, Entity entity, final int delayInSeconds)
-	{
-		RebuildEntityTask rebuildEntityTask = new RebuildEntityTask(regionName, worldUUID, entity);
-
-		ScheduledTask scheduledTask = this.underlyingScheduler.submit(Task.builder()
-				.execute(rebuildEntityTask)
-				.delay(delayInSeconds, TimeUnit.SECONDS)
-				.plugin(WorldRebuilder.getPlugin().getPluginContainer())
-				.build(), getNewTaskName());
-
-		rebuildEntityTask.setTask(scheduledTask);
-		addTaskToList(rebuildEntityTask);
+		worldRebuilderTask.setTask(scheduledTask);
+		addTaskToList(worldRebuilderTask);
 	}
 
 	public Scheduler getUnderlyingScheduler()
@@ -121,6 +88,7 @@ public class WorldRebuilderScheduler
 
 	public void removeTaskForRegion(String regionName, WorldRebuilderTask worldRebuilderTask)
 	{
+		worldRebuilderTask.cancel();
 		regionName = regionName.toLowerCase();
 		List<WorldRebuilderTask> tasks = this.rebuildTasks.get(regionName);
 		if (tasks != null)

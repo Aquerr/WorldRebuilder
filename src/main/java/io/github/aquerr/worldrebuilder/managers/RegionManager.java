@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Singleton
 public class RegionManager
@@ -66,10 +67,13 @@ public class RegionManager
 	public void forceRebuildRegion(final Region region)
 	{
 		WorldRebuilderScheduler worldRebuilderScheduler = WorldRebuilderScheduler.getInstance();
-		List<WorldRebuilderTask> worldRebuilderTasks = new LinkedList<>(worldRebuilderScheduler.getTasksForRegion(region.getName()));
-		worldRebuilderScheduler.cancelTasksForRegion(region.getName());
-		for (final WorldRebuilderTask worldRebuilderTask : worldRebuilderTasks)
+		List<WorldRebuilderTask> nonIntervalWorldRebuilderTasks = new LinkedList<>(worldRebuilderScheduler.getTasksForRegion(region.getName()))
+				.stream()
+				.filter(worldRebuilderTask -> worldRebuilderTask.getInterval() == 0)
+				.collect(Collectors.toList());
+		for (final WorldRebuilderTask worldRebuilderTask : nonIntervalWorldRebuilderTasks)
 		{
+			worldRebuilderScheduler.removeTaskForRegion(region.getName(), worldRebuilderTask);
 			worldRebuilderTask.run();
 		}
 	}

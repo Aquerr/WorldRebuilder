@@ -68,7 +68,7 @@ public class BlockPlaceListener extends AbstractListener
 
                 if (blocksToRestore.size() > 0)
                 {
-                    super.getPlugin().getWorldRebuilderScheduler().scheduleRebuildBlocksTask(region.getName(), transactions.get(0).original().location().get().world().uniqueId(), blocksToRestore, region.getRestoreTime());
+                    region.rebuildBlocks(blocksToRestore);
                 }
             }
         });

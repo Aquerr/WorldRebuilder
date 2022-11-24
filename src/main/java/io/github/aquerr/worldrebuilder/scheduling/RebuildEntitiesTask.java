@@ -1,12 +1,9 @@
 package io.github.aquerr.worldrebuilder.scheduling;
 
 import io.github.aquerr.worldrebuilder.util.WorldUtils;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.scheduler.ScheduledTask;
-import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -21,6 +18,8 @@ public class RebuildEntitiesTask implements WorldRebuilderTask
 	private final UUID worldUUID;
 	private final List<EntitySnapshot> entitySnapshots;
 	private ScheduledTask task;
+	private int interval;
+	private int delay;
 
 	RebuildEntitiesTask(final String regionName, final UUID worldUUID, final List<EntitySnapshot> entitySnapshots)
 	{
@@ -66,14 +65,38 @@ public class RebuildEntitiesTask implements WorldRebuilderTask
 		return this.worldUUID;
 	}
 
-	@Override
-	public boolean cancel()
-	{
-		return this.task.cancel();
-	}
-
 	public void setTask(ScheduledTask task)
 	{
 		this.task = task;
+	}
+
+	@Override
+	public ScheduledTask getTask()
+	{
+		return this.task;
+	}
+
+	@Override
+	public int getInterval()
+	{
+		return this.interval;
+	}
+
+	@Override
+	public void setInterval(int intervalInSeconds)
+	{
+		this.interval = intervalInSeconds;
+	}
+
+	@Override
+	public int getDelay()
+	{
+		return this.delay;
+	}
+
+	@Override
+	public void setDelay(int delayInSeconds)
+	{
+		this.delay = delayInSeconds;
 	}
 }
