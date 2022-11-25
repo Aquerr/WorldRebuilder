@@ -19,14 +19,6 @@ import java.util.stream.Collectors;
 
 public class RebuildRegionInIntervalStrategy implements RebuildRegionBlocksStrategy
 {
-    private final Region region;
-
-    public RebuildRegionInIntervalStrategy(Region region)
-    {
-        this.region = region;
-        rebuildBlocks(region, Collections.emptyList());
-    }
-
     @Override
     public void rebuildBlocks(Region region, Collection<BlockSnapshot> blocks)
     {
@@ -34,7 +26,7 @@ public class RebuildRegionInIntervalStrategy implements RebuildRegionBlocksStrat
             return;
 
         List<BlockSnapshot> blocksToRebuild = new ArrayList<>(blocks);
-        blocksToRebuild.addAll(getBlocksFromRegion());
+        blocksToRebuild.addAll(getBlocksFromRegion(region));
 
         if (blocksToRebuild.isEmpty())
             return;
@@ -45,6 +37,18 @@ public class RebuildRegionInIntervalStrategy implements RebuildRegionBlocksStrat
         WorldRebuilderScheduler.getInstance().scheduleTask(rebuildBlocksTask);
     }
 
+    @Override
+    public RebuildStrategyType getType()
+    {
+        return RebuildStrategyType.CONSTANT_REBUILD_IN_INTERVAL;
+    }
+
+    @Override
+    public boolean doesRunContinuously()
+    {
+        return true;
+    }
+
     private boolean isTaskAlreadyRunningForRegion(Region region)
     {
         List<WorldRebuilderTask> tasks = WorldRebuilderScheduler.getInstance().getTasksForRegion(region.getName());
@@ -52,14 +56,14 @@ public class RebuildRegionInIntervalStrategy implements RebuildRegionBlocksStrat
                 .anyMatch(task -> !task.getTask().task().interval().isZero());
     }
 
-    private Collection<? extends BlockSnapshot> getBlocksFromRegion()
+    private Collection<? extends BlockSnapshot> getBlocksFromRegion(Region region)
     {
         return WorldUtils.getWorldByUUID(region.getWorldUniqueId())
-                .map(this::getBlocksFromRegion)
+                .map(serverWorld -> getBlocksFromRegion(region, serverWorld))
                 .orElse(Collections.emptyList());
     }
 
-    private List<BlockSnapshot> getBlocksFromRegion(ServerWorld serverWorld)
+    private List<BlockSnapshot> getBlocksFromRegion(Region region, ServerWorld serverWorld)
     {
         return serverWorld.blockStateStream(region.getFirstPoint(), region.getSecondPoint(), StreamOptions.lazily())
                 .map(element -> element.type().snapshotFor(ServerLocation.of(element.volume(), element.position())))

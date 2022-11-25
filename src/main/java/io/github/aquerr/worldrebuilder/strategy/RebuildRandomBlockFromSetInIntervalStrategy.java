@@ -8,25 +8,19 @@ import org.spongepowered.api.block.BlockSnapshot;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class RebuildRandomBlockFromSetInIntervalStrategy implements RebuildRegionBlocksStrategy
+public class RebuildRandomBlockFromSetInIntervalStrategy implements RebuildBlockFromSetStrategy
 {
     private final Set<BlockSnapshot> blocksToUse;
-    private final Region region;
 
-    public RebuildRandomBlockFromSetInIntervalStrategy(final Region region, Set<BlockSnapshot> blocksToUse)
+    public RebuildRandomBlockFromSetInIntervalStrategy(Set<BlockSnapshot> blocksToUse)
     {
-        if (region == null)
-            throw new IllegalArgumentException("Provided region must not be null!");
         if (blocksToUse == null || blocksToUse.isEmpty())
             throw new IllegalArgumentException("Provided blocks collection must not be empty!");
 
-        this.region = region;
         this.blocksToUse = blocksToUse;
-        rebuildBlocks(region, Collections.emptyList());
     }
 
     @Override
@@ -41,10 +35,28 @@ public class RebuildRandomBlockFromSetInIntervalStrategy implements RebuildRegio
         WorldRebuilderScheduler.getInstance().scheduleTask(rebuildRandomBlockFromSetTask);
     }
 
+    @Override
+    public RebuildStrategyType getType()
+    {
+        return RebuildStrategyType.CONSTANT_REBUILD_IN_INTERVAL_RANDOM_BLOCK_FROM_SET;
+    }
+
+    @Override
+    public boolean doesRunContinuously()
+    {
+        return true;
+    }
+
     private boolean isTaskAlreadyRunningForRegion(Region region)
     {
         List<WorldRebuilderTask> tasks = WorldRebuilderScheduler.getInstance().getTasksForRegion(region.getName());
         return tasks.stream()
                 .anyMatch(task -> !task.getTask().task().interval().isZero());
+    }
+
+    @Override
+    public Collection<BlockSnapshot> getBlocksToUse()
+    {
+        return new ArrayList<>(blocksToUse);
     }
 }

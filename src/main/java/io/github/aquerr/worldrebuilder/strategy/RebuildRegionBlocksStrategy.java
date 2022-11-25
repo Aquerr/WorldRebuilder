@@ -5,8 +5,11 @@ import org.spongepowered.api.block.BlockSnapshot;
 
 import java.util.Collection;
 
-@FunctionalInterface
 public interface RebuildRegionBlocksStrategy
 {
     void rebuildBlocks(Region region, Collection<BlockSnapshot> blocks);
+
+    RebuildStrategyType getType();
+
+    boolean doesRunContinuously();
 }

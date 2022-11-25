@@ -17,4 +17,16 @@ public class RebuildSameBlockStrategy implements RebuildRegionBlocksStrategy
         rebuildBlocksTask.setDelay(region.getRestoreTime());
         WorldRebuilderScheduler.getInstance().scheduleTask(rebuildBlocksTask);
     }
+
+    @Override
+    public RebuildStrategyType getType()
+    {
+        return RebuildStrategyType.SAME_BLOCK;
+    }
+
+    @Override
+    public boolean doesRunContinuously()
+    {
+        return false;
+    }
 }

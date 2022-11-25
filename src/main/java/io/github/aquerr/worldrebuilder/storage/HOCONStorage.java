@@ -3,10 +3,12 @@ package io.github.aquerr.worldrebuilder.storage;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.github.aquerr.worldrebuilder.entity.Region;
-import io.github.aquerr.worldrebuilder.storage.serializer.BlockSnapshotExceptionListTypeSerializer;
-import io.github.aquerr.worldrebuilder.storage.serializer.BlockSnapshotExceptionTypeSerializer;
+import io.github.aquerr.worldrebuilder.storage.serializer.BlockRebuildStrategyTypeSerializer;
+import io.github.aquerr.worldrebuilder.storage.serializer.BlockSnapshotListTypeSerializer;
+import io.github.aquerr.worldrebuilder.storage.serializer.BlockSnapshotSerializer;
 import io.github.aquerr.worldrebuilder.storage.serializer.Vector3iTypeSerializer;
 import io.github.aquerr.worldrebuilder.storage.serializer.WRTypeTokens;
+import io.github.aquerr.worldrebuilder.strategy.RebuildRegionBlocksStrategy;
 import io.github.aquerr.worldrebuilder.strategy.RebuildSameBlockStrategy;
 import io.leangen.geantyref.TypeToken;
 import org.slf4j.Logger;
@@ -26,6 +28,7 @@ import org.spongepowered.math.vector.Vector3i;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -79,8 +82,10 @@ public class HOCONStorage implements Storage
 		this.configNode.node(ROOT_NODE_NAME, region.getName(), "active").set(region.isActive());
 		this.configNode.node(ROOT_NODE_NAME, region.getName(), "shouldDropBlocks").set(region.shouldDropBlocks());
 
-		this.configNode.node(ROOT_NODE_NAME, region.getName(), "blockSnapshotsExceptions").set(WRTypeTokens.BLOCK_EXCEPTION_LIST_TYPE_TOKEN, region.getBlockSnapshotsExceptions());
+		this.configNode.node(ROOT_NODE_NAME, region.getName(), "blockSnapshotsExceptions").set(WRTypeTokens.BLOCK_SNAPSHOT_COLLECTION_TYPE_TOKEN, region.getBlockSnapshotsExceptions());
 		this.configNode.node(ROOT_NODE_NAME, region.getName(), "entitySnapshotsExceptions").set(WRTypeTokens.ENTITY_SNAPSHOT_LIST_TYPE_TOKEN, region.getEntitySnapshotsExceptions());
+
+		this.configNode.node(ROOT_NODE_NAME, region.getName(), "blockRebuildStrategy").set(WRTypeTokens.BLOCK_REBUILD_STRATEGY, region.getRebuildRegionBlocksStrategy());
 
 		saveChanges();
 	}
@@ -116,9 +121,12 @@ public class HOCONStorage implements Storage
 			final boolean isActive = this.configNode.node(ROOT_NODE_NAME, name, "active").getBoolean(true);
 			final boolean shouldDropBlocks = this.configNode.node(ROOT_NODE_NAME, name, "shouldDropBlocks").getBoolean(true);
 
-			final List<BlockSnapshot> blockSnapshotsExceptions = this.configNode.node(ROOT_NODE_NAME, name, "blockSnapshotsExceptions").get(WRTypeTokens.BLOCK_EXCEPTION_LIST_TYPE_TOKEN, Collections.emptyList());
+			final Collection<BlockSnapshot> blockSnapshotsExceptions = this.configNode.node(ROOT_NODE_NAME, name, "blockSnapshotsExceptions").get(WRTypeTokens.BLOCK_SNAPSHOT_COLLECTION_TYPE_TOKEN, Collections.emptyList());
 			final List<EntitySnapshot> entitySnapshotsExceptions = this.configNode.node(ROOT_NODE_NAME, name, "entitySnapshotsExceptions").getList(TypeToken.get(EntitySnapshot.class), Collections.emptyList());
-			return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime, isActive, shouldDropBlocks, new LinkedList<>(blockSnapshotsExceptions), new LinkedList<>(entitySnapshotsExceptions), new RebuildSameBlockStrategy());
+
+			final RebuildRegionBlocksStrategy rebuildRegionBlocksStrategy = this.configNode.node(ROOT_NODE_NAME, name, "blockRebuildStrategy").get(WRTypeTokens.BLOCK_REBUILD_STRATEGY, new RebuildSameBlockStrategy());
+
+			return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime, isActive, shouldDropBlocks, new LinkedList<>(blockSnapshotsExceptions), new LinkedList<>(entitySnapshotsExceptions), rebuildRegionBlocksStrategy);
 		}
 		catch (Exception exception)
 		{
@@ -180,9 +188,10 @@ public class HOCONStorage implements Storage
 	{
 		TypeSerializerCollection collection = TypeSerializerCollection.builder()
 				.registerAll(TypeSerializerCollection.defaults())
-				.register(WRTypeTokens.BLOCK_EXCEPTION_TYPE_TOKEN, new BlockSnapshotExceptionTypeSerializer())
-				.register(WRTypeTokens.BLOCK_EXCEPTION_LIST_TYPE_TOKEN, new BlockSnapshotExceptionListTypeSerializer())
+				.register(WRTypeTokens.BLOCK_SNAPSHOT_TYPE_TOKEN, new BlockSnapshotSerializer())
+				.register(WRTypeTokens.BLOCK_SNAPSHOT_COLLECTION_TYPE_TOKEN, new BlockSnapshotListTypeSerializer())
 				.register(WRTypeTokens.VECTOR3I_TYPE_TOKEN, new Vector3iTypeSerializer())
+				.register(WRTypeTokens.BLOCK_REBUILD_STRATEGY, new BlockRebuildStrategyTypeSerializer())
 				.registerAll(configManager.serializers())
 				.build();
 

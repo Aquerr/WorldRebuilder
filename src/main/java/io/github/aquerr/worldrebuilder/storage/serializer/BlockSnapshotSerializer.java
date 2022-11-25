@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import static java.lang.String.format;
 
-public class BlockSnapshotExceptionTypeSerializer implements TypeSerializer<BlockSnapshot>
+public class BlockSnapshotSerializer implements TypeSerializer<BlockSnapshot>
 {
     @Override
     public BlockSnapshot deserialize(Type type, ConfigurationNode node) throws SerializationException

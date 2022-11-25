@@ -8,9 +8,10 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-public class BlockSnapshotExceptionListTypeSerializer implements TypeSerializer<List<BlockSnapshot>>
+public class BlockSnapshotListTypeSerializer implements TypeSerializer<Collection<BlockSnapshot>>
 {
     @Override
     public List<BlockSnapshot> deserialize(Type type, ConfigurationNode value) throws SerializationException
@@ -18,13 +19,13 @@ public class BlockSnapshotExceptionListTypeSerializer implements TypeSerializer<
         final List<BlockSnapshot> blockSnapshots = new ArrayList<>();
         for (final ConfigurationNode configurationNode : value.childrenList())
         {
-            final BlockSnapshot blockSnapshot = configurationNode.get(WRTypeTokens.BLOCK_EXCEPTION_TYPE_TOKEN);
+            final BlockSnapshot blockSnapshot = configurationNode.get(WRTypeTokens.BLOCK_SNAPSHOT_TYPE_TOKEN);
             blockSnapshots.add(blockSnapshot);
         }
         return blockSnapshots;    }
 
     @Override
-    public void serialize(Type type, @Nullable List<BlockSnapshot> blockSnapshots, ConfigurationNode value) throws SerializationException
+    public void serialize(Type type, @Nullable Collection<BlockSnapshot> blockSnapshots, ConfigurationNode value) throws SerializationException
     {
         if (blockSnapshots == null)
             return;
@@ -32,7 +33,7 @@ public class BlockSnapshotExceptionListTypeSerializer implements TypeSerializer<
         for (final BlockSnapshot blockSnapshot : blockSnapshots)
         {
             final ConfigurationNode configurationNode = value.appendListNode();
-            configurationNode.set(WRTypeTokens.BLOCK_EXCEPTION_TYPE_TOKEN, blockSnapshot);
+            configurationNode.set(WRTypeTokens.BLOCK_SNAPSHOT_TYPE_TOKEN, blockSnapshot);
         }
     }
 }

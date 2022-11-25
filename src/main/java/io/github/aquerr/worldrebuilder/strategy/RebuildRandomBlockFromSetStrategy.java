@@ -11,18 +11,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class RebuildRandomBlockFromSetStrategy implements RebuildRegionBlocksStrategy
+public class RebuildRandomBlockFromSetStrategy implements RebuildBlockFromSetStrategy
 {
     private static final ThreadLocalRandom THREAD_LOCAL_RANDOM = ThreadLocalRandom.current();
 
-    private final List<BlockSnapshot> blockSnapshots;
+    private final List<BlockSnapshot> blocksToUse;
 
-    public RebuildRandomBlockFromSetStrategy(Set<BlockSnapshot> blockSnapshots)
+    public RebuildRandomBlockFromSetStrategy(Set<BlockSnapshot> blocksToUse)
     {
-        if (blockSnapshots == null || blockSnapshots.isEmpty())
+        if (blocksToUse == null || blocksToUse.isEmpty())
             throw new IllegalArgumentException("Provided blocks collection must not be empty!");
 
-        this.blockSnapshots = new ArrayList<>(blockSnapshots);
+        this.blocksToUse = new ArrayList<>(blocksToUse);
     }
 
     @Override
@@ -41,9 +41,27 @@ public class RebuildRandomBlockFromSetStrategy implements RebuildRegionBlocksStr
         WorldRebuilderScheduler.getInstance().scheduleTask(rebuildBlocksTask);
     }
 
+    @Override
+    public RebuildStrategyType getType()
+    {
+        return RebuildStrategyType.RANDOM_BLOCK_FROM_SET;
+    }
+
+    @Override
+    public boolean doesRunContinuously()
+    {
+        return false;
+    }
+
     private BlockSnapshot getRandomBlock()
     {
-        int randomIndex = THREAD_LOCAL_RANDOM.nextInt(blockSnapshots.size());
-        return this.blockSnapshots.get(randomIndex);
+        int randomIndex = THREAD_LOCAL_RANDOM.nextInt(blocksToUse.size());
+        return this.blocksToUse.get(randomIndex);
+    }
+
+    @Override
+    public Collection<BlockSnapshot> getBlocksToUse()
+    {
+        return new ArrayList<>(blocksToUse);
     }
 }
