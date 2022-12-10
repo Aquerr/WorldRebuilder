@@ -50,7 +50,10 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 					.forEach(this::safeTeleportPlayer);
 		}
 
-		WorldRebuilderScheduler.getInstance().removeTaskForRegion(regionName, this);
+		if (this.interval == 0)
+		{
+			WorldRebuilderScheduler.getInstance().removeTaskForRegion(regionName, this);
+		}
 	}
 
 	@Override

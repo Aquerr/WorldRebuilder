@@ -50,6 +50,7 @@ public class ListCommand extends WRCommand
 					text("First Point: ", BLUE), text(region.getFirstPoint().toString()), newline(),
 					text("Second Point: ", BLUE), text(region.getSecondPoint().toString()), newline(),
 					text("Restore Time: ", BLUE), text(region.getRestoreTime(), region.isActive() ? GREEN : RED), newline(),
+					text("Rebuild Strategy: ", BLUE), text(region.getRebuildRegionBlocksStrategy().getType().toString()), newline(),
 					text("Active: ", BLUE), text(region.isActive(), region.isActive() ? GREEN : RED)
 			);
 

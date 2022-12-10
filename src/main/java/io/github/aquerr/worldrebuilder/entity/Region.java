@@ -259,7 +259,6 @@ public class Region
 			return;
 
 		final List<BlockSnapshot> blocksToRestore = new ArrayList<>();
-
 		for (final BlockSnapshot blockSnapshot : blockSnapshots)
 		{
 			if(canRestoreBlock(blockSnapshot))
@@ -267,6 +266,9 @@ public class Region
 				blocksToRestore.add(blockSnapshot);
 			}
 		}
+
+		if (blocksToRestore.isEmpty())
+			return;
 
 		this.rebuildRegionBlocksStrategy.rebuildBlocks(this, blocksToRestore);
 	}

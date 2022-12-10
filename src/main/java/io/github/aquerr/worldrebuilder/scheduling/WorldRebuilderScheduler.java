@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -49,6 +50,7 @@ public class WorldRebuilderScheduler
 				.plugin(WorldRebuilder.getPlugin().getPluginContainer())
 				.execute(worldRebuilderTask)
 				.delay(worldRebuilderTask.getDelay(), TimeUnit.SECONDS)
+				.interval(worldRebuilderTask.getInterval(), TimeUnit.SECONDS)
 				.build(), getNewTaskName());
 
 		worldRebuilderTask.setTask(scheduledTask);
@@ -62,7 +64,8 @@ public class WorldRebuilderScheduler
 
 	public List<WorldRebuilderTask> getTasksForRegion(final String regionName)
 	{
-		return this.rebuildTasks.get(regionName.toLowerCase());
+		return Optional.ofNullable(this.rebuildTasks.get(regionName.toLowerCase()))
+				.orElse(Collections.emptyList());
 	}
 
 	private void addTaskToList(WorldRebuilderTask task)

@@ -6,6 +6,7 @@ import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderTask;
 import io.github.aquerr.worldrebuilder.util.WorldUtils;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
@@ -65,7 +66,8 @@ public class RebuildRegionInIntervalStrategy implements RebuildRegionBlocksStrat
 
     private List<BlockSnapshot> getBlocksFromRegion(Region region, ServerWorld serverWorld)
     {
-        return serverWorld.blockStateStream(region.getFirstPoint(), region.getSecondPoint(), StreamOptions.lazily())
+        AABB aabb = AABB.of(region.getFirstPoint(), region.getSecondPoint());
+        return serverWorld.blockStateStream(aabb.min().toInt(), aabb.max().toInt(), StreamOptions.lazily())
                 .map(element -> element.type().snapshotFor(ServerLocation.of(element.volume(), element.position())))
                 .toStream()
                 .map(VolumeElement::type)

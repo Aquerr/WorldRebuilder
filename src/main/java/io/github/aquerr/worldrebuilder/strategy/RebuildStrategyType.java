@@ -2,20 +2,27 @@ package io.github.aquerr.worldrebuilder.strategy;
 
 public enum RebuildStrategyType
 {
-    SAME_BLOCK(false),
-    RANDOM_BLOCK_FROM_SET(true),
-    CONSTANT_REBUILD_IN_INTERVAL(false),
-    CONSTANT_REBUILD_IN_INTERVAL_RANDOM_BLOCK_FROM_SET(true);
+    SAME_BLOCK(false, false),
+    RANDOM_BLOCK_FROM_SET(true, false),
+    CONSTANT_REBUILD_IN_INTERVAL(false, true),
+    CONSTANT_REBUILD_IN_INTERVAL_RANDOM_BLOCK_FROM_SET(true, true);
 
-    private boolean hasPredefinedBlockSet;
+    private final boolean hasPredefinedBlockSet;
+    private final boolean doesRunContinuously;
 
-    RebuildStrategyType(final boolean hasPredefinedBlockSet)
+    RebuildStrategyType(final boolean hasPredefinedBlockSet, final boolean doesRunContinuously)
     {
         this.hasPredefinedBlockSet = hasPredefinedBlockSet;
+        this.doesRunContinuously = doesRunContinuously;
     }
 
     public boolean hasPredefinedBlockSet()
     {
         return hasPredefinedBlockSet;
+    }
+
+    public boolean isDoesRunContinuously()
+    {
+        return this.doesRunContinuously;
     }
 }

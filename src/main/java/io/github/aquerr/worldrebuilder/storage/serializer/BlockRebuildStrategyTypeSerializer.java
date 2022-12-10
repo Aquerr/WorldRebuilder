@@ -21,14 +21,17 @@ import java.util.HashSet;
 
 public class BlockRebuildStrategyTypeSerializer implements TypeSerializer<RebuildRegionBlocksStrategy>
 {
+    private static final String NODE_TYPE = "type";
+    private static final String NODE_BLOCKS_TO_USE = "blocksToUse";
+
     @Override
     public RebuildRegionBlocksStrategy deserialize(Type type, ConfigurationNode node) throws SerializationException
     {
-        RebuildStrategyType strategyType = node.node("type").get(TypeToken.get(RebuildStrategyType.class), RebuildStrategyType.SAME_BLOCK);
-        boolean doesRunContinuously = node.node("doesRunContinuously").getBoolean(false);
+        RebuildStrategyType strategyType = node.node(NODE_TYPE).get(TypeToken.get(RebuildStrategyType.class), RebuildStrategyType.SAME_BLOCK);
+        boolean doesRunContinuously = strategyType.isDoesRunContinuously();
         if (strategyType.hasPredefinedBlockSet())
         {
-            Collection<BlockSnapshot> blocks = node.node("blocksToUse").get(WRTypeTokens.BLOCK_SNAPSHOT_COLLECTION_TYPE_TOKEN, Collections.emptyList());
+            Collection<BlockSnapshot> blocks = node.node(NODE_BLOCKS_TO_USE).get(WRTypeTokens.BLOCK_SNAPSHOT_COLLECTION_TYPE_TOKEN, Collections.emptyList());
             if (doesRunContinuously)
             {
                 return new RebuildRandomBlockFromSetInIntervalStrategy(new HashSet<>(blocks));
@@ -49,13 +52,12 @@ public class BlockRebuildStrategyTypeSerializer implements TypeSerializer<Rebuil
         if (obj == null)
             return;
 
-        node.node("type").set(obj.getType().name());
-        node.node("doesRunContinuously").set(obj.doesRunContinuously());
+        node.node(NODE_TYPE).set(obj.getType().name());
 
         if (obj instanceof RebuildBlockFromSetStrategy)
         {
             RebuildBlockFromSetStrategy rebuildBlockFromSetStrategy = (RebuildBlockFromSetStrategy)obj;
-            node.node("blocksToUse").set(WRTypeTokens.BLOCK_SNAPSHOT_COLLECTION_TYPE_TOKEN, rebuildBlockFromSetStrategy.getBlocksToUse());
+            node.node(NODE_BLOCKS_TO_USE).set(WRTypeTokens.BLOCK_SNAPSHOT_COLLECTION_TYPE_TOKEN, rebuildBlockFromSetStrategy.getBlocksToUse());
         }
     }
 }

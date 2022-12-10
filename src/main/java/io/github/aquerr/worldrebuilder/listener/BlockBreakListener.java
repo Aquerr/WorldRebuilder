@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -39,7 +38,7 @@ public class BlockBreakListener extends AbstractListener
 		super(plugin);
 	}
 
-	@Listener(order = Order.LAST)
+	@Listener
 	public void onBlockBreak(final ChangeBlockEvent.All event)
 	{
 		LocatableBlock locatableBlock = null;
@@ -68,9 +67,7 @@ public class BlockBreakListener extends AbstractListener
 		if (filteredTransactions.isEmpty())
 			return;
 
-		final UUID worldUUID = filteredTransactions.get(0).original().location().get().world().uniqueId();
-
-		CompletableFuture.runAsync(() -> rebuildBlocks(worldUUID, new LinkedList<>(filteredTransactions)));
+		CompletableFuture.runAsync(() -> rebuildBlocks(new LinkedList<>(filteredTransactions)));
 	}
 
 	@Listener
@@ -184,7 +181,7 @@ public class BlockBreakListener extends AbstractListener
 		}
 	}
 
-	private void rebuildBlocks(final UUID worldUUID, final List<BlockTransaction> transactions)
+	private void rebuildBlocks(final List<BlockTransaction> transactions)
 	{
 		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
 		for(final Region region : regions)

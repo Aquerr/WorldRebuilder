@@ -22,6 +22,7 @@ import io.github.aquerr.worldrebuilder.listener.EntitySpawnListener;
 import io.github.aquerr.worldrebuilder.listener.WandUsageListener;
 import io.github.aquerr.worldrebuilder.managers.RegionManager;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
+import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -188,6 +189,8 @@ public class WorldRebuilder
 				.permission(Permissions.CREATE_REGION_COMMAND)
 				.executor(new CreateRegionCommand(this))
 				.addParameter(Parameter.string().key("name").build())
+				.addParameter(Parameter.enumValue(RebuildStrategyType.class).key("strategyType").optional().build())
+				.addParameter(Parameter.jsonTextOfRemainingElements().key("blockList").optional().build())
 				.build());
 
 		//Delete Region Command
