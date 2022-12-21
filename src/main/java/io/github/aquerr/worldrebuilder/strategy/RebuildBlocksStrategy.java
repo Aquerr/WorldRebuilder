@@ -5,7 +5,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 
 import java.util.Collection;
 
-public interface RebuildRegionBlocksStrategy
+public interface RebuildBlocksStrategy
 {
     void rebuildBlocks(Region region, Collection<BlockSnapshot> blocks);
 

@@ -3,14 +3,13 @@ package io.github.aquerr.worldrebuilder.commands;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.entity.SelectionPoints;
-import io.github.aquerr.worldrebuilder.strategy.RebuildRandomBlockFromSetInIntervalStrategy;
-import io.github.aquerr.worldrebuilder.strategy.RebuildRandomBlockFromSetStrategy;
-import io.github.aquerr.worldrebuilder.strategy.RebuildRegionInIntervalStrategy;
+import io.github.aquerr.worldrebuilder.strategy.RebuildBlockFromRandomBlockSetInIntervalStrategy;
+import io.github.aquerr.worldrebuilder.strategy.RebuildBlockFromRandomBlockSetStrategy;
+import io.github.aquerr.worldrebuilder.strategy.RebuildInIntervalStrategy;
 import io.github.aquerr.worldrebuilder.strategy.RebuildSameBlockStrategy;
 import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyType;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -18,8 +17,8 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.world.server.ServerWorld;
 
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 import static net.kyori.adventure.text.Component.text;
 
@@ -36,7 +35,11 @@ public class CreateRegionCommand extends WRCommand
 	{
 		final String name = context.requireOne(Parameter.string().key("name").build());
 		final RebuildStrategyType strategyType = context.one(Parameter.enumValue(RebuildStrategyType.class).key("strategyType").build()).orElse(RebuildStrategyType.SAME_BLOCK);
-		final Component blockList = context.one(Parameter.jsonTextOfRemainingElements().key("blockList").build()).orElse(null);
+//		Parameter.Multi multi = Parameter.seqBuilder(Parameter.blockState().key("blockList").build()).build();
+
+		final Collection<? extends BlockState> blockList = context.all(Parameter.blockState().key("blockList").build());
+//		final Component blockList = context.one(Parameter.blockState().key("blockList").build()).orElse(null);
+//		final BlockState blockList = context.one(Parameter.blockState().key("blockList").build()).orElse(null);
 
 		if (!(context.cause().audience() instanceof ServerPlayer))
 			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(text("Only in-game players can use this command!", NamedTextColor.RED)));
@@ -60,29 +63,32 @@ public class CreateRegionCommand extends WRCommand
 		return CommandResult.success();
 	}
 
-	private Region createRegionForSelectedStrategy(String regionName, RebuildStrategyType rebuildStrategyType, Component blocksAsString, ServerWorld world, SelectionPoints selectionPoints) throws CommandException
+	private Region createRegionForSelectedStrategy(String regionName, RebuildStrategyType rebuildStrategyType, Collection<? extends BlockState> blocks, ServerWorld world, SelectionPoints selectionPoints) throws CommandException
 	{
-		if (rebuildStrategyType.hasPredefinedBlockSet() && blocksAsString == null)
+		if (rebuildStrategyType.hasPredefinedBlockSet() && blocks == null)
 		{
 			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(text("Selected rebuild strategy require predefined block set!")));
 		}
 
-		switch (rebuildStrategyType)
+		try
 		{
-			case RANDOM_BLOCK_FROM_SET:
-				return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), new RebuildRandomBlockFromSetStrategy(parseBlockSnapshotsFromString(blocksAsString)));
-			case CONSTANT_REBUILD_IN_INTERVAL_RANDOM_BLOCK_FROM_SET:
-				return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), new RebuildRandomBlockFromSetInIntervalStrategy(parseBlockSnapshotsFromString(blocksAsString)));
-			case CONSTANT_REBUILD_IN_INTERVAL:
-				return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), new RebuildRegionInIntervalStrategy());
-			case SAME_BLOCK:
-			default:
-				return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), new RebuildSameBlockStrategy());
+			switch (rebuildStrategyType)
+			{
+				case RANDOM_BLOCK_FROM_SET:
+					return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 10, new RebuildBlockFromRandomBlockSetStrategy(new HashSet<>(blocks)));
+				case CONSTANT_REBUILD_IN_INTERVAL_RANDOM_BLOCK_FROM_SET:
+					return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 60, new RebuildBlockFromRandomBlockSetInIntervalStrategy(new HashSet<>(blocks)));
+				case CONSTANT_REBUILD_IN_INTERVAL:
+					return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 60, new RebuildInIntervalStrategy());
+				case SAME_BLOCK:
+				default:
+					return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 10, new RebuildSameBlockStrategy());
+			}
 		}
-	}
+		catch (Exception exception)
+		{
 
-	private Set<BlockSnapshot> parseBlockSnapshotsFromString(Component blockSnapshotsAsString)
-	{
-		return new HashSet<>();
+			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(text("Could not create region. Reason: " + exception.getMessage())), exception);
+		}
 	}
 }

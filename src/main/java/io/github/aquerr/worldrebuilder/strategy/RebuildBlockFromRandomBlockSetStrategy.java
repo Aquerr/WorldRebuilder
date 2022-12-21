@@ -4,20 +4,22 @@ import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.scheduling.RebuildBlocksTask;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class RebuildRandomBlockFromSetStrategy implements RebuildBlockFromSetStrategy
+public class RebuildBlockFromRandomBlockSetStrategy implements RebuildBlockFromSetStrategy
 {
     private static final ThreadLocalRandom THREAD_LOCAL_RANDOM = ThreadLocalRandom.current();
 
-    private final List<BlockSnapshot> blocksToUse;
+    private final List<BlockState> blocksToUse;
 
-    public RebuildRandomBlockFromSetStrategy(Set<BlockSnapshot> blocksToUse)
+    public RebuildBlockFromRandomBlockSetStrategy(Set<BlockState> blocksToUse)
     {
         if (blocksToUse == null || blocksToUse.isEmpty())
             throw new IllegalArgumentException("Provided blocks collection must not be empty!");
@@ -31,12 +33,10 @@ public class RebuildRandomBlockFromSetStrategy implements RebuildBlockFromSetStr
         final List<BlockSnapshot> newBlocks = new ArrayList<>();
         for (final BlockSnapshot blockToRebuild : blocksToRebuild)
         {
-            blockToRebuild.location()
-                    .map(blockLocation -> getRandomBlock().withLocation(blockLocation))
-                    .ifPresent(newBlocks::add);
+            newBlocks.add(blockToRebuild.withState(getRandomBlock()));
         }
 
-        RebuildBlocksTask rebuildBlocksTask = new RebuildBlocksTask(region.getName(), region.getWorldUniqueId(), newBlocks);
+        RebuildBlocksTask rebuildBlocksTask = new RebuildBlocksTask(region.getName(), newBlocks);
         rebuildBlocksTask.setDelay(region.getRestoreTime());
         WorldRebuilderScheduler.getInstance().scheduleTask(rebuildBlocksTask);
     }
@@ -53,15 +53,15 @@ public class RebuildRandomBlockFromSetStrategy implements RebuildBlockFromSetStr
         return false;
     }
 
-    private BlockSnapshot getRandomBlock()
+    private BlockState getRandomBlock()
     {
         int randomIndex = THREAD_LOCAL_RANDOM.nextInt(blocksToUse.size());
-        return this.blocksToUse.get(randomIndex);
+        return (BlockState)this.blocksToUse.toArray()[randomIndex];
     }
 
     @Override
-    public Collection<BlockSnapshot> getBlocksToUse()
+    public Set<BlockState> getBlocksToUse()
     {
-        return new ArrayList<>(blocksToUse);
+        return new HashSet<>(blocksToUse);
     }
 }

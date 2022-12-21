@@ -8,12 +8,12 @@ import org.spongepowered.api.block.BlockSnapshot;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class RebuildSameBlockStrategy implements RebuildRegionBlocksStrategy
+public class RebuildSameBlockStrategy implements RebuildBlocksStrategy
 {
     @Override
     public void rebuildBlocks(Region region, Collection<BlockSnapshot> blockSnapshots)
     {
-        RebuildBlocksTask rebuildBlocksTask = new RebuildBlocksTask(region.getName(), region.getWorldUniqueId(), new ArrayList<>(blockSnapshots));
+        RebuildBlocksTask rebuildBlocksTask = new RebuildBlocksTask(region.getName(), new ArrayList<>(blockSnapshots));
         rebuildBlocksTask.setDelay(region.getRestoreTime());
         WorldRebuilderScheduler.getInstance().scheduleTask(rebuildBlocksTask);
     }

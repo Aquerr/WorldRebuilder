@@ -1,5 +1,7 @@
 package io.github.aquerr.worldrebuilder.scheduling;
 
+import io.github.aquerr.worldrebuilder.WorldRebuilder;
+import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.util.WorldUtils;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -31,6 +33,10 @@ public class RebuildEntitiesTask implements WorldRebuilderTask
 	@Override
 	public void run()
 	{
+		Region region = WorldRebuilder.getPlugin().getRegionManager().getRegion(regionName);
+		if (!region.isActive())
+			return;
+
 		final Optional<ServerWorld> optionalWorld = WorldUtils.getWorldByUUID(worldUUID);
 		if(!optionalWorld.isPresent())
 			return;
@@ -59,12 +65,6 @@ public class RebuildEntitiesTask implements WorldRebuilderTask
 				.collect(Collectors.toList());
 	}
 
-	@Override
-	public UUID getWorldUniqueId()
-	{
-		return this.worldUUID;
-	}
-
 	public void setTask(ScheduledTask task)
 	{
 		this.task = task;
@@ -74,18 +74,6 @@ public class RebuildEntitiesTask implements WorldRebuilderTask
 	public ScheduledTask getTask()
 	{
 		return this.task;
-	}
-
-	@Override
-	public int getInterval()
-	{
-		return this.interval;
-	}
-
-	@Override
-	public void setInterval(int intervalInSeconds)
-	{
-		this.interval = intervalInSeconds;
 	}
 
 	@Override

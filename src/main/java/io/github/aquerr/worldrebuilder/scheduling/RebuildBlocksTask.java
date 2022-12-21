@@ -1,5 +1,7 @@
 package io.github.aquerr.worldrebuilder.scheduling;
 
+import io.github.aquerr.worldrebuilder.WorldRebuilder;
+import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.util.WorldUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -10,49 +12,51 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class RebuildBlocksTask implements WorldRebuilderTask
 {
 	protected final String regionName;
-	protected final UUID worldUUID;
 	protected final List<BlockSnapshot> blocks;
 	protected ScheduledTask task;
 	protected int delay;
 	protected int interval;
 
-	public RebuildBlocksTask(final String regionName, final UUID worldUUID, List<BlockSnapshot> blocks)
+	public RebuildBlocksTask(final String regionName, List<BlockSnapshot> blocks)
 	{
 		this.regionName = regionName;
-		this.worldUUID = worldUUID;
 		this.blocks = blocks;
 	}
 
 	@Override
 	public void run()
 	{
-		final Optional<ServerWorld> optionalWorld = WorldUtils.getWorldByUUID(worldUUID);
+		Region region = WorldRebuilder.getPlugin().getRegionManager().getRegion(regionName);
+		if (!region.isActive())
+			return;
+
+		final Optional<ServerWorld> optionalWorld = WorldUtils.getWorldByUUID(region.getWorldUniqueId());
 		if(!optionalWorld.isPresent())
 			return;
 		final ServerWorld world = optionalWorld.get();
 
 		for(final BlockSnapshot blockSnapshot : this.blocks)
 		{
-			world.restoreSnapshot(blockSnapshot, true, BlockChangeFlags.ALL);
+			world.restoreSnapshot(blockSnapshot.position(), blockSnapshot, true, BlockChangeFlags.ALL);
 
 			// Will the block spawn where player stands?
 			// If so, teleport the player to safe location.
-			Sponge.server().onlinePlayers().stream()
-					.filter(player -> isPlayerAtBlock(player, blockSnapshot))
-					.forEach(this::safeTeleportPlayer);
+			safeTeleportPlayerIfAtLocation(blockSnapshot.position());
 		}
 
-		if (this.interval == 0)
+		WorldRebuilderScheduler.getInstance().removeTaskForRegion(regionName, this);
+		if (region.getRebuildBlocksStrategy().doesRunContinuously())
 		{
-			WorldRebuilderScheduler.getInstance().removeTaskForRegion(regionName, this);
+			// Reschedule with the latest settings
+			region.rebuildBlocks(Collections.emptyList());
 		}
 	}
 
@@ -71,12 +75,6 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 	}
 
 	@Override
-	public UUID getWorldUniqueId()
-	{
-		return this.worldUUID;
-	}
-
-	@Override
 	public void setTask(ScheduledTask task)
 	{
 		this.task = task;
@@ -86,18 +84,6 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 	public ScheduledTask getTask()
 	{
 		return this.task;
-	}
-
-	@Override
-	public int getInterval()
-	{
-		return this.interval;
-	}
-
-	@Override
-	public void setInterval(int intervalInSeconds)
-	{
-		this.interval = intervalInSeconds;
 	}
 
 	@Override
@@ -112,16 +98,23 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 		this.delay = delayInSeconds;
 	}
 
-	protected boolean isPlayerAtBlock(final ServerPlayer player, BlockSnapshot blockSnapshot)
+	protected boolean isPlayerAtBlock(Vector3i vector3i, final ServerPlayer player)
 	{
-		return player.position().toInt().equals(blockSnapshot.position());
+		return player.position().toInt().equals(vector3i);
 	}
 
-	protected void safeTeleportPlayer(ServerPlayer player)
+	protected void safeTeleportPlayerIfAtLocation(Vector3i vector3i)
+	{
+		Sponge.server().onlinePlayers().stream()
+				.filter(player -> isPlayerAtBlock(vector3i, player))
+				.forEach(this::safeTeleportPlayer);
+	}
+
+	private void safeTeleportPlayer(ServerPlayer player)
 	{
 		player.setLocationAndRotation(Sponge.server().teleportHelper()
-				.findSafeLocation(ServerLocation.of(player.world(), player.position()))
-				.orElse(player.serverLocation()),
+						.findSafeLocation(ServerLocation.of(player.world(), player.position()))
+						.orElse(player.serverLocation()),
 				player.rotation());
 	}
 }

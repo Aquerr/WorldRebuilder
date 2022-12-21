@@ -22,7 +22,8 @@ public class BlockSnapshotListTypeSerializer implements TypeSerializer<Collectio
             final BlockSnapshot blockSnapshot = configurationNode.get(WRTypeTokens.BLOCK_SNAPSHOT_TYPE_TOKEN);
             blockSnapshots.add(blockSnapshot);
         }
-        return blockSnapshots;    }
+        return blockSnapshots;
+    }
 
     @Override
     public void serialize(Type type, @Nullable Collection<BlockSnapshot> blockSnapshots, ConfigurationNode value) throws SerializationException

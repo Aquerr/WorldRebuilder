@@ -8,11 +8,11 @@ import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderTask;
 import io.github.aquerr.worldrebuilder.storage.StorageManager;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Singleton
 public class RegionManager
@@ -38,6 +38,8 @@ public class RegionManager
 		{
 			this.regions.put(region.getName(), region);
 		}
+
+		startRebuildForContinuousRegions();
 	}
 
 	public void addRegion(final Region region)
@@ -67,18 +69,32 @@ public class RegionManager
 	public void forceRebuildRegion(final Region region)
 	{
 		WorldRebuilderScheduler worldRebuilderScheduler = WorldRebuilderScheduler.getInstance();
-		List<WorldRebuilderTask> nonIntervalWorldRebuilderTasks = new LinkedList<>(worldRebuilderScheduler.getTasksForRegion(region.getName()))
-				.stream()
-				.filter(worldRebuilderTask -> worldRebuilderTask.getInterval() == 0)
-				.collect(Collectors.toList());
+		List<WorldRebuilderTask> nonIntervalWorldRebuilderTasks = new LinkedList<>(worldRebuilderScheduler.getTasksForRegion(region.getName()));
 		for (final WorldRebuilderTask worldRebuilderTask : nonIntervalWorldRebuilderTasks)
 		{
 			worldRebuilderScheduler.removeTaskForRegion(region.getName(), worldRebuilderTask);
 			worldRebuilderTask.run();
+
+			// Reschedule if rebuild is performed continuously
+			if (region.getRebuildBlocksStrategy().doesRunContinuously())
+			{
+				region.rebuildBlocks(Collections.emptyList());
+			}
 		}
 	}
 
 	public void init() {
 		this.storageManager.init();
+	}
+
+	private void startRebuildForContinuousRegions()
+	{
+		for (final Region region : getRegions())
+		{
+			if (region.getRebuildBlocksStrategy().doesRunContinuously())
+			{
+				region.rebuildBlocks(Collections.emptyList());
+			}
+		}
 	}
 }

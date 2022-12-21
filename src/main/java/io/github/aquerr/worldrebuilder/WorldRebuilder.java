@@ -23,11 +23,13 @@ import io.github.aquerr.worldrebuilder.listener.WandUsageListener;
 import io.github.aquerr.worldrebuilder.managers.RegionManager;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
 import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyType;
+import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.config.ConfigDir;
@@ -40,6 +42,7 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -190,7 +193,7 @@ public class WorldRebuilder
 				.executor(new CreateRegionCommand(this))
 				.addParameter(Parameter.string().key("name").build())
 				.addParameter(Parameter.enumValue(RebuildStrategyType.class).key("strategyType").optional().build())
-				.addParameter(Parameter.jsonTextOfRemainingElements().key("blockList").optional().build())
+				.addParameter(Parameter.blockState().key("blockList").optional().consumeAllRemaining().build())
 				.build());
 
 		//Delete Region Command

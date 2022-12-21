@@ -19,7 +19,8 @@ import java.util.concurrent.TimeUnit;
 
 public class WorldRebuilderScheduler
 {
-	private static final ExecutorService SINGLE_THREADED_EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
+	private static final ExecutorService STORAGE_EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
+//	private static final ScheduledExecutorService HEARTBEAT_SERVICE = Executors.newSingleThreadScheduledExecutor();
 	private static WorldRebuilderScheduler INSTANCE;
 
 	// RegionName => [ScheduledRebuildTasks]
@@ -37,11 +38,12 @@ public class WorldRebuilderScheduler
 	{
 		this.underlyingScheduler = scheduler;
 		INSTANCE = this;
+//		HEARTBEAT_SERVICE.scheduleAtFixedRate();
 	}
 
 	public void queueStorageTask(Runnable runnable)
 	{
-		SINGLE_THREADED_EXECUTOR_SERVICE.submit(runnable);
+		STORAGE_EXECUTOR_SERVICE.submit(runnable);
 	}
 
 	public void scheduleTask(WorldRebuilderTask worldRebuilderTask)
@@ -50,7 +52,6 @@ public class WorldRebuilderScheduler
 				.plugin(WorldRebuilder.getPlugin().getPluginContainer())
 				.execute(worldRebuilderTask)
 				.delay(worldRebuilderTask.getDelay(), TimeUnit.SECONDS)
-				.interval(worldRebuilderTask.getInterval(), TimeUnit.SECONDS)
 				.build(), getNewTaskName());
 
 		worldRebuilderTask.setTask(scheduledTask);

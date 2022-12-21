@@ -1,11 +1,9 @@
 package io.github.aquerr.worldrebuilder.entity;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
-import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
-import io.github.aquerr.worldrebuilder.strategy.RebuildRegionBlocksStrategy;
+import io.github.aquerr.worldrebuilder.strategy.RebuildBlocksStrategy;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.scheduler.Task;
@@ -40,18 +38,18 @@ public class Region
 	// Placed in the territory by mob/player after the region was created.
 	private List<EntitySnapshot> entitySnapshotsException;
 
-	private RebuildRegionBlocksStrategy rebuildRegionBlocksStrategy;
+	private RebuildBlocksStrategy rebuildBlocksStrategy;
 
-	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint, final Vector3i secondPoint, RebuildRegionBlocksStrategy rebuildRegionBlocksStrategy)
+	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint, final Vector3i secondPoint, int restoreTime, RebuildBlocksStrategy rebuildBlocksStrategy)
 	{
-		this(name, worldUniqueId, firstPoint, secondPoint, 10, true, true, new ArrayList<>(), new ArrayList<>(), rebuildRegionBlocksStrategy);
+		this(name, worldUniqueId, firstPoint, secondPoint, restoreTime, true, true, new ArrayList<>(), new ArrayList<>(), rebuildBlocksStrategy);
 	}
 
 	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint,
 				  final Vector3i secondPoint, final int restoreTime,
 				  final boolean isActive, final boolean shouldDropBlocks,
 				  final List<BlockSnapshot> blockSnapshotsExceptions, final List<EntitySnapshot> entitySnapshotsException,
-				  RebuildRegionBlocksStrategy rebuildRegionBlocksStrategy)
+				  RebuildBlocksStrategy rebuildBlocksStrategy)
 	{
 		this.name = name;
 		this.worldUniqueId = worldUniqueId;
@@ -65,7 +63,7 @@ public class Region
 		this.blockSnapshotsExceptions = blockSnapshotsExceptions;
 		this.entitySnapshotsException = entitySnapshotsException;
 
-		this.rebuildRegionBlocksStrategy = rebuildRegionBlocksStrategy;
+		this.rebuildBlocksStrategy = rebuildBlocksStrategy;
 
 //		this.blockSnapshotsExceptions = RegionUtil.getBlockSnapshots(worldUniqueId, firstPoint, secondPoint);
 //		this.entitySnapshotsException = RegionUtil.getEntitySnapshots(worldUniqueId, firstPoint, secondPoint);
@@ -121,14 +119,14 @@ public class Region
 		this.shouldDropBlocks = shouldDropBlocks;
 	}
 
-	public void setRebuildRegionBlocksStrategy(RebuildRegionBlocksStrategy rebuildRegionBlocksStrategy)
+	public void setRebuildBlocksStrategy(RebuildBlocksStrategy rebuildBlocksStrategy)
 	{
-		this.rebuildRegionBlocksStrategy = rebuildRegionBlocksStrategy;
+		this.rebuildBlocksStrategy = rebuildBlocksStrategy;
 	}
 
-	public RebuildRegionBlocksStrategy getRebuildRegionBlocksStrategy()
+	public RebuildBlocksStrategy getRebuildBlocksStrategy()
 	{
-		return rebuildRegionBlocksStrategy;
+		return rebuildBlocksStrategy;
 	}
 
 	public boolean intersects(final UUID worldUniqueId, final Vector3i position)
@@ -270,7 +268,7 @@ public class Region
 		if (blocksToRestore.isEmpty())
 			return;
 
-		this.rebuildRegionBlocksStrategy.rebuildBlocks(this, blocksToRestore);
+		this.rebuildBlocksStrategy.rebuildBlocks(this, blocksToRestore);
 	}
 
 	private boolean canRestoreBlock(BlockSnapshot blockSnapshot)

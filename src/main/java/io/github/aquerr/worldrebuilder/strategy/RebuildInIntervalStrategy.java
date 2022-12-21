@@ -3,7 +3,6 @@ package io.github.aquerr.worldrebuilder.strategy;
 import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.scheduling.RebuildBlocksTask;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
-import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderTask;
 import io.github.aquerr.worldrebuilder.util.WorldUtils;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.util.AABB;
@@ -18,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RebuildRegionInIntervalStrategy implements RebuildRegionBlocksStrategy
+public class RebuildInIntervalStrategy implements RebuildBlocksStrategy
 {
     @Override
     public void rebuildBlocks(Region region, Collection<BlockSnapshot> blocks)
@@ -32,8 +31,7 @@ public class RebuildRegionInIntervalStrategy implements RebuildRegionBlocksStrat
         if (blocksToRebuild.isEmpty())
             return;
 
-        RebuildBlocksTask rebuildBlocksTask = new RebuildBlocksTask(region.getName(), region.getWorldUniqueId(), blocksToRebuild);
-        rebuildBlocksTask.setInterval(region.getRestoreTime());
+        RebuildBlocksTask rebuildBlocksTask = new RebuildBlocksTask(region.getName(), blocksToRebuild);
         rebuildBlocksTask.setDelay(region.getRestoreTime());
         WorldRebuilderScheduler.getInstance().scheduleTask(rebuildBlocksTask);
     }
@@ -52,9 +50,7 @@ public class RebuildRegionInIntervalStrategy implements RebuildRegionBlocksStrat
 
     private boolean isTaskAlreadyRunningForRegion(Region region)
     {
-        List<WorldRebuilderTask> tasks = WorldRebuilderScheduler.getInstance().getTasksForRegion(region.getName());
-        return tasks.stream()
-                .anyMatch(task -> !task.getTask().task().interval().isZero());
+        return !WorldRebuilderScheduler.getInstance().getTasksForRegion(region.getName()).isEmpty();
     }
 
     private Collection<? extends BlockSnapshot> getBlocksFromRegion(Region region)

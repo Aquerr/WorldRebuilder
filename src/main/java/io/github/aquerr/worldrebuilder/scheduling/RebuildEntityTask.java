@@ -1,6 +1,7 @@
 package io.github.aquerr.worldrebuilder.scheduling;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
+import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.util.WorldUtils;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
@@ -39,6 +40,10 @@ public class RebuildEntityTask implements WorldRebuilderTask
 	@Override
 	public void run()
 	{
+		Region region = WorldRebuilder.getPlugin().getRegionManager().getRegion(regionName);
+		if (!region.isActive())
+			return;
+
 		//If not removed then return. We do not want to duplicate entities.
 		if (!entity.isRemoved())
 			return;
@@ -108,12 +113,6 @@ public class RebuildEntityTask implements WorldRebuilderTask
 		return Collections.singletonList(this.entity.serverLocation().blockPosition());
 	}
 
-	@Override
-	public UUID getWorldUniqueId()
-	{
-		return this.worldUUID;
-	}
-
 	public void setTask(ScheduledTask task)
 	{
 		this.task = task;
@@ -123,18 +122,6 @@ public class RebuildEntityTask implements WorldRebuilderTask
 	public ScheduledTask getTask()
 	{
 		return this.task;
-	}
-
-	@Override
-	public int getInterval()
-	{
-		return this.interval;
-	}
-
-	@Override
-	public void setInterval(int intervalInSeconds)
-	{
-		this.interval = intervalInSeconds;
 	}
 
 	@Override
