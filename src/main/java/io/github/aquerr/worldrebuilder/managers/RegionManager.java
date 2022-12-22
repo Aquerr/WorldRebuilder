@@ -103,8 +103,8 @@ public class RegionManager
 	{
 		if (region.getRebuildBlocksStrategy().doesRunContinuously())
 		{
+			WorldRebuilderScheduler.getInstance().cancelTasksForRegion(region.getName());
 			region.rebuildBlocks(Collections.emptyList());
-
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("Started continuous rebuild for region: {}", region.getName());
