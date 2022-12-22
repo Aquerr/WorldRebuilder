@@ -4,25 +4,19 @@ import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.scheduling.RebuildBlocksTask;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockState;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class RebuildBlockFromRandomBlockSetStrategy implements RebuildBlockFromSetStrategy
+public class RebuildBlockFromRandomBlockSetStrategy extends AbstractRebuildBlockFromRandomBlockSetStrategy implements RebuildBlockFromSetStrategy
 {
     private static final ThreadLocalRandom THREAD_LOCAL_RANDOM = ThreadLocalRandom.current();
 
-    private final List<BlockState> blocksToUse;
-
-    public RebuildBlockFromRandomBlockSetStrategy(List<BlockState> blocksToUse)
+    public RebuildBlockFromRandomBlockSetStrategy(List<WRBlockState> blocksToUse)
     {
-        if (blocksToUse == null || blocksToUse.isEmpty())
-            throw new IllegalArgumentException("Provided blocks collection must not be empty!");
-
-        this.blocksToUse = new ArrayList<>(blocksToUse);
+        super(blocksToUse);
     }
 
     @Override
@@ -31,7 +25,7 @@ public class RebuildBlockFromRandomBlockSetStrategy implements RebuildBlockFromS
         final List<BlockSnapshot> newBlocks = new ArrayList<>();
         for (final BlockSnapshot blockToRebuild : blocksToRebuild)
         {
-            newBlocks.add(blockToRebuild.withState(getRandomBlock()));
+            newBlocks.add(blockToRebuild.withState(getRandomBlock().getBlockState()));
         }
 
         RebuildBlocksTask rebuildBlocksTask = new RebuildBlocksTask(region.getName(), newBlocks);
@@ -51,15 +45,9 @@ public class RebuildBlockFromRandomBlockSetStrategy implements RebuildBlockFromS
         return false;
     }
 
-    private BlockState getRandomBlock()
+    private WRBlockState getRandomBlock()
     {
         int randomIndex = THREAD_LOCAL_RANDOM.nextInt(blocksToUse.size());
         return this.blocksToUse.get(randomIndex);
-    }
-
-    @Override
-    public List<BlockState> getBlocksToUse()
-    {
-        return new ArrayList<>(blocksToUse);
     }
 }

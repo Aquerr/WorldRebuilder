@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RebuildInIntervalStrategy implements RebuildBlocksStrategy
+public class RebuildSameBlockInIntervalStrategy implements RebuildBlocksStrategy
 {
     @Override
     public void rebuildBlocks(Region region, Collection<BlockSnapshot> blocks)

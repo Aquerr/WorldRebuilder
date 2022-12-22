@@ -4,22 +4,16 @@ import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.scheduling.ConstantRebuildRegionFromRandomBlockSetTask;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockState;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class RebuildBlockFromRandomBlockSetInIntervalStrategy implements RebuildBlockFromSetStrategy
+public class RebuildBlockFromRandomBlockSetInIntervalStrategy extends AbstractRebuildBlockFromRandomBlockSetStrategy implements RebuildBlockFromSetStrategy
 {
-    private final List<BlockState> blocksToUse;
-
-    public RebuildBlockFromRandomBlockSetInIntervalStrategy(List<BlockState> blocksToUse)
+    public RebuildBlockFromRandomBlockSetInIntervalStrategy(List<WRBlockState> blocksToUse)
     {
-        if (blocksToUse == null || blocksToUse.isEmpty())
-            throw new IllegalArgumentException("Provided blocks collection must not be empty!");
-
-        this.blocksToUse = new ArrayList<>(blocksToUse);
+        super(blocksToUse);
     }
 
     @Override
@@ -48,11 +42,5 @@ public class RebuildBlockFromRandomBlockSetInIntervalStrategy implements Rebuild
     private boolean isTaskAlreadyRunningForRegion(Region region)
     {
         return !WorldRebuilderScheduler.getInstance().getTasksForRegion(region.getName()).isEmpty();
-    }
-
-    @Override
-    public List<BlockState> getBlocksToUse()
-    {
-        return new ArrayList<>(blocksToUse);
     }
 }

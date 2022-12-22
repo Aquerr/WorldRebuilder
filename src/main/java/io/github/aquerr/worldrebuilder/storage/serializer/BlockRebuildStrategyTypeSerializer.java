@@ -4,9 +4,10 @@ import io.github.aquerr.worldrebuilder.strategy.RebuildBlockFromSetStrategy;
 import io.github.aquerr.worldrebuilder.strategy.RebuildBlockFromRandomBlockSetInIntervalStrategy;
 import io.github.aquerr.worldrebuilder.strategy.RebuildBlockFromRandomBlockSetStrategy;
 import io.github.aquerr.worldrebuilder.strategy.RebuildBlocksStrategy;
-import io.github.aquerr.worldrebuilder.strategy.RebuildInIntervalStrategy;
+import io.github.aquerr.worldrebuilder.strategy.RebuildSameBlockInIntervalStrategy;
 import io.github.aquerr.worldrebuilder.strategy.RebuildSameBlockStrategy;
 import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyType;
+import io.github.aquerr.worldrebuilder.strategy.WRBlockState;
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
@@ -31,7 +32,7 @@ public class BlockRebuildStrategyTypeSerializer implements TypeSerializer<Rebuil
         boolean doesRunContinuously = strategyType.isDoesRunContinuously();
         if (strategyType.hasPredefinedBlockSet())
         {
-            List<BlockState> blocks = node.node(NODE_BLOCKS_TO_USE).get(new TypeToken<List<BlockState>>() {}, Collections.emptyList());
+            List<WRBlockState> blocks = node.node(NODE_BLOCKS_TO_USE).get(WRTypeTokens.WR_BLOCK_STATE_LIST_TYPE_TOKEN, Collections.emptyList());
             if (doesRunContinuously)
             {
                 return new RebuildBlockFromRandomBlockSetInIntervalStrategy(new ArrayList<>(blocks));
@@ -41,7 +42,7 @@ public class BlockRebuildStrategyTypeSerializer implements TypeSerializer<Rebuil
 
         if (doesRunContinuously)
         {
-            return new RebuildInIntervalStrategy();
+            return new RebuildSameBlockInIntervalStrategy();
         }
         return new RebuildSameBlockStrategy();
     }
@@ -57,7 +58,7 @@ public class BlockRebuildStrategyTypeSerializer implements TypeSerializer<Rebuil
         if (obj instanceof RebuildBlockFromSetStrategy)
         {
             RebuildBlockFromSetStrategy rebuildBlockFromSetStrategy = (RebuildBlockFromSetStrategy)obj;
-            node.node(NODE_BLOCKS_TO_USE).setList(new TypeToken<BlockState>() {}, new ArrayList<>(rebuildBlockFromSetStrategy.getBlocksToUse()));
+            node.node(NODE_BLOCKS_TO_USE).setList(WRTypeTokens.WR_BLOCK_STATE_TYPE_TOKEN, new ArrayList<>(rebuildBlockFromSetStrategy.getBlocksToUse()));
         }
     }
 }

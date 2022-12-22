@@ -2,9 +2,9 @@ package io.github.aquerr.worldrebuilder.scheduling;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.strategy.WRBlockState;
 import io.github.aquerr.worldrebuilder.util.WorldUtils;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
@@ -19,9 +19,9 @@ public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTa
 {
     private static final ThreadLocalRandom THREAD_LOCAL_RANDOM = ThreadLocalRandom.current();
 
-    private final List<BlockState> blocksToUse;
+    private final List<WRBlockState> blocksToUse;
 
-    public ConstantRebuildRegionFromRandomBlockSetTask(String regionName, List<BlockSnapshot> blocksToRebuild, List<BlockState> blocksToUse)
+    public ConstantRebuildRegionFromRandomBlockSetTask(String regionName, List<BlockSnapshot> blocksToRebuild, List<WRBlockState> blocksToUse)
     {
         super(regionName, blocksToRebuild);
         this.blocksToUse = new ArrayList<>(blocksToUse);
@@ -52,7 +52,7 @@ public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTa
             {
                 for (int y = minimumY; y <= maximumY; y++)
                 {
-                    world.setBlock(x, y, z, getRandomBlock());
+                    world.setBlock(x, y, z, getRandomBlock().getBlockState());
                     safeTeleportPlayerIfAtLocation(Vector3i.from(x, y, z), region);
                 }
             }
@@ -60,7 +60,7 @@ public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTa
 
         for(final BlockSnapshot blockSnapshot : blocks)
         {
-            world.setBlock(blockSnapshot.position(), getRandomBlock(), BlockChangeFlags.ALL);
+            world.setBlock(blockSnapshot.position(), getRandomBlock().getBlockState(), BlockChangeFlags.ALL);
 
             // Will the block spawn where player stands?
             // If so, teleport the player to safe location.
@@ -72,7 +72,7 @@ public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTa
         region.rebuildBlocks(Collections.emptyList());
     }
 
-    private BlockState getRandomBlock()
+    private WRBlockState getRandomBlock()
     {
         int randomIndex = THREAD_LOCAL_RANDOM.nextInt(blocksToUse.size());
         return this.blocksToUse.get(randomIndex);

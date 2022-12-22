@@ -7,6 +7,8 @@ import io.github.aquerr.worldrebuilder.storage.serializer.BlockRebuildStrategyTy
 import io.github.aquerr.worldrebuilder.storage.serializer.BlockSnapshotListTypeSerializer;
 import io.github.aquerr.worldrebuilder.storage.serializer.BlockSnapshotSerializer;
 import io.github.aquerr.worldrebuilder.storage.serializer.Vector3iTypeSerializer;
+import io.github.aquerr.worldrebuilder.storage.serializer.WRBlockStateListTypeSerializer;
+import io.github.aquerr.worldrebuilder.storage.serializer.WRBlockStateTypeSerializer;
 import io.github.aquerr.worldrebuilder.storage.serializer.WRTypeTokens;
 import io.github.aquerr.worldrebuilder.strategy.RebuildBlocksStrategy;
 import io.github.aquerr.worldrebuilder.strategy.RebuildSameBlockStrategy;
@@ -192,6 +194,8 @@ public class HOCONStorage implements Storage
 				.register(WRTypeTokens.BLOCK_SNAPSHOT_COLLECTION_TYPE_TOKEN, new BlockSnapshotListTypeSerializer())
 				.register(WRTypeTokens.VECTOR3I_TYPE_TOKEN, new Vector3iTypeSerializer())
 				.register(WRTypeTokens.BLOCK_REBUILD_STRATEGY, new BlockRebuildStrategyTypeSerializer())
+				.register(WRTypeTokens.WR_BLOCK_STATE_TYPE_TOKEN, new WRBlockStateTypeSerializer())
+				.register(WRTypeTokens.WR_BLOCK_STATE_LIST_TYPE_TOKEN, new WRBlockStateListTypeSerializer())
 				.registerAll(configManager.serializers())
 				.build();
 
