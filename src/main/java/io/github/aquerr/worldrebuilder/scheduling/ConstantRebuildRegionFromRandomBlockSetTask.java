@@ -51,6 +51,7 @@ public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTa
             this.currentSeconds--;
 
             displayRebuildMessageIfNecessary(this.currentSeconds);
+            return;
         }
 
         Region region = WorldRebuilder.getPlugin().getRegionManager().getRegion(regionName);
