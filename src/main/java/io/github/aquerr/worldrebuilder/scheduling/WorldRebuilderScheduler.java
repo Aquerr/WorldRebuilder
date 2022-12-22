@@ -70,6 +70,29 @@ public class WorldRebuilderScheduler
 		}
 	}
 
+	public void scheduleIntervalTask(WorldRebuilderTask worldRebuilderTask)
+	{
+		if (this.logger.isDebugEnabled())
+		{
+			this.logger.debug("Scheduling task: " + worldRebuilderTask);
+		}
+
+		ScheduledTask scheduledTask = this.underlyingScheduler.submit(Task.builder()
+				.plugin(WorldRebuilder.getPlugin().getPluginContainer())
+				.execute(worldRebuilderTask)
+				.delay(1, TimeUnit.SECONDS)
+				.interval(worldRebuilderTask.getDelay(), TimeUnit.SECONDS)
+				.build(), getNewTaskName());
+
+		worldRebuilderTask.setTask(scheduledTask);
+		addTaskToList(worldRebuilderTask);
+
+		if (this.logger.isDebugEnabled())
+		{
+			this.logger.debug("Scheduled task: " + worldRebuilderTask);
+		}
+	}
+
 	public Scheduler getUnderlyingScheduler()
 	{
 		return this.underlyingScheduler;

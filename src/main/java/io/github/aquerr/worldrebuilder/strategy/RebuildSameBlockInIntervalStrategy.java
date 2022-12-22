@@ -33,7 +33,7 @@ public class RebuildSameBlockInIntervalStrategy implements RebuildBlocksStrategy
             return;
 
         RebuildBlocksTask rebuildBlocksTask = new ConstantRebuildRegionBlocksTask(region.getName(), blocksToRebuild, region.getRestoreTime());
-        WorldRebuilderScheduler.getInstance().scheduleTask(rebuildBlocksTask);
+        WorldRebuilderScheduler.getInstance().scheduleIntervalTask(rebuildBlocksTask);
     }
 
     @Override

@@ -48,7 +48,7 @@ public class BlockPlaceListener extends AbstractListener
 
                     if (region.intersects(transaction.original().location().get().world().uniqueId(), transaction.original().position()))
                     {
-                        if (!region.isActive())
+                        if (!region.isActive() && region.getRebuildBlocksStrategy().doesRunContinuously())
                         {
                             continue;
                         }
