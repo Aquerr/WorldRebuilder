@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTask
@@ -22,7 +21,7 @@ public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTa
 
     private final List<BlockState> blocksToUse;
 
-    public ConstantRebuildRegionFromRandomBlockSetTask(String regionName, List<BlockSnapshot> blocksToRebuild, Set<BlockState> blocksToUse)
+    public ConstantRebuildRegionFromRandomBlockSetTask(String regionName, List<BlockSnapshot> blocksToRebuild, List<BlockState> blocksToUse)
     {
         super(regionName, blocksToRebuild);
         this.blocksToUse = new ArrayList<>(blocksToUse);

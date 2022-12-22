@@ -8,9 +8,7 @@ import org.spongepowered.api.block.BlockState;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RebuildBlockFromRandomBlockSetStrategy implements RebuildBlockFromSetStrategy
@@ -19,7 +17,7 @@ public class RebuildBlockFromRandomBlockSetStrategy implements RebuildBlockFromS
 
     private final List<BlockState> blocksToUse;
 
-    public RebuildBlockFromRandomBlockSetStrategy(Set<BlockState> blocksToUse)
+    public RebuildBlockFromRandomBlockSetStrategy(List<BlockState> blocksToUse)
     {
         if (blocksToUse == null || blocksToUse.isEmpty())
             throw new IllegalArgumentException("Provided blocks collection must not be empty!");
@@ -56,12 +54,12 @@ public class RebuildBlockFromRandomBlockSetStrategy implements RebuildBlockFromS
     private BlockState getRandomBlock()
     {
         int randomIndex = THREAD_LOCAL_RANDOM.nextInt(blocksToUse.size());
-        return (BlockState)this.blocksToUse.toArray()[randomIndex];
+        return this.blocksToUse.get(randomIndex);
     }
 
     @Override
-    public Set<BlockState> getBlocksToUse()
+    public List<BlockState> getBlocksToUse()
     {
-        return new HashSet<>(blocksToUse);
+        return new ArrayList<>(blocksToUse);
     }
 }

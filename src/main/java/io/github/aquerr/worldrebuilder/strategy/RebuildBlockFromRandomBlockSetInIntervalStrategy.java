@@ -8,19 +8,18 @@ import org.spongepowered.api.block.BlockState;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 public class RebuildBlockFromRandomBlockSetInIntervalStrategy implements RebuildBlockFromSetStrategy
 {
-    private final Set<BlockState> blocksToUse;
+    private final List<BlockState> blocksToUse;
 
-    public RebuildBlockFromRandomBlockSetInIntervalStrategy(Set<BlockState> blocksToUse)
+    public RebuildBlockFromRandomBlockSetInIntervalStrategy(List<BlockState> blocksToUse)
     {
         if (blocksToUse == null || blocksToUse.isEmpty())
             throw new IllegalArgumentException("Provided blocks collection must not be empty!");
 
-        this.blocksToUse = blocksToUse;
+        this.blocksToUse = new ArrayList<>(blocksToUse);
     }
 
     @Override
@@ -52,8 +51,8 @@ public class RebuildBlockFromRandomBlockSetInIntervalStrategy implements Rebuild
     }
 
     @Override
-    public Set<BlockState> getBlocksToUse()
+    public List<BlockState> getBlocksToUse()
     {
-        return new HashSet<>(blocksToUse);
+        return new ArrayList<>(blocksToUse);
     }
 }

@@ -17,7 +17,6 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
 public class BlockRebuildStrategyTypeSerializer implements TypeSerializer<RebuildBlocksStrategy>
@@ -35,9 +34,9 @@ public class BlockRebuildStrategyTypeSerializer implements TypeSerializer<Rebuil
             List<BlockState> blocks = node.node(NODE_BLOCKS_TO_USE).get(new TypeToken<List<BlockState>>() {}, Collections.emptyList());
             if (doesRunContinuously)
             {
-                return new RebuildBlockFromRandomBlockSetInIntervalStrategy(new HashSet<>(blocks));
+                return new RebuildBlockFromRandomBlockSetInIntervalStrategy(new ArrayList<>(blocks));
             }
-            return new RebuildBlockFromRandomBlockSetStrategy(new HashSet<>(blocks));
+            return new RebuildBlockFromRandomBlockSetStrategy(new ArrayList<>(blocks));
         }
 
         if (doesRunContinuously)

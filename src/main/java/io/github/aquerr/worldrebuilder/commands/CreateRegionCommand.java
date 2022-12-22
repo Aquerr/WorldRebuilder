@@ -17,8 +17,8 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.world.server.ServerWorld;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 
 import static net.kyori.adventure.text.Component.text;
 
@@ -35,11 +35,8 @@ public class CreateRegionCommand extends WRCommand
 	{
 		final String name = context.requireOne(Parameter.string().key("name").build());
 		final RebuildStrategyType strategyType = context.one(Parameter.enumValue(RebuildStrategyType.class).key("strategyType").build()).orElse(RebuildStrategyType.SAME_BLOCK);
-//		Parameter.Multi multi = Parameter.seqBuilder(Parameter.blockState().key("blockList").build()).build();
 
 		final Collection<? extends BlockState> blockList = context.all(Parameter.blockState().key("blockList").build());
-//		final Component blockList = context.one(Parameter.blockState().key("blockList").build()).orElse(null);
-//		final BlockState blockList = context.one(Parameter.blockState().key("blockList").build()).orElse(null);
 
 		if (!(context.cause().audience() instanceof ServerPlayer))
 			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(text("Only in-game players can use this command!", NamedTextColor.RED)));
@@ -75,9 +72,9 @@ public class CreateRegionCommand extends WRCommand
 			switch (rebuildStrategyType)
 			{
 				case RANDOM_BLOCK_FROM_SET:
-					return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 10, new RebuildBlockFromRandomBlockSetStrategy(new HashSet<>(blocks)));
+					return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 10, new RebuildBlockFromRandomBlockSetStrategy(new ArrayList<>(blocks)));
 				case CONSTANT_REBUILD_IN_INTERVAL_RANDOM_BLOCK_FROM_SET:
-					return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 60, new RebuildBlockFromRandomBlockSetInIntervalStrategy(new HashSet<>(blocks)));
+					return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 60, new RebuildBlockFromRandomBlockSetInIntervalStrategy(new ArrayList<>(blocks)));
 				case CONSTANT_REBUILD_IN_INTERVAL:
 					return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 60, new RebuildInIntervalStrategy());
 				case SAME_BLOCK:

@@ -64,9 +64,6 @@ public class Region
 		this.entitySnapshotsException = entitySnapshotsException;
 
 		this.rebuildBlocksStrategy = rebuildBlocksStrategy;
-
-//		this.blockSnapshotsExceptions = RegionUtil.getBlockSnapshots(worldUniqueId, firstPoint, secondPoint);
-//		this.entitySnapshotsException = RegionUtil.getEntitySnapshots(worldUniqueId, firstPoint, secondPoint);
 	}
 
 	public String getName()
@@ -219,6 +216,7 @@ public class Region
 		{
 			if (blockException.position().equals(blockSnapshot.position()) && blockException.state().type().equals(blockSnapshot.state().type()))
 			{
+				removeIgnoredBlock(blockSnapshot);
 				return true;
 			}
 		}
