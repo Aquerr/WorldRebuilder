@@ -3,7 +3,7 @@ package io.github.aquerr.worldrebuilder.strategy;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractRebuildBlockFromRandomBlockSetStrategy implements RebuildBlockFromSetStrategy
+abstract class AbstractRebuildBlockFromRandomBlockSetStrategy implements RebuildBlockFromSetStrategy
 {
     protected final List<WRBlockState> blocksToUse;
 
