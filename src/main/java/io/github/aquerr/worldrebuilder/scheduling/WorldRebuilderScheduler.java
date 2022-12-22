@@ -7,27 +7,27 @@ import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class WorldRebuilderScheduler
 {
 	private static final ExecutorService STORAGE_EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
-//	private static final ScheduledExecutorService HEARTBEAT_SERVICE = Executors.newSingleThreadScheduledExecutor();
 	private static WorldRebuilderScheduler INSTANCE;
 
 	private final Map<String, List<WorldRebuilderTask>> rebuildTasks = new ConcurrentHashMap<>();
 
-	private final Scheduler underlyingScheduler;
+	private final Scheduler asyncScheduler;
+	private final Scheduler syncScheduler;
 	private final Logger logger;
+
 
 	public static WorldRebuilderScheduler getInstance()
 	{
@@ -35,12 +35,12 @@ public class WorldRebuilderScheduler
 	}
 
 	@Inject
-	public WorldRebuilderScheduler(final Scheduler scheduler, final Logger logger)
+	public WorldRebuilderScheduler(final Scheduler scheduler, final Scheduler asyncScheduler, final Logger logger)
 	{
-		this.underlyingScheduler = scheduler;
+		this.syncScheduler = scheduler;
+		this.asyncScheduler = asyncScheduler;
 		this.logger = logger;
 		INSTANCE = this;
-//		HEARTBEAT_SERVICE.scheduleAtFixedRate();
 	}
 
 	public void queueStorageTask(Runnable runnable)
@@ -55,11 +55,11 @@ public class WorldRebuilderScheduler
 			this.logger.debug("Scheduling task: " + worldRebuilderTask);
 		}
 
-		ScheduledTask scheduledTask = this.underlyingScheduler.submit(Task.builder()
+		ScheduledTask scheduledTask = this.syncScheduler.submit(Task.builder()
 				.plugin(WorldRebuilder.getPlugin().getPluginContainer())
 				.execute(worldRebuilderTask)
-				.delay(worldRebuilderTask.getDelay(), TimeUnit.SECONDS)
-				.build(), getNewTaskName());
+				.delay(worldRebuilderTask.getDelay() * 1000L, ChronoUnit.MILLIS)
+				.build());
 
 		worldRebuilderTask.setTask(scheduledTask);
 		addTaskToList(worldRebuilderTask);
@@ -77,12 +77,11 @@ public class WorldRebuilderScheduler
 			this.logger.debug("Scheduling task: " + worldRebuilderTask);
 		}
 
-		ScheduledTask scheduledTask = this.underlyingScheduler.submit(Task.builder()
+		ScheduledTask scheduledTask = this.asyncScheduler.submit(Task.builder()
 				.plugin(WorldRebuilder.getPlugin().getPluginContainer())
 				.execute(worldRebuilderTask)
-				.delay(1, TimeUnit.SECONDS)
-				.interval(worldRebuilderTask.getDelay(), TimeUnit.SECONDS)
-				.build(), getNewTaskName());
+				.interval(1, ChronoUnit.SECONDS)
+				.build());
 
 		worldRebuilderTask.setTask(scheduledTask);
 		addTaskToList(worldRebuilderTask);
@@ -93,9 +92,22 @@ public class WorldRebuilderScheduler
 		}
 	}
 
-	public Scheduler getUnderlyingScheduler()
+	public void scheduleTask(Runnable runnable)
 	{
-		return this.underlyingScheduler;
+		if (this.logger.isDebugEnabled())
+		{
+			this.logger.debug("Scheduling task: " + runnable);
+		}
+
+		this.syncScheduler.submit(Task.builder()
+				.plugin(WorldRebuilder.getPlugin().getPluginContainer())
+				.execute(runnable)
+				.build());
+
+		if (this.logger.isDebugEnabled())
+		{
+			this.logger.debug("Scheduled task: " + runnable);
+		}
 	}
 
 	public List<WorldRebuilderTask> getTasksForRegion(final String regionName)
@@ -112,11 +124,6 @@ public class WorldRebuilderScheduler
 			list1.addAll(list2);
 			return list1;
 		});
-	}
-
-	private String getNewTaskName()
-	{
-		return "WorldRebuilder - Rebuild Task - " + UUID.randomUUID();
 	}
 
 	public void cancelTasksForRegion(String regionName)

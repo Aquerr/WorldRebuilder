@@ -107,7 +107,7 @@ public class WorldRebuilder
 	@Listener
 	public void onPluginLoad(final LoadedGameEvent event)
 	{
-		this.worldRebuilderScheduler = new WorldRebuilderScheduler(Sponge.server().scheduler(), this.logger);
+		this.worldRebuilderScheduler = new WorldRebuilderScheduler(Sponge.server().scheduler(), Sponge.game().asyncScheduler(), this.logger);
 		registerListeners();
 		this.regionManager.reloadRegions();
 	}

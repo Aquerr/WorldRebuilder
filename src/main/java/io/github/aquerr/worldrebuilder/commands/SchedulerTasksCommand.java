@@ -40,7 +40,7 @@ public class SchedulerTasksCommand extends WRCommand
             for (final WorldRebuilderTask worldRebuilderTask  : tasksForRegion)
             {
                 final Component taskTooltipInfo = LinearComponents.linear(
-                        text("Rebuild Time: ", BLUE), text(worldRebuilderTask.getDelay(), GOLD), newline());
+                        text("Rebuild Time: ", BLUE), text(worldRebuilderTask.getDelay(), GOLD));
 
                 regionRecord = regionRecord.append(newline()).append(text(worldRebuilderTask.getTask().name()))
                         .hoverEvent(taskTooltipInfo);

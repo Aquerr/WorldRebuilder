@@ -3,12 +3,9 @@ package io.github.aquerr.worldrebuilder.scheduling;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.util.WorldUtils;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -49,7 +46,7 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 			// Will the block spawn where player stands?
 			// If so, teleport the player to safe location.
 
-			safeTeleportPlayerIfAtLocation(blockSnapshot.position(), region);
+			WorldRebuilderTask.safeTeleportPlayerIfAtLocation(blockSnapshot.position(), region);
 		}
 
 		WorldRebuilderScheduler.getInstance().removeTaskForRegion(regionName, this);
@@ -96,28 +93,5 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 	public void setDelay(int delayInSeconds)
 	{
 		this.delay = delayInSeconds;
-	}
-
-	protected boolean isPlayerAtBlock(Vector3i vector3i, final ServerPlayer player)
-	{
-		return player.position().toInt().equals(vector3i);
-	}
-
-	protected void safeTeleportPlayerIfAtLocation(Vector3i vector3i, Region region)
-	{
-		int heightRadius = Math.abs(region.getFirstPoint().y() - region.getSecondPoint().y());
-		int widthRadius = (int)Math.sqrt(Math.pow(Math.abs(region.getFirstPoint().x()), 2) + Math.pow(Math.abs(region.getSecondPoint().z()), 2));
-
-		Sponge.server().onlinePlayers().stream()
-				.filter(player -> isPlayerAtBlock(vector3i, player))
-				.forEach(serverPlayer -> safeTeleportPlayer(serverPlayer, heightRadius, widthRadius));
-	}
-
-	private void safeTeleportPlayer(ServerPlayer player, int height, int width)
-	{
-		player.setLocationAndRotation(Sponge.server().teleportHelper()
-						.findSafeLocation(ServerLocation.of(player.world(), player.position()), height, width)
-						.orElse(player.serverLocation()),
-				player.rotation());
 	}
 }

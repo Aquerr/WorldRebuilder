@@ -8,8 +8,11 @@ import net.kyori.adventure.text.LinearComponents;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +43,6 @@ public class ConstantRebuildRegionBlocksTask extends RebuildBlocksTask
         if (this.currentSeconds > 0)
         {
             this.currentSeconds--;
-
             displayRebuildMessageIfNecessary(this.currentSeconds);
             return;
         }
@@ -54,22 +56,9 @@ public class ConstantRebuildRegionBlocksTask extends RebuildBlocksTask
             return;
         final ServerWorld world = optionalWorld.get();
 
-        for(final BlockSnapshot blockSnapshot : this.blocks)
-        {
-            world.restoreSnapshot(blockSnapshot.position(), blockSnapshot, true, BlockChangeFlags.ALL);
-
-            // Will the block spawn where player stands?
-            // If so, teleport the player to safe location.
-
-            safeTeleportPlayerIfAtLocation(blockSnapshot.position(), region);
-        }
-
-        WorldRebuilderScheduler.getInstance().removeTaskForRegion(regionName, this);
-        if (region.getRebuildBlocksStrategy().doesRunContinuously())
-        {
-            // Reschedule with the latest settings
-            region.rebuildBlocks(Collections.emptyList());
-        }
+        WorldRebuilderScheduler.getInstance().scheduleTask(new DoRebuild(region, world, blocks));
+        WorldRebuilderScheduler.getInstance().cancelTasksForRegion(regionName);
+        region.rebuildBlocks(Collections.emptyList());
     }
 
     private void displayRebuildMessageIfNecessary(int secondsLeft)
@@ -81,7 +70,57 @@ public class ConstantRebuildRegionBlocksTask extends RebuildBlocksTask
                             text("Region "),
                             text(regionName).color(NamedTextColor.BLUE),
                             text(" will be rebuild in "),
-                            text(secondsLeft).color(NamedTextColor.GOLD)));
+                            text(secondsLeft + " seconds").color(NamedTextColor.GOLD)));
+        }
+    }
+
+    private static class DoRebuild implements Runnable
+    {
+        private final Region region;
+        private final ServerWorld serverWorld;
+        private final List<BlockSnapshot> blockSnapshots;
+
+        DoRebuild(Region region, final ServerWorld serverWorld, final List<BlockSnapshot> blockSnapshots)
+        {
+            this.region = region;
+            this.serverWorld = serverWorld;
+            this.blockSnapshots = blockSnapshots;
+        }
+
+        @Override
+        public void run()
+        {
+            for(final BlockSnapshot blockSnapshot : this.blockSnapshots)
+            {
+                serverWorld.restoreSnapshot(blockSnapshot.position(), blockSnapshot, true, BlockChangeFlags.ALL);
+
+                // Will the block spawn where player stands?
+                // If so, teleport the player to safe location.
+                safeTeleportPlayerIfAtLocation(blockSnapshot.position(), region);
+            }
+        }
+
+        protected void safeTeleportPlayerIfAtLocation(Vector3i vector3i, Region region)
+        {
+            int heightRadius = Math.abs(region.getFirstPoint().y() - region.getSecondPoint().y());
+            int widthRadius = (int)Math.sqrt(Math.pow(Math.abs(region.getFirstPoint().x()), 2) + Math.pow(Math.abs(region.getSecondPoint().z()), 2));
+
+            Sponge.server().onlinePlayers().stream()
+                    .filter(player -> isPlayerAtBlock(vector3i, player))
+                    .forEach(serverPlayer -> safeTeleportPlayer(serverPlayer, heightRadius, widthRadius));
+        }
+
+        private void safeTeleportPlayer(ServerPlayer player, int height, int width)
+        {
+            player.setLocationAndRotation(Sponge.server().teleportHelper()
+                            .findSafeLocation(ServerLocation.of(player.world(), player.position()), height, width)
+                            .orElse(player.serverLocation()),
+                    player.rotation());
+        }
+
+        protected boolean isPlayerAtBlock(Vector3i vector3i, final ServerPlayer player)
+        {
+            return player.position().toInt().equals(vector3i);
         }
     }
 }

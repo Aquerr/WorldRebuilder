@@ -63,7 +63,7 @@ public class RebuildSameBlockInIntervalStrategy implements RebuildBlocksStrategy
     private List<BlockSnapshot> getBlocksFromRegion(Region region, ServerWorld serverWorld)
     {
         AABB aabb = AABB.of(region.getFirstPoint(), region.getSecondPoint());
-        return serverWorld.blockStateStream(aabb.min().toInt(), aabb.max().toInt(), StreamOptions.lazily())
+        return serverWorld.blockStateStream(aabb.min().toInt(), aabb.max().toInt(), StreamOptions.forceLoadedAndCopied())
                 .map(element -> element.type().snapshotFor(ServerLocation.of(element.volume(), element.position())))
                 .toStream()
                 .map(VolumeElement::type)

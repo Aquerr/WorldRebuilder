@@ -9,7 +9,6 @@ import net.kyori.adventure.text.LinearComponents;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -49,7 +48,6 @@ public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTa
         if (this.currentSeconds > 0)
         {
             this.currentSeconds--;
-
             displayRebuildMessageIfNecessary(this.currentSeconds);
             return;
         }
@@ -63,43 +61,9 @@ public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTa
             return;
         final ServerWorld world = optionalWorld.get();
 
-        int minimumX = Math.min(region.getFirstPoint().x(), region.getSecondPoint().x());
-        int minimumY = Math.min(region.getFirstPoint().y(), region.getSecondPoint().y());
-        int minimumZ = Math.min(region.getFirstPoint().z(), region.getSecondPoint().z());
-        int maximumX = Math.max(region.getFirstPoint().x(), region.getSecondPoint().x());
-        int maximumY = Math.max(region.getFirstPoint().y(), region.getSecondPoint().y());
-        int maximumZ = Math.max(region.getFirstPoint().z(), region.getSecondPoint().z());
-
-        for (int x = minimumX; x <= maximumX; x++)
-        {
-            for (int z = minimumZ; z <= maximumZ; z++)
-            {
-                for (int y = minimumY; y <= maximumY; y++)
-                {
-                    world.setBlock(x, y, z, getRandomBlock().getBlockState());
-                    safeTeleportPlayerIfAtLocation(Vector3i.from(x, y, z), region);
-                }
-            }
-        }
-
-        for(final BlockSnapshot blockSnapshot : blocks)
-        {
-            world.setBlock(blockSnapshot.position(), getRandomBlock().getBlockState(), BlockChangeFlags.ALL);
-
-            // Will the block spawn where player stands?
-            // If so, teleport the player to safe location.
-            safeTeleportPlayerIfAtLocation(blockSnapshot.position(), region);
-        }
-
-        // Reschedule with the latest settings
+        WorldRebuilderScheduler.getInstance().scheduleTask(new DoRebuild(region, world, blocksToUse));
         WorldRebuilderScheduler.getInstance().cancelTasksForRegion(region.getName());
         region.rebuildBlocks(Collections.emptyList());
-    }
-
-    private WRBlockState getRandomBlock()
-    {
-        int randomIndex = THREAD_LOCAL_RANDOM.nextInt(blocksToUse.size());
-        return this.blocksToUse.get(randomIndex);
     }
 
     private void displayRebuildMessageIfNecessary(int secondsLeft)
@@ -111,7 +75,50 @@ public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTa
                             text("Region "),
                             text(regionName).color(NamedTextColor.BLUE),
                             text(" will be rebuild in "),
-                            text(secondsLeft).color(NamedTextColor.GOLD)));
+                            text(secondsLeft + " seconds").color(NamedTextColor.GOLD)));
+        }
+    }
+
+    private static class DoRebuild implements Runnable
+    {
+        private final Region region;
+        private final ServerWorld serverWorld;
+        private final List<WRBlockState> blocksToUse;
+
+        DoRebuild(Region region, final ServerWorld serverWorld, final List<WRBlockState> blocksToUse)
+        {
+            this.region = region;
+            this.serverWorld = serverWorld;
+            this.blocksToUse = blocksToUse;
+        }
+
+        @Override
+        public void run()
+        {
+            int minimumX = Math.min(region.getFirstPoint().x(), region.getSecondPoint().x());
+            int minimumY = Math.min(region.getFirstPoint().y(), region.getSecondPoint().y());
+            int minimumZ = Math.min(region.getFirstPoint().z(), region.getSecondPoint().z());
+            int maximumX = Math.max(region.getFirstPoint().x(), region.getSecondPoint().x());
+            int maximumY = Math.max(region.getFirstPoint().y(), region.getSecondPoint().y());
+            int maximumZ = Math.max(region.getFirstPoint().z(), region.getSecondPoint().z());
+
+            for (int x = minimumX; x <= maximumX; x++)
+            {
+                for (int z = minimumZ; z <= maximumZ; z++)
+                {
+                    for (int y = minimumY; y <= maximumY; y++)
+                    {
+                        serverWorld.setBlock(x, y, z, getRandomBlock().getBlockState());
+                        WorldRebuilderTask.safeTeleportPlayerIfAtLocation(Vector3i.from(x, y, z), region);
+                    }
+                }
+            }
+        }
+
+        private WRBlockState getRandomBlock()
+        {
+            int randomIndex = THREAD_LOCAL_RANDOM.nextInt(blocksToUse.size());
+            return this.blocksToUse.get(randomIndex);
         }
     }
 }
