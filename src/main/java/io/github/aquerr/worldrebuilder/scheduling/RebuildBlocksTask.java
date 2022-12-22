@@ -23,7 +23,6 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 	protected final List<BlockSnapshot> blocks;
 	protected ScheduledTask task;
 	protected int delay;
-	protected int interval;
 
 	public RebuildBlocksTask(final String regionName, List<BlockSnapshot> blocks)
 	{
@@ -49,7 +48,8 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 
 			// Will the block spawn where player stands?
 			// If so, teleport the player to safe location.
-			safeTeleportPlayerIfAtLocation(blockSnapshot.position());
+
+			safeTeleportPlayerIfAtLocation(blockSnapshot.position(), region);
 		}
 
 		WorldRebuilderScheduler.getInstance().removeTaskForRegion(regionName, this);
@@ -103,17 +103,20 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 		return player.position().toInt().equals(vector3i);
 	}
 
-	protected void safeTeleportPlayerIfAtLocation(Vector3i vector3i)
+	protected void safeTeleportPlayerIfAtLocation(Vector3i vector3i, Region region)
 	{
+		int heightRadius = Math.abs(region.getFirstPoint().y() - region.getSecondPoint().y());
+		int widthRadius = (int)Math.sqrt(Math.pow(Math.abs(region.getFirstPoint().x()), 2) + Math.pow(Math.abs(region.getSecondPoint().z()), 2));
+
 		Sponge.server().onlinePlayers().stream()
 				.filter(player -> isPlayerAtBlock(vector3i, player))
-				.forEach(this::safeTeleportPlayer);
+				.forEach(serverPlayer -> safeTeleportPlayer(serverPlayer, heightRadius, widthRadius));
 	}
 
-	private void safeTeleportPlayer(ServerPlayer player)
+	private void safeTeleportPlayer(ServerPlayer player, int height, int width)
 	{
 		player.setLocationAndRotation(Sponge.server().teleportHelper()
-						.findSafeLocation(ServerLocation.of(player.world(), player.position()))
+						.findSafeLocation(ServerLocation.of(player.world(), player.position()), height, width)
 						.orElse(player.serverLocation()),
 				player.rotation());
 	}

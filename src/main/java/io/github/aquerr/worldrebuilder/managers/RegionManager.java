@@ -6,6 +6,7 @@ import io.github.aquerr.worldrebuilder.entity.Region;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderTask;
 import io.github.aquerr.worldrebuilder.storage.StorageManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -18,12 +19,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RegionManager
 {
 	private final StorageManager storageManager;
+	private final Logger logger;
 	private final Map<String, Region> regions = new ConcurrentHashMap<>();
 
 	@Inject
-	public RegionManager(final StorageManager storageManager)
+	public RegionManager(final StorageManager storageManager, final Logger logger)
 	{
 		this.storageManager = storageManager;
+		this.logger = logger;
 	}
 
 	public Collection<Region> getRegions()
@@ -52,6 +55,7 @@ public class RegionManager
 	{
 		WorldRebuilderScheduler.getInstance().queueStorageTask(() -> this.storageManager.updateRegion(region));
 		this.regions.put(region.getName(), region);
+		restartRebuildForRegionIfContinuous(region);
 	}
 
 	public void deleteRegion(final String name)
@@ -91,9 +95,19 @@ public class RegionManager
 	{
 		for (final Region region : getRegions())
 		{
-			if (region.getRebuildBlocksStrategy().doesRunContinuously())
+			restartRebuildForRegionIfContinuous(region);
+		}
+	}
+
+	private void restartRebuildForRegionIfContinuous(Region region)
+	{
+		if (region.getRebuildBlocksStrategy().doesRunContinuously())
+		{
+			region.rebuildBlocks(Collections.emptyList());
+
+			if (logger.isDebugEnabled())
 			{
-				region.rebuildBlocks(Collections.emptyList());
+				logger.debug("Started continuous rebuild for region: {}", region.getName());
 			}
 		}
 	}

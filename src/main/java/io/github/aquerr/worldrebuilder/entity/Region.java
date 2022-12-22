@@ -257,17 +257,19 @@ public class Region
 			return;
 
 		final List<BlockSnapshot> blocksToRestore = new ArrayList<>();
-		for (final BlockSnapshot blockSnapshot : blockSnapshots)
+		if (!getRebuildBlocksStrategy().doesRunContinuously())
 		{
-			if(canRestoreBlock(blockSnapshot))
+			for (final BlockSnapshot blockSnapshot : blockSnapshots)
 			{
-				blocksToRestore.add(blockSnapshot);
+				if(canRestoreBlock(blockSnapshot))
+				{
+					blocksToRestore.add(blockSnapshot);
+				}
 			}
+
+			if (blocksToRestore.isEmpty())
+				return;
 		}
-
-		if (blocksToRestore.isEmpty())
-			return;
-
 		this.rebuildBlocksStrategy.rebuildBlocks(this, blocksToRestore);
 	}
 

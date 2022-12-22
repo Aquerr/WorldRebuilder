@@ -10,18 +10,19 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class RebuildRegionFromRandomBlockSetTask extends RebuildBlocksTask
+public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTask
 {
     private static final ThreadLocalRandom THREAD_LOCAL_RANDOM = ThreadLocalRandom.current();
 
     private final List<BlockState> blocksToUse;
 
-    public RebuildRegionFromRandomBlockSetTask(String regionName, List<BlockSnapshot> blocksToRebuild, Set<BlockState> blocksToUse)
+    public ConstantRebuildRegionFromRandomBlockSetTask(String regionName, List<BlockSnapshot> blocksToRebuild, Set<BlockState> blocksToUse)
     {
         super(regionName, blocksToRebuild);
         this.blocksToUse = new ArrayList<>(blocksToUse);
@@ -52,8 +53,8 @@ public class RebuildRegionFromRandomBlockSetTask extends RebuildBlocksTask
             {
                 for (int y = minimumY; y <= maximumY; y++)
                 {
-                    safeTeleportPlayerIfAtLocation(Vector3i.from(x, y, z));
                     world.setBlock(x, y, z, getRandomBlock());
+                    safeTeleportPlayerIfAtLocation(Vector3i.from(x, y, z), region);
                 }
             }
         }
@@ -64,8 +65,12 @@ public class RebuildRegionFromRandomBlockSetTask extends RebuildBlocksTask
 
             // Will the block spawn where player stands?
             // If so, teleport the player to safe location.
-            safeTeleportPlayerIfAtLocation(blockSnapshot.position());
+            safeTeleportPlayerIfAtLocation(blockSnapshot.position(), region);
         }
+
+        // Reschedule with the latest settings
+        WorldRebuilderScheduler.getInstance().cancelTasksForRegion(region.getName());
+        region.rebuildBlocks(Collections.emptyList());
     }
 
     private BlockState getRandomBlock()

@@ -12,6 +12,7 @@ import io.github.aquerr.worldrebuilder.commands.InfoCommand;
 import io.github.aquerr.worldrebuilder.commands.ListCommand;
 import io.github.aquerr.worldrebuilder.commands.RegionCommand;
 import io.github.aquerr.worldrebuilder.commands.RestoreTimeCommand;
+import io.github.aquerr.worldrebuilder.commands.SchedulerTasksCommand;
 import io.github.aquerr.worldrebuilder.commands.WandCommand;
 import io.github.aquerr.worldrebuilder.commands.args.WorldRebuilderCommandParameters;
 import io.github.aquerr.worldrebuilder.entity.SelectionPoints;
@@ -106,7 +107,7 @@ public class WorldRebuilder
 	@Listener
 	public void onPluginLoad(final LoadedGameEvent event)
 	{
-		this.worldRebuilderScheduler = new WorldRebuilderScheduler(Sponge.server().scheduler());
+		this.worldRebuilderScheduler = new WorldRebuilderScheduler(Sponge.server().scheduler(), this.logger);
 		registerListeners();
 		this.regionManager.reloadRegions();
 	}
@@ -257,6 +258,13 @@ public class WorldRebuilder
 							Parameter.subcommand(forceRebuildCommand, "force_rebuild")
 						)
 				)
+				.build());
+
+		// Scheduler Tasks Debug Command
+		this.subcommands.put(Collections.singletonList("tasks"), Command.builder()
+				.shortDescription(Component.text("Show currently scheduled region tasks"))
+				.permission(Permissions.SCHEDULER_TASKS_COMMAND)
+				.executor(new SchedulerTasksCommand(this))
 				.build());
 
 		//WorldRebuilder commands

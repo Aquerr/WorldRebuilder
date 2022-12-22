@@ -2,6 +2,7 @@ package io.github.aquerr.worldrebuilder.scheduling;
 
 import com.google.inject.Inject;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
@@ -23,10 +24,10 @@ public class WorldRebuilderScheduler
 //	private static final ScheduledExecutorService HEARTBEAT_SERVICE = Executors.newSingleThreadScheduledExecutor();
 	private static WorldRebuilderScheduler INSTANCE;
 
-	// RegionName => [ScheduledRebuildTasks]
 	private final Map<String, List<WorldRebuilderTask>> rebuildTasks = new ConcurrentHashMap<>();
 
 	private final Scheduler underlyingScheduler;
+	private final Logger logger;
 
 	public static WorldRebuilderScheduler getInstance()
 	{
@@ -34,9 +35,10 @@ public class WorldRebuilderScheduler
 	}
 
 	@Inject
-	public WorldRebuilderScheduler(final Scheduler scheduler)
+	public WorldRebuilderScheduler(final Scheduler scheduler, final Logger logger)
 	{
 		this.underlyingScheduler = scheduler;
+		this.logger = logger;
 		INSTANCE = this;
 //		HEARTBEAT_SERVICE.scheduleAtFixedRate();
 	}
@@ -48,6 +50,11 @@ public class WorldRebuilderScheduler
 
 	public void scheduleTask(WorldRebuilderTask worldRebuilderTask)
 	{
+		if (this.logger.isDebugEnabled())
+		{
+			this.logger.debug("Scheduling task: " + worldRebuilderTask);
+		}
+
 		ScheduledTask scheduledTask = this.underlyingScheduler.submit(Task.builder()
 				.plugin(WorldRebuilder.getPlugin().getPluginContainer())
 				.execute(worldRebuilderTask)
@@ -56,6 +63,11 @@ public class WorldRebuilderScheduler
 
 		worldRebuilderTask.setTask(scheduledTask);
 		addTaskToList(worldRebuilderTask);
+
+		if (this.logger.isDebugEnabled())
+		{
+			this.logger.debug("Scheduled task: " + worldRebuilderTask);
+		}
 	}
 
 	public Scheduler getUnderlyingScheduler()
@@ -86,12 +98,22 @@ public class WorldRebuilderScheduler
 
 	public void cancelTasksForRegion(String regionName)
 	{
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("Cancel tasks for region: {}", regionName);
+		}
+
 		getTasksForRegion(regionName).forEach(WorldRebuilderTask::cancel);
 		this.rebuildTasks.remove(regionName.toLowerCase());
 	}
 
 	public void removeTaskForRegion(String regionName, WorldRebuilderTask worldRebuilderTask)
 	{
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("Removing task {} for region: {}", regionName, worldRebuilderTask);
+		}
+
 		worldRebuilderTask.cancel();
 		regionName = regionName.toLowerCase();
 		List<WorldRebuilderTask> tasks = this.rebuildTasks.get(regionName);
@@ -105,6 +127,11 @@ public class WorldRebuilderScheduler
 
 	public void removeTasksForRegion(String regionName)
 	{
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("Removing tasks for region: {}", regionName);
+		}
+
 		regionName = regionName.toLowerCase();
 		List<WorldRebuilderTask> tasks = this.rebuildTasks.getOrDefault(regionName, Collections.emptyList());
 		for (WorldRebuilderTask task : tasks)

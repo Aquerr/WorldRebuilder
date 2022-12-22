@@ -16,4 +16,5 @@ public class Permissions
 	public static final String ACTIVE_COMMAND = "worldrebuilder.command.region.active";
 	public static final String DROP_BLOCKS_COMMAND = "worldrebuilder.command.region.dropblocks";
 	public static final String FORCE_REBUILD_COMMAND = "worldrebuilder.command.region.forcerebuild";
+	public static final String SCHEDULER_TASKS_COMMAND = "worldrebuilder.command.schedulertasks";
 }

@@ -66,5 +66,6 @@ public class ListCommand extends WRCommand
 				.padding(text("-", BLUE))
 				.build();
 		paginationList.sendTo(context.cause().audience());
-		return CommandResult.success();	}
+		return CommandResult.success();
+	}
 }

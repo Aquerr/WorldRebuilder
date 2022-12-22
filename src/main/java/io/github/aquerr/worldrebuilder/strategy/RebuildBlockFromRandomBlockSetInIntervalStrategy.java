@@ -1,7 +1,7 @@
 package io.github.aquerr.worldrebuilder.strategy;
 
 import io.github.aquerr.worldrebuilder.entity.Region;
-import io.github.aquerr.worldrebuilder.scheduling.RebuildRegionFromRandomBlockSetTask;
+import io.github.aquerr.worldrebuilder.scheduling.ConstantRebuildRegionFromRandomBlockSetTask;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -29,9 +29,9 @@ public class RebuildBlockFromRandomBlockSetInIntervalStrategy implements Rebuild
         if (isTaskAlreadyRunningForRegion(region))
             return;
 
-        RebuildRegionFromRandomBlockSetTask rebuildRegionFromRandomBlockSetTask = new RebuildRegionFromRandomBlockSetTask(region.getName(), new ArrayList<>(blocksToRebuild), this.blocksToUse);
-        rebuildRegionFromRandomBlockSetTask.setDelay(region.getRestoreTime());
-        WorldRebuilderScheduler.getInstance().scheduleTask(rebuildRegionFromRandomBlockSetTask);
+        ConstantRebuildRegionFromRandomBlockSetTask constantRebuildRegionFromRandomBlockSetTask = new ConstantRebuildRegionFromRandomBlockSetTask(region.getName(), new ArrayList<>(blocksToRebuild), this.blocksToUse);
+        constantRebuildRegionFromRandomBlockSetTask.setDelay(region.getRestoreTime());
+        WorldRebuilderScheduler.getInstance().scheduleTask(constantRebuildRegionFromRandomBlockSetTask);
     }
 
     @Override
