@@ -1,7 +1,7 @@
 package io.github.aquerr.worldrebuilder.scheduling;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
-import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.model.Region;
 import io.github.aquerr.worldrebuilder.util.WorldUtils;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -20,7 +20,6 @@ public class RebuildEntitiesTask implements WorldRebuilderTask
 	private final UUID worldUUID;
 	private final List<EntitySnapshot> entitySnapshots;
 	private ScheduledTask task;
-	private int interval;
 	private int delay;
 
 	RebuildEntitiesTask(final String regionName, final UUID worldUUID, final List<EntitySnapshot> entitySnapshots)

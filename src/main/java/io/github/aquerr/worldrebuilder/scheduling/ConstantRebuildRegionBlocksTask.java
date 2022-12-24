@@ -1,11 +1,12 @@
 package io.github.aquerr.worldrebuilder.scheduling;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
-import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.model.Region;
+import io.github.aquerr.worldrebuilder.util.TeleportUtils;
 import io.github.aquerr.worldrebuilder.util.WorldUtils;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.LinearComponents;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
@@ -25,11 +26,13 @@ import static net.kyori.adventure.text.Component.text;
  */
 public class ConstantRebuildRegionBlocksTask extends RebuildBlocksTask
 {
+    private final Region region;
     private int currentSeconds;
 
-    public ConstantRebuildRegionBlocksTask(String regionName, List<BlockSnapshot> originalRegionBlocks, final int rebuildTimeSeconds)
+    public ConstantRebuildRegionBlocksTask(Region region, List<BlockSnapshot> originalRegionBlocks, final int rebuildTimeSeconds)
     {
-        super(regionName, originalRegionBlocks);
+        super(region.getName(), originalRegionBlocks);
+        this.region = region;
         this.delay = rebuildTimeSeconds;
         this.currentSeconds = delay;
     }
@@ -60,14 +63,12 @@ public class ConstantRebuildRegionBlocksTask extends RebuildBlocksTask
 
     private void displayRebuildMessageIfNecessary(int secondsLeft)
     {
-        if (secondsLeft == 10)
+        String message = this.region.getNotifications().get((long)secondsLeft);
+        if (message != null)
         {
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(),
-                    LinearComponents.linear(WorldRebuilder.PLUGIN_PREFIX,
-                            text("Region "),
-                            text(regionName).color(NamedTextColor.BLUE),
-                            text(" will be rebuild in "),
-                            text(secondsLeft + " seconds").color(NamedTextColor.GOLD)));
+                    LinearComponents.linear(WorldRebuilder.PLUGIN_PREFIX, LegacyComponentSerializer.legacyAmpersand()
+                            .deserialize(message.replaceAll("\\{REGION_NAME}", regionName))));
         }
     }
 
@@ -93,7 +94,7 @@ public class ConstantRebuildRegionBlocksTask extends RebuildBlocksTask
 
                 // Will the block spawn where player stands?
                 // If so, teleport the player to safe location.
-                WorldRebuilderTask.safeTeleportPlayerIfAtLocation(blockSnapshot.position(), region);
+                TeleportUtils.safeTeleportPlayerIfAtLocation(blockSnapshot.position(), region);
             }
         }
     }

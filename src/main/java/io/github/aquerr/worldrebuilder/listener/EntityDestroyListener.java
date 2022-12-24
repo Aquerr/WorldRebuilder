@@ -1,7 +1,7 @@
 package io.github.aquerr.worldrebuilder.listener;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
-import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.model.Region;
 import io.github.aquerr.worldrebuilder.scheduling.RebuildEntityTask;
 import net.minecraft.entity.item.HangingEntity;
 import org.spongepowered.api.entity.Entity;

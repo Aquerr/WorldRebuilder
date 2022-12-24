@@ -1,4 +1,4 @@
-package io.github.aquerr.worldrebuilder.entity;
+package io.github.aquerr.worldrebuilder.model;
 
 import org.spongepowered.math.vector.Vector3i;
 

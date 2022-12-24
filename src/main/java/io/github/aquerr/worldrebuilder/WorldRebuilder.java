@@ -3,19 +3,22 @@ package io.github.aquerr.worldrebuilder;
 
 import com.google.inject.Inject;
 import io.github.aquerr.worldrebuilder.commands.ActiveCommand;
+import io.github.aquerr.worldrebuilder.commands.AddNotificationCommand;
 import io.github.aquerr.worldrebuilder.commands.BlockDropCommand;
 import io.github.aquerr.worldrebuilder.commands.CreateRegionCommand;
+import io.github.aquerr.worldrebuilder.commands.DeleteNotificationCommand;
 import io.github.aquerr.worldrebuilder.commands.DeleteRegionCommand;
 import io.github.aquerr.worldrebuilder.commands.ForceRebuildCommand;
 import io.github.aquerr.worldrebuilder.commands.HelpCommand;
 import io.github.aquerr.worldrebuilder.commands.InfoCommand;
 import io.github.aquerr.worldrebuilder.commands.ListCommand;
+import io.github.aquerr.worldrebuilder.commands.ListNotificationsCommand;
 import io.github.aquerr.worldrebuilder.commands.RegionCommand;
 import io.github.aquerr.worldrebuilder.commands.RestoreTimeCommand;
 import io.github.aquerr.worldrebuilder.commands.SchedulerTasksCommand;
 import io.github.aquerr.worldrebuilder.commands.WandCommand;
 import io.github.aquerr.worldrebuilder.commands.args.WorldRebuilderCommandParameters;
-import io.github.aquerr.worldrebuilder.entity.SelectionPoints;
+import io.github.aquerr.worldrebuilder.model.SelectionPoints;
 import io.github.aquerr.worldrebuilder.listener.BlockBreakListener;
 import io.github.aquerr.worldrebuilder.listener.BlockPlaceListener;
 import io.github.aquerr.worldrebuilder.listener.EntityDestroyListener;
@@ -24,13 +27,10 @@ import io.github.aquerr.worldrebuilder.listener.WandUsageListener;
 import io.github.aquerr.worldrebuilder.managers.RegionManager;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
 import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyType;
-import io.leangen.geantyref.TypeToken;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.config.ConfigDir;
@@ -43,18 +43,19 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static net.kyori.adventure.text.Component.text;
+
 @Plugin("worldrebuilder")
 public class WorldRebuilder
 {
-	public static final TextComponent PLUGIN_ERROR = Component.text("[WR] ", NamedTextColor.RED);
-	public static final TextComponent PLUGIN_PREFIX = Component.text("[WR] ", NamedTextColor.GREEN);
+	public static final TextComponent PLUGIN_ERROR = text("[WR] ", NamedTextColor.RED);
+	public static final TextComponent PLUGIN_PREFIX = text("[WR] ", NamedTextColor.GREEN);
 
 	private final Map<List<String>, Command.Parameterized> subcommands = new HashMap<>();
 	private final Map<UUID, SelectionPoints> playerSelectionPoints = new HashMap<>();
@@ -167,7 +168,7 @@ public class WorldRebuilder
 
 		//Help Command
 		this.subcommands.put(Collections.singletonList("help"), Command.builder()
-				.shortDescription(Component.text("Shows all available commands"))
+				.shortDescription(text("Shows all available commands"))
 				.permission(Permissions.HELP_COMMAND)
 				.executor(new HelpCommand(this))
 				.addParameter(Parameter.integerNumber().key("page").optional().build())
@@ -175,21 +176,21 @@ public class WorldRebuilder
 
 		//Wand Command
 		this.subcommands.put(Collections.singletonList("wand"), Command.builder()
-				.shortDescription(Component.text("Gives WorldRebuilder wand"))
+				.shortDescription(text("Gives WorldRebuilder wand"))
 				.permission(Permissions.WAND_COMMAND)
 				.executor(new WandCommand(this))
 				.build());
 
 		//List Command
 		this.subcommands.put(Collections.singletonList("list"), Command.builder()
-				.shortDescription(Component.text("Shows a list of all regions"))
+				.shortDescription(text("Shows a list of all regions"))
 				.permission(Permissions.LIST_COMMAND)
 				.executor(new ListCommand(this))
 				.build());
 
 		//Create Region Command
 		this.subcommands.put(Collections.singletonList("create_region"), Command.builder()
-				.shortDescription(Component.text("Creates a region from selected points"))
+				.shortDescription(text("Creates a region from selected points"))
 				.permission(Permissions.CREATE_REGION_COMMAND)
 				.executor(new CreateRegionCommand(this))
 				.addParameter(Parameter.string().key("name").build())
@@ -199,7 +200,7 @@ public class WorldRebuilder
 
 		//Delete Region Command
 		this.subcommands.put(Collections.singletonList("delete_region"), Command.builder()
-				.shortDescription(Component.text("Deletes a region"))
+				.shortDescription(text("Deletes a region"))
 				.permission(Permissions.DELETE_COMMAND)
 				.executor(new DeleteRegionCommand(this))
 				.addParameter(WorldRebuilderCommandParameters.region())
@@ -207,14 +208,14 @@ public class WorldRebuilder
 
 		//Info Command
 		final Command.Parameterized regionCommand = Command.builder()
-				.shortDescription(Component.text("Shows information about the region"))
+				.shortDescription(text("Shows information about the region"))
 				.permission(Permissions.INFO_COMMAND)
 				.executor(new InfoCommand(this))
 				.build();
 
 		//RestoreTime Command
 		final Command.Parameterized restoreTimeCommand = Command.builder()
-				.shortDescription(Component.text("Sets region restore time"))
+				.shortDescription(text("Sets region restore time"))
 				.permission(Permissions.RESTORE_TIME_COMMAND)
 				.executor(new RestoreTimeCommand(this))
 				.addParameter(Parameter.integerNumber().key("timeInSeconds").build())
@@ -222,7 +223,7 @@ public class WorldRebuilder
 
 		//Active Command
 		final Command.Parameterized activeCommand = Command.builder()
-				.shortDescription(Component.text("Activates/Deactivates a region"))
+				.shortDescription(text("Activates/Deactivates a region"))
 				.permission(Permissions.ACTIVE_COMMAND)
 				.executor(new ActiveCommand(this))
 				.addParameter(Parameter.bool().key("isActive").build())
@@ -230,7 +231,7 @@ public class WorldRebuilder
 
 		//DropBlocks Command
 		final Command.Parameterized blockDropCommand = Command.builder()
-				.shortDescription(Component.text("Toggles block drop in region"))
+				.shortDescription(text("Toggles block drop in region"))
 				.permission(Permissions.DROP_BLOCKS_COMMAND)
 				.executor(new BlockDropCommand(this))
 				.addParameter(Parameter.bool().key("value").build())
@@ -238,14 +239,44 @@ public class WorldRebuilder
 
 		//ForceRebuild Command
 		final Command.Parameterized forceRebuildCommand = Command.builder()
-				.shortDescription(Component.text("Force rebuilds region"))
+				.shortDescription(text("Force rebuilds region"))
 				.permission(Permissions.FORCE_REBUILD_COMMAND)
 				.executor(new ForceRebuildCommand(this))
 				.build();
 
+		//Change strategy Command
+		final Command.Parameterized strategyCommand = Command.builder()
+				.shortDescription(text("Change region rebuild strategy"))
+				.permission(Permissions.CREATE_REGION_COMMAND)
+				.executor(new CreateRegionCommand(this))
+				.addParameter(Parameter.enumValue(RebuildStrategyType.class).key("strategyType").optional().build())
+				.addParameter(Parameter.blockState().key("blockList").optional().consumeAllRemaining().build())
+				.build();
+
+		final Command.Parameterized listNotificationsCommand = Command.builder()
+				.shortDescription(text("List notifications for region"))
+				.permission(Permissions.LIST_NOTIFICATIONS_COMMAND)
+				.executor(new ListNotificationsCommand(this))
+				.build();
+
+		final Command.Parameterized addNotificationCommand = Command.builder()
+				.shortDescription(text("Add notification to region"))
+				.permission(Permissions.ADD_NOTIFICATION_COMMAND)
+				.executor(new AddNotificationCommand(this))
+				.addParameter(Parameter.duration().key("timeBeforeRebuild").build())
+				.addParameter(Parameter.string().key("message").build())
+				.build();
+
+		final Command.Parameterized deleteNotificationCommand = Command.builder()
+				.shortDescription(text("Add notification to region. Use {REGION_NAME} to include region's name."))
+				.permission(Permissions.DELETE_NOTIFICATION_COMMAND)
+				.executor(new DeleteNotificationCommand(this))
+				.addParameter(Parameter.duration().key("timeBeforeRebuild").build())
+				.build();
+
 		//Region Command/s
 		this.subcommands.put(Collections.singletonList("region"), Command.builder()
-				.shortDescription(Component.text("Region commands"))
+				.shortDescription(text("Region commands"))
 				.permission(Permissions.REGION_COMMANDS)
 				.executor(new RegionCommand(this))
 				.addParameters(
@@ -255,14 +286,18 @@ public class WorldRebuilder
 							Parameter.subcommand(restoreTimeCommand, "restore_time"),
 							Parameter.subcommand(activeCommand, "active"),
 							Parameter.subcommand(blockDropCommand, "drop_blocks"),
-							Parameter.subcommand(forceRebuildCommand, "force_rebuild")
+							Parameter.subcommand(forceRebuildCommand, "force_rebuild"),
+							Parameter.subcommand(strategyCommand, "strategy"),
+							Parameter.subcommand(listNotificationsCommand, "list_notifications"),
+							Parameter.subcommand(addNotificationCommand, "add_notification"),
+							Parameter.subcommand(deleteNotificationCommand, "delete_notification")
 						)
 				)
 				.build());
 
 		// Scheduler Tasks Debug Command
 		this.subcommands.put(Collections.singletonList("tasks"), Command.builder()
-				.shortDescription(Component.text("Show currently scheduled region tasks"))
+				.shortDescription(text("Show currently scheduled region tasks"))
 				.permission(Permissions.SCHEDULER_TASKS_COMMAND)
 				.executor(new SchedulerTasksCommand(this))
 				.build());

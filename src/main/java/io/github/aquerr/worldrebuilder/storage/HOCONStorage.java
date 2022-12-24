@@ -2,7 +2,7 @@ package io.github.aquerr.worldrebuilder.storage;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.model.Region;
 import io.github.aquerr.worldrebuilder.storage.serializer.BlockRebuildStrategyTypeSerializer;
 import io.github.aquerr.worldrebuilder.storage.serializer.BlockSnapshotListTypeSerializer;
 import io.github.aquerr.worldrebuilder.storage.serializer.BlockSnapshotSerializer;
@@ -11,7 +11,8 @@ import io.github.aquerr.worldrebuilder.storage.serializer.WRBlockStateListTypeSe
 import io.github.aquerr.worldrebuilder.storage.serializer.WRBlockStateTypeSerializer;
 import io.github.aquerr.worldrebuilder.storage.serializer.WRTypeTokens;
 import io.github.aquerr.worldrebuilder.strategy.RebuildBlocksStrategy;
-import io.github.aquerr.worldrebuilder.strategy.RebuildSameBlockStrategy;
+import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyFactory;
+import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyType;
 import io.leangen.geantyref.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +90,8 @@ public class HOCONStorage implements Storage
 
 		this.configNode.node(ROOT_NODE_NAME, region.getName(), "blockRebuildStrategy").set(WRTypeTokens.BLOCK_REBUILD_STRATEGY, region.getRebuildBlocksStrategy());
 
+		this.configNode.node(ROOT_NODE_NAME, region.getName(), "notifications").set(region.getNotifications());
+
 		saveChanges();
 	}
 
@@ -126,9 +129,11 @@ public class HOCONStorage implements Storage
 			final Collection<BlockSnapshot> blockSnapshotsExceptions = this.configNode.node(ROOT_NODE_NAME, name, "blockSnapshotsExceptions").get(WRTypeTokens.BLOCK_SNAPSHOT_COLLECTION_TYPE_TOKEN, Collections.emptyList());
 			final List<EntitySnapshot> entitySnapshotsExceptions = this.configNode.node(ROOT_NODE_NAME, name, "entitySnapshotsExceptions").getList(TypeToken.get(EntitySnapshot.class), Collections.emptyList());
 
-			final RebuildBlocksStrategy rebuildBlocksStrategy = this.configNode.node(ROOT_NODE_NAME, name, "blockRebuildStrategy").get(WRTypeTokens.BLOCK_REBUILD_STRATEGY, new RebuildSameBlockStrategy());
+			final RebuildBlocksStrategy rebuildBlocksStrategy = this.configNode.node(ROOT_NODE_NAME, name, "blockRebuildStrategy").get(WRTypeTokens.BLOCK_REBUILD_STRATEGY, RebuildStrategyFactory.getStrategy(RebuildStrategyType.SAME_BLOCK, Collections.emptyList()));
 
-			return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime, isActive, shouldDropBlocks, new LinkedList<>(blockSnapshotsExceptions), new LinkedList<>(entitySnapshotsExceptions), rebuildBlocksStrategy);
+			final Map<Long, String> notifications = this.configNode.node(ROOT_NODE_NAME, name, "notifications").get(new TypeToken<Map<Long, String>>() {});
+
+			return new Region(name, worldUUID, firstPosition, secondPosition, restoreTime, isActive, shouldDropBlocks, new LinkedList<>(blockSnapshotsExceptions), new LinkedList<>(entitySnapshotsExceptions), rebuildBlocksStrategy, notifications);
 		}
 		catch (Exception exception)
 		{

@@ -1,12 +1,13 @@
 package io.github.aquerr.worldrebuilder.scheduling;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
-import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.model.Region;
 import io.github.aquerr.worldrebuilder.strategy.WRBlockState;
+import io.github.aquerr.worldrebuilder.util.TeleportUtils;
 import io.github.aquerr.worldrebuilder.util.WorldUtils;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.LinearComponents;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -30,13 +31,15 @@ public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTa
 {
     private static final ThreadLocalRandom THREAD_LOCAL_RANDOM = ThreadLocalRandom.current();
 
+    private final Region region;
     private final List<WRBlockState> blocksToUse;
 
     private int currentSeconds;
 
-    public ConstantRebuildRegionFromRandomBlockSetTask(String regionName, List<BlockSnapshot> blocksToRebuild, List<WRBlockState> blocksToUse, final int rebuildTimeSeconds)
+    public ConstantRebuildRegionFromRandomBlockSetTask(Region region, List<BlockSnapshot> blocksToRebuild, List<WRBlockState> blocksToUse, final int rebuildTimeSeconds)
     {
-        super(regionName, blocksToRebuild);
+        super(region.getName(), blocksToRebuild);
+        this.region = region;
         this.blocksToUse = new ArrayList<>(blocksToUse);
         this.delay = rebuildTimeSeconds;
         this.currentSeconds = delay;
@@ -68,14 +71,12 @@ public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTa
 
     private void displayRebuildMessageIfNecessary(int secondsLeft)
     {
-        if (secondsLeft == 10)
+        String message = this.region.getNotifications().get((long)secondsLeft);
+        if (message != null)
         {
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(),
-                    LinearComponents.linear(WorldRebuilder.PLUGIN_PREFIX,
-                            text("Region "),
-                            text(regionName).color(NamedTextColor.BLUE),
-                            text(" will be rebuild in "),
-                            text(secondsLeft + " seconds").color(NamedTextColor.GOLD)));
+                    LinearComponents.linear(WorldRebuilder.PLUGIN_PREFIX, LegacyComponentSerializer.legacyAmpersand()
+                            .deserialize(message.replaceAll("\\{REGION_NAME}", regionName))));
         }
     }
 
@@ -109,7 +110,7 @@ public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTa
                     for (int y = minimumY; y <= maximumY; y++)
                     {
                         serverWorld.setBlock(x, y, z, getRandomBlock().getBlockState());
-                        WorldRebuilderTask.safeTeleportPlayerIfAtLocation(Vector3i.from(x, y, z), region);
+                        TeleportUtils.safeTeleportPlayerIfAtLocation(Vector3i.from(x, y, z), region);
                     }
                 }
             }

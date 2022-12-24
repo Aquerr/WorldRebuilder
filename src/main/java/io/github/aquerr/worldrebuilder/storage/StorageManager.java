@@ -2,7 +2,7 @@ package io.github.aquerr.worldrebuilder.storage;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.model.Region;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.configurate.serialize.SerializationException;

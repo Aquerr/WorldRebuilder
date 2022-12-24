@@ -1,6 +1,6 @@
 package io.github.aquerr.worldrebuilder.strategy;
 
-import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.model.Region;
 import org.spongepowered.api.block.BlockSnapshot;
 
 import java.util.Collection;

@@ -1,6 +1,6 @@
 package io.github.aquerr.worldrebuilder.strategy;
 
-import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.model.Region;
 import io.github.aquerr.worldrebuilder.scheduling.ConstantRebuildRegionBlocksTask;
 import io.github.aquerr.worldrebuilder.scheduling.RebuildBlocksTask;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RebuildSameBlockInIntervalStrategy implements RebuildBlocksStrategy
+class RebuildSameBlockInIntervalStrategy implements RebuildBlocksStrategy
 {
     @Override
     public void rebuildBlocks(Region region, Collection<BlockSnapshot> blocks)
@@ -32,14 +32,14 @@ public class RebuildSameBlockInIntervalStrategy implements RebuildBlocksStrategy
         if (blocksToRebuild.isEmpty())
             return;
 
-        RebuildBlocksTask rebuildBlocksTask = new ConstantRebuildRegionBlocksTask(region.getName(), blocksToRebuild, region.getRestoreTime());
+        RebuildBlocksTask rebuildBlocksTask = new ConstantRebuildRegionBlocksTask(region, blocksToRebuild, region.getRestoreTime());
         WorldRebuilderScheduler.getInstance().scheduleIntervalTask(rebuildBlocksTask);
     }
 
     @Override
     public RebuildStrategyType getType()
     {
-        return RebuildStrategyType.CONSTANT_REBUILD_IN_INTERVAL;
+        return RebuildStrategyType.SAME_BLOCK_CONSTANT_IN_INTERVAL;
     }
 
     @Override

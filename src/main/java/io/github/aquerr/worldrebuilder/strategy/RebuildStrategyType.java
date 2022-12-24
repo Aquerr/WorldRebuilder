@@ -4,8 +4,8 @@ public enum RebuildStrategyType
 {
     SAME_BLOCK(false, false),
     RANDOM_BLOCK_FROM_SET(true, false),
-    CONSTANT_REBUILD_IN_INTERVAL(false, true),
-    CONSTANT_REBUILD_IN_INTERVAL_RANDOM_BLOCK_FROM_SET(true, true);
+    SAME_BLOCK_CONSTANT_IN_INTERVAL(false, true),
+    RANDOM_BLOCK_FROM_SET_CONSTANT_IN_INTERVAL(true, true);
 
     private final boolean hasPredefinedBlockSet;
     private final boolean doesRunContinuously;

@@ -1,7 +1,7 @@
 package io.github.aquerr.worldrebuilder.commands;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
-import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.model.Region;
 import io.github.aquerr.worldrebuilder.util.WorldUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.LinearComponents;

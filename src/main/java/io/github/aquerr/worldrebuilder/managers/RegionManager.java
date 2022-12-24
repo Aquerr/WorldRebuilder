@@ -2,7 +2,7 @@ package io.github.aquerr.worldrebuilder.managers;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.model.Region;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderTask;
 import io.github.aquerr.worldrebuilder.storage.StorageManager;
@@ -61,7 +61,7 @@ public class RegionManager
 	public void deleteRegion(final String name)
 	{
 		WorldRebuilderScheduler.getInstance().queueStorageTask(() -> this.storageManager.deleteRegion(name));
-		WorldRebuilderScheduler.getInstance().removeTasksForRegion(name);
+		WorldRebuilderScheduler.getInstance().cancelTasksForRegion(name);
 		this.regions.remove(name);
 	}
 
@@ -101,9 +101,9 @@ public class RegionManager
 
 	private void restartRebuildForRegionIfContinuous(Region region)
 	{
+		WorldRebuilderScheduler.getInstance().cancelTasksForRegion(region.getName());
 		if (region.getRebuildBlocksStrategy().doesRunContinuously())
 		{
-			WorldRebuilderScheduler.getInstance().cancelTasksForRegion(region.getName());
 			region.rebuildBlocks(Collections.emptyList());
 			if (logger.isDebugEnabled())
 			{

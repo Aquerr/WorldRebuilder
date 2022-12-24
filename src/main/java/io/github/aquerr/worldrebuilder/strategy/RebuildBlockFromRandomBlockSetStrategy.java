@@ -1,6 +1,6 @@
 package io.github.aquerr.worldrebuilder.strategy;
 
-import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.model.Region;
 import io.github.aquerr.worldrebuilder.scheduling.RebuildBlocksTask;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class RebuildBlockFromRandomBlockSetStrategy extends AbstractRebuildBlockFromRandomBlockSetStrategy implements RebuildBlockFromSetStrategy
+class RebuildBlockFromRandomBlockSetStrategy extends AbstractRebuildBlockFromRandomBlockSetStrategy implements RebuildBlockFromSetStrategy
 {
     private static final ThreadLocalRandom THREAD_LOCAL_RANDOM = ThreadLocalRandom.current();
 

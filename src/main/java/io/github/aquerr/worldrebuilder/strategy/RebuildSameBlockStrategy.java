@@ -1,6 +1,6 @@
 package io.github.aquerr.worldrebuilder.strategy;
 
-import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.model.Region;
 import io.github.aquerr.worldrebuilder.scheduling.RebuildBlocksTask;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -8,7 +8,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class RebuildSameBlockStrategy implements RebuildBlocksStrategy
+class RebuildSameBlockStrategy implements RebuildBlocksStrategy
 {
     @Override
     public void rebuildBlocks(Region region, Collection<BlockSnapshot> blockSnapshots)

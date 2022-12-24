@@ -1,6 +1,6 @@
 package io.github.aquerr.worldrebuilder.storage;
 
-import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.model.Region;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.List;

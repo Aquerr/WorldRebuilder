@@ -1,6 +1,6 @@
 package io.github.aquerr.worldrebuilder.strategy;
 
-import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.model.Region;
 import io.github.aquerr.worldrebuilder.scheduling.ConstantRebuildRegionFromRandomBlockSetTask;
 import io.github.aquerr.worldrebuilder.scheduling.WorldRebuilderScheduler;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class RebuildBlockFromRandomBlockSetInIntervalStrategy extends AbstractRebuildBlockFromRandomBlockSetStrategy implements RebuildBlockFromSetStrategy
+class RebuildBlockFromRandomBlockSetInIntervalStrategy extends AbstractRebuildBlockFromRandomBlockSetStrategy implements RebuildBlockFromSetStrategy
 {
     public RebuildBlockFromRandomBlockSetInIntervalStrategy(List<WRBlockState> blocksToUse)
     {
@@ -22,14 +22,14 @@ public class RebuildBlockFromRandomBlockSetInIntervalStrategy extends AbstractRe
         if (isTaskAlreadyRunningForRegion(region))
             return;
 
-        ConstantRebuildRegionFromRandomBlockSetTask constantRebuildRegionFromRandomBlockSetTask = new ConstantRebuildRegionFromRandomBlockSetTask(region.getName(), new ArrayList<>(blocksToRebuild), this.blocksToUse, region.getRestoreTime());
+        ConstantRebuildRegionFromRandomBlockSetTask constantRebuildRegionFromRandomBlockSetTask = new ConstantRebuildRegionFromRandomBlockSetTask(region, new ArrayList<>(blocksToRebuild), this.blocksToUse, region.getRestoreTime());
         WorldRebuilderScheduler.getInstance().scheduleIntervalTask(constantRebuildRegionFromRandomBlockSetTask);
     }
 
     @Override
     public RebuildStrategyType getType()
     {
-        return RebuildStrategyType.CONSTANT_REBUILD_IN_INTERVAL_RANDOM_BLOCK_FROM_SET;
+        return RebuildStrategyType.RANDOM_BLOCK_FROM_SET_CONSTANT_IN_INTERVAL;
     }
 
     @Override

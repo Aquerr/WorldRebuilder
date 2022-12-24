@@ -1,19 +1,20 @@
 package io.github.aquerr.worldrebuilder.commands;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
-import io.github.aquerr.worldrebuilder.commands.args.WorldRebuilderCommandParameters;
 import io.github.aquerr.worldrebuilder.model.Region;
-import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 
-public class BlockDropCommand extends WRCommand
+import java.time.Duration;
+
+import static net.kyori.adventure.text.Component.text;
+
+public class DeleteNotificationCommand extends WRCommand
 {
-    public BlockDropCommand(WorldRebuilder plugin)
+    public DeleteNotificationCommand(WorldRebuilder plugin)
     {
         super(plugin);
     }
@@ -21,12 +22,12 @@ public class BlockDropCommand extends WRCommand
     @Override
     public CommandResult execute(CommandContext context) throws CommandException
     {
-        final Region region = context.requireOne(WorldRebuilderCommandParameters.region());
-        final boolean value = context.requireOne(Parameter.bool().key("value").build());
+        final Region region = context.requireOne(Parameter.key("region", Region.class));
+        final Duration timeBeforeRebuild = context.requireOne(Parameter.duration().key("timeBeforeRebuild").build());
 
-        region.setShouldDropBlocks(value);
+        region.getNotifications().remove(timeBeforeRebuild.getSeconds());
         super.getPlugin().getRegionManager().updateRegion(region);
-        context.sendMessage(Identity.nil(), WorldRebuilder.PLUGIN_PREFIX.append(Component.text("Region has been updated!", NamedTextColor.GREEN)));
+        context.cause().audience().sendMessage(WorldRebuilder.PLUGIN_PREFIX.append(text("Notification has been removed.", NamedTextColor.GREEN)));
         return CommandResult.success();
     }
 }

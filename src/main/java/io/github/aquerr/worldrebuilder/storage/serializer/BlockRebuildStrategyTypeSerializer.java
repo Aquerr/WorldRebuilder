@@ -1,16 +1,12 @@
 package io.github.aquerr.worldrebuilder.storage.serializer;
 
 import io.github.aquerr.worldrebuilder.strategy.RebuildBlockFromSetStrategy;
-import io.github.aquerr.worldrebuilder.strategy.RebuildBlockFromRandomBlockSetInIntervalStrategy;
-import io.github.aquerr.worldrebuilder.strategy.RebuildBlockFromRandomBlockSetStrategy;
 import io.github.aquerr.worldrebuilder.strategy.RebuildBlocksStrategy;
-import io.github.aquerr.worldrebuilder.strategy.RebuildSameBlockInIntervalStrategy;
-import io.github.aquerr.worldrebuilder.strategy.RebuildSameBlockStrategy;
+import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyFactory;
 import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyType;
 import io.github.aquerr.worldrebuilder.strategy.WRBlockState;
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
@@ -29,22 +25,8 @@ public class BlockRebuildStrategyTypeSerializer implements TypeSerializer<Rebuil
     public RebuildBlocksStrategy deserialize(Type type, ConfigurationNode node) throws SerializationException
     {
         RebuildStrategyType strategyType = node.node(NODE_TYPE).get(TypeToken.get(RebuildStrategyType.class), RebuildStrategyType.SAME_BLOCK);
-        boolean doesRunContinuously = strategyType.isDoesRunContinuously();
-        if (strategyType.hasPredefinedBlockSet())
-        {
-            List<WRBlockState> blocks = node.node(NODE_BLOCKS_TO_USE).get(WRTypeTokens.WR_BLOCK_STATE_LIST_TYPE_TOKEN, Collections.emptyList());
-            if (doesRunContinuously)
-            {
-                return new RebuildBlockFromRandomBlockSetInIntervalStrategy(new ArrayList<>(blocks));
-            }
-            return new RebuildBlockFromRandomBlockSetStrategy(new ArrayList<>(blocks));
-        }
-
-        if (doesRunContinuously)
-        {
-            return new RebuildSameBlockInIntervalStrategy();
-        }
-        return new RebuildSameBlockStrategy();
+        List<WRBlockState> blocks = node.node(NODE_BLOCKS_TO_USE).get(WRTypeTokens.WR_BLOCK_STATE_LIST_TYPE_TOKEN, Collections.emptyList());
+        return RebuildStrategyFactory.getStrategy(strategyType, blocks);
     }
 
     @Override

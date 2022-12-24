@@ -2,17 +2,19 @@ package io.github.aquerr.worldrebuilder.commands;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.model.Region;
-import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 
-public class ActiveCommand extends WRCommand
+import java.time.Duration;
+
+import static net.kyori.adventure.text.Component.text;
+
+public class AddNotificationCommand extends WRCommand
 {
-    public ActiveCommand(final WorldRebuilder plugin)
+    public AddNotificationCommand(WorldRebuilder plugin)
     {
         super(plugin);
     }
@@ -21,11 +23,12 @@ public class ActiveCommand extends WRCommand
     public CommandResult execute(CommandContext context) throws CommandException
     {
         final Region region = context.requireOne(Parameter.key("region", Region.class));
-        final boolean isActive = context.requireOne(Parameter.bool().key("isActive").build());
+        final Duration timeBeforeRebuild = context.requireOne(Parameter.duration().key("timeBeforeRebuild").build());
+        final String message = context.requireOne(Parameter.string().key("message").build());
 
-        region.setActive(isActive);
+        region.getNotifications().put(timeBeforeRebuild.getSeconds(), message);
         super.getPlugin().getRegionManager().updateRegion(region);
-        context.sendMessage(Identity.nil(), WorldRebuilder.PLUGIN_PREFIX.append(Component.text("Region has been " + (isActive ? "activated" : "deactivated") + "!", NamedTextColor.GREEN)));
+        context.cause().audience().sendMessage(WorldRebuilder.PLUGIN_PREFIX.append(text("Notification has been added.", NamedTextColor.GREEN)));
         return CommandResult.success();
     }
 }

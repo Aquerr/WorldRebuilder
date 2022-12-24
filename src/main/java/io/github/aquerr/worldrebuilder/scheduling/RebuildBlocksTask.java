@@ -1,7 +1,8 @@
 package io.github.aquerr.worldrebuilder.scheduling;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
-import io.github.aquerr.worldrebuilder.entity.Region;
+import io.github.aquerr.worldrebuilder.model.Region;
+import io.github.aquerr.worldrebuilder.util.TeleportUtils;
 import io.github.aquerr.worldrebuilder.util.WorldUtils;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.scheduler.ScheduledTask;
@@ -46,7 +47,7 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 			// Will the block spawn where player stands?
 			// If so, teleport the player to safe location.
 
-			WorldRebuilderTask.safeTeleportPlayerIfAtLocation(blockSnapshot.position(), region);
+			TeleportUtils.safeTeleportPlayerIfAtLocation(blockSnapshot.position(), region);
 		}
 
 		WorldRebuilderScheduler.getInstance().removeTaskForRegion(regionName, this);

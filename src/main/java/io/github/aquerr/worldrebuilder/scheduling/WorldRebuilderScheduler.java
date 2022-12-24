@@ -154,20 +154,4 @@ public class WorldRebuilderScheduler
 				this.rebuildTasks.remove(regionName);
 		}
 	}
-
-	public void removeTasksForRegion(String regionName)
-	{
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("Removing tasks for region: {}", regionName);
-		}
-
-		regionName = regionName.toLowerCase();
-		List<WorldRebuilderTask> tasks = this.rebuildTasks.getOrDefault(regionName, Collections.emptyList());
-		for (WorldRebuilderTask task : tasks)
-		{
-			task.cancel();
-		}
-		this.rebuildTasks.remove(regionName);
-	}
 }

@@ -1,4 +1,4 @@
-package io.github.aquerr.worldrebuilder.entity;
+package io.github.aquerr.worldrebuilder.model;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.strategy.RebuildBlocksStrategy;
@@ -11,7 +11,10 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +33,7 @@ public class Region
 
 	private boolean shouldDropBlocks;
 
-	// Position (x, y, z) --> Block Snapshot
+	//  USED BY NON INTERVAL REGIONS  //
 
 	// Placed in the territory by mob/player after the region was created.
 	private List<BlockSnapshot> blockSnapshotsExceptions;
@@ -40,16 +43,25 @@ public class Region
 
 	private RebuildBlocksStrategy rebuildBlocksStrategy;
 
-	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint, final Vector3i secondPoint, int restoreTime, RebuildBlocksStrategy rebuildBlocksStrategy)
+	//  USED BY INTERVAL REGIONS  //
+	private Map<Long, String> notifications;
+
+	public Region(final String name,
+				  final UUID worldUniqueId,
+				  final Vector3i firstPoint,
+				  final Vector3i secondPoint,
+				  int restoreTime,
+				  RebuildBlocksStrategy rebuildBlocksStrategy,
+				  Map<Long, String> notifications)
 	{
-		this(name, worldUniqueId, firstPoint, secondPoint, restoreTime, true, true, new ArrayList<>(), new ArrayList<>(), rebuildBlocksStrategy);
+		this(name, worldUniqueId, firstPoint, secondPoint, restoreTime, true, true, new ArrayList<>(), new ArrayList<>(), rebuildBlocksStrategy, notifications);
 	}
 
 	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint,
 				  final Vector3i secondPoint, final int restoreTime,
 				  final boolean isActive, final boolean shouldDropBlocks,
 				  final List<BlockSnapshot> blockSnapshotsExceptions, final List<EntitySnapshot> entitySnapshotsException,
-				  RebuildBlocksStrategy rebuildBlocksStrategy)
+				  RebuildBlocksStrategy rebuildBlocksStrategy, Map<Long, String> notifications)
 	{
 		this.name = name;
 		this.worldUniqueId = worldUniqueId;
@@ -64,6 +76,8 @@ public class Region
 		this.entitySnapshotsException = entitySnapshotsException;
 
 		this.rebuildBlocksStrategy = rebuildBlocksStrategy;
+
+		this.notifications = notifications;
 	}
 
 	public String getName()
@@ -114,6 +128,16 @@ public class Region
 	public void setShouldDropBlocks(boolean shouldDropBlocks)
 	{
 		this.shouldDropBlocks = shouldDropBlocks;
+	}
+
+	public void setNotifications(Map<Long, String> notifications)
+	{
+		this.notifications = notifications;
+	}
+
+	public Map<Long, String> getNotifications()
+	{
+		return notifications;
 	}
 
 	public void setRebuildBlocksStrategy(RebuildBlocksStrategy rebuildBlocksStrategy)

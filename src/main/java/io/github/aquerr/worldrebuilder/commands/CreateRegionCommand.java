@@ -1,13 +1,11 @@
 package io.github.aquerr.worldrebuilder.commands;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
-import io.github.aquerr.worldrebuilder.entity.Region;
-import io.github.aquerr.worldrebuilder.entity.SelectionPoints;
-import io.github.aquerr.worldrebuilder.strategy.RebuildBlockFromRandomBlockSetInIntervalStrategy;
-import io.github.aquerr.worldrebuilder.strategy.RebuildBlockFromRandomBlockSetStrategy;
-import io.github.aquerr.worldrebuilder.strategy.RebuildSameBlockInIntervalStrategy;
-import io.github.aquerr.worldrebuilder.strategy.RebuildSameBlockStrategy;
+import io.github.aquerr.worldrebuilder.model.Region;
+import io.github.aquerr.worldrebuilder.model.SelectionPoints;
+import io.github.aquerr.worldrebuilder.strategy.RebuildBlocksStrategy;
 import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyType;
+import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyFactory;
 import io.github.aquerr.worldrebuilder.strategy.WRBlockState;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.block.BlockState;
@@ -19,6 +17,8 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.world.server.ServerWorld;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static net.kyori.adventure.text.Component.text;
@@ -70,23 +70,22 @@ public class CreateRegionCommand extends WRCommand
 
 		try
 		{
-			switch (rebuildStrategyType)
-			{
-				case RANDOM_BLOCK_FROM_SET:
-					return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 10, new RebuildBlockFromRandomBlockSetStrategy(blocks.stream().map(WRBlockState::of).collect(Collectors.toList())));
-				case CONSTANT_REBUILD_IN_INTERVAL_RANDOM_BLOCK_FROM_SET:
-					return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 60, new RebuildBlockFromRandomBlockSetInIntervalStrategy(blocks.stream().map(WRBlockState::of).collect(Collectors.toList())));
-				case CONSTANT_REBUILD_IN_INTERVAL:
-					return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 60, new RebuildSameBlockInIntervalStrategy());
-				case SAME_BLOCK:
-				default:
-					return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), 10, new RebuildSameBlockStrategy());
-			}
+			RebuildBlocksStrategy rebuildBlocksStrategy = RebuildStrategyFactory.getStrategy(rebuildStrategyType, blocks.stream().map(WRBlockState::of).collect(Collectors.toList()));
+			int restoreTime = rebuildBlocksStrategy.doesRunContinuously() ? 60 : 10;
+			return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), restoreTime, rebuildBlocksStrategy, prepareDefaultNotifications());
 		}
 		catch (Exception exception)
 		{
 
 			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(text("Could not create region. Reason: " + exception.getMessage())), exception);
 		}
+	}
+
+	private Map<Long, String> prepareDefaultNotifications()
+	{
+		Map<Long, String> defaultNotifications = new HashMap<>();
+		defaultNotifications.put(10L, "Region &a{REGION_NAME}&r will be rebuild in &610 seconds");
+		defaultNotifications.put(60L, "Region &a{REGION_NAME}&r will be rebuild in &61 minute");
+		return defaultNotifications;
 	}
 }
