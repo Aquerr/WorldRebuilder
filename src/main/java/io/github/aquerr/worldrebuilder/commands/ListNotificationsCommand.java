@@ -31,12 +31,14 @@ public class ListNotificationsCommand extends WRCommand
         final Region region = context.requireOne(Parameter.key("region", Region.class));
         final List<Component> helpList = new LinkedList<>();
 
+        int number = 1;
         for (final Map.Entry<Long, String> notification : region.getNotifications().entrySet())
         {
             final Component component = LinearComponents.linear(
-                    text("Time before rebuild: ", BLUE), text(notification.getKey() + "s", GOLD), text("Message: ", BLUE), text(notification.getValue(), GOLD)
+                    text(number + ". "), text("Time: ", BLUE), text(notification.getKey() + "s", GOLD), text(" Message: ", BLUE), text(notification.getValue(), GOLD)
             );
             helpList.add(component);
+            number++;
         }
 
         final PaginationList paginationList = PaginationList.builder()

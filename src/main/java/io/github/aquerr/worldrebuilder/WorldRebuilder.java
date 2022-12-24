@@ -253,20 +253,23 @@ public class WorldRebuilder
 				.addParameter(Parameter.blockState().key("blockList").optional().consumeAllRemaining().build())
 				.build();
 
+		// List notifications command
 		final Command.Parameterized listNotificationsCommand = Command.builder()
 				.shortDescription(text("List notifications for region"))
 				.permission(Permissions.LIST_NOTIFICATIONS_COMMAND)
 				.executor(new ListNotificationsCommand(this))
 				.build();
 
+		// Add notification command
 		final Command.Parameterized addNotificationCommand = Command.builder()
 				.shortDescription(text("Add notification to region"))
 				.permission(Permissions.ADD_NOTIFICATION_COMMAND)
 				.executor(new AddNotificationCommand(this))
 				.addParameter(Parameter.duration().key("timeBeforeRebuild").build())
-				.addParameter(Parameter.string().key("message").build())
+				.addParameter(Parameter.formattingCodeTextOfRemainingElements().key("message").build())
 				.build();
 
+		// Delete notification command
 		final Command.Parameterized deleteNotificationCommand = Command.builder()
 				.shortDescription(text("Add notification to region. Use {REGION_NAME} to include region's name."))
 				.permission(Permissions.DELETE_NOTIFICATION_COMMAND)

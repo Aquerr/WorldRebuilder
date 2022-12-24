@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static net.kyori.adventure.text.Component.text;
-
 /**
  * This task is meant to run every second.
  *
@@ -50,8 +48,8 @@ public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTa
     {
         if (this.currentSeconds > 0)
         {
-            this.currentSeconds--;
             displayRebuildMessageIfNecessary(this.currentSeconds);
+            this.currentSeconds--;
             return;
         }
 

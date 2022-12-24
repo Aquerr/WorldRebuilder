@@ -16,8 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static net.kyori.adventure.text.Component.text;
-
 /**
  * This task is meant to run every second.
  *
@@ -42,8 +40,8 @@ public class ConstantRebuildRegionBlocksTask extends RebuildBlocksTask
     {
         if (this.currentSeconds > 0)
         {
-            this.currentSeconds--;
             displayRebuildMessageIfNecessary(this.currentSeconds);
+            this.currentSeconds--;
             return;
         }
 
