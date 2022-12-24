@@ -16,6 +16,7 @@ import io.github.aquerr.worldrebuilder.commands.ListNotificationsCommand;
 import io.github.aquerr.worldrebuilder.commands.RegionCommand;
 import io.github.aquerr.worldrebuilder.commands.RestoreTimeCommand;
 import io.github.aquerr.worldrebuilder.commands.SchedulerTasksCommand;
+import io.github.aquerr.worldrebuilder.commands.StrategyCommand;
 import io.github.aquerr.worldrebuilder.commands.WandCommand;
 import io.github.aquerr.worldrebuilder.commands.args.WorldRebuilderCommandParameters;
 import io.github.aquerr.worldrebuilder.model.SelectionPoints;
@@ -247,8 +248,8 @@ public class WorldRebuilder
 		//Change strategy Command
 		final Command.Parameterized strategyCommand = Command.builder()
 				.shortDescription(text("Change region rebuild strategy"))
-				.permission(Permissions.CREATE_REGION_COMMAND)
-				.executor(new CreateRegionCommand(this))
+				.permission(Permissions.STRATEGY_COMMAND)
+				.executor(new StrategyCommand(this))
 				.addParameter(Parameter.enumValue(RebuildStrategyType.class).key("strategyType").optional().build())
 				.addParameter(Parameter.blockState().key("blockList").optional().consumeAllRemaining().build())
 				.build();

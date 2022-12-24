@@ -16,6 +16,7 @@ public class Permissions
 	public static final String ACTIVE_COMMAND = "worldrebuilder.command.region.active";
 	public static final String DROP_BLOCKS_COMMAND = "worldrebuilder.command.region.drop_blocks";
 	public static final String FORCE_REBUILD_COMMAND = "worldrebuilder.command.region.force_rebuild";
+	public static final String STRATEGY_COMMAND = "worldrebuilder.command.region.strategy";
 	public static final String LIST_NOTIFICATIONS_COMMAND = "worldrebuilder.command.region.list_notifications";
 	public static final String ADD_NOTIFICATION_COMMAND = "worldrebuilder.command.region.add_notification";
 	public static final String DELETE_NOTIFICATION_COMMAND = "worldrebuilder.command.region.delete_notification";
