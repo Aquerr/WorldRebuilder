@@ -1,7 +1,7 @@
 package io.github.aquerr.worldrebuilder.listener;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
-import io.github.aquerr.worldrebuilder.entity.SelectionPoints;
+import io.github.aquerr.worldrebuilder.model.SelectionPoints;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.LinearComponents;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -10,6 +10,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.filter.cause.Root;
@@ -25,6 +26,9 @@ public class WandUsageListener extends AbstractListener
     @Listener
     public void onRightClick(final InteractBlockEvent.Secondary event, final @Root Player player)
     {
+        if (isOffHand(event))
+            return;
+
         if(event.block() == BlockSnapshot.empty())
             return;
 
@@ -57,6 +61,9 @@ public class WandUsageListener extends AbstractListener
     @Listener
     public void onLeftClick(final InteractBlockEvent.Primary.Start event, final @Root Player player)
     {
+        if (isOffHand(event))
+            return;
+
         if(event.block() == BlockSnapshot.empty())
             return;
 
@@ -84,5 +91,10 @@ public class WandUsageListener extends AbstractListener
                 Component.text(" has been selected at ", NamedTextColor.BLUE),
                 Component.text(event.block().position().toString(), NamedTextColor.GOLD)));
         event.setCancelled(true);
+    }
+
+    private boolean isOffHand(InteractBlockEvent event)
+    {
+        return event.context().get(EventContextKeys.USED_HAND).orElse(HandTypes.OFF_HAND.get()) == HandTypes.OFF_HAND.get();
     }
 }
