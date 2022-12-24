@@ -194,7 +194,7 @@ public class WorldRebuilder
 				.permission(Permissions.CREATE_REGION_COMMAND)
 				.executor(new CreateRegionCommand(this))
 				.addParameter(Parameter.string().key("name").build())
-				.addParameter(Parameter.enumValue(RebuildStrategyType.class).key("strategyType").optional().build())
+				.addParameter(Parameter.enumValue(RebuildStrategyType.class).key("strategyType").build())
 				.addParameter(Parameter.blockState().key("blockList").optional().consumeAllRemaining().build())
 				.build());
 

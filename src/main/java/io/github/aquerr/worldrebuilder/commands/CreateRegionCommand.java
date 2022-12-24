@@ -35,7 +35,7 @@ public class CreateRegionCommand extends WRCommand
 	public CommandResult execute(CommandContext context) throws CommandException
 	{
 		final String name = context.requireOne(Parameter.string().key("name").build());
-		final RebuildStrategyType strategyType = context.one(Parameter.enumValue(RebuildStrategyType.class).key("strategyType").build()).orElse(RebuildStrategyType.SAME_BLOCK);
+		final RebuildStrategyType strategyType = context.requireOne(Parameter.enumValue(RebuildStrategyType.class).key("strategyType").build());
 
 		final Collection<? extends BlockState> blockList = context.all(Parameter.blockState().key("blockList").build());
 
