@@ -272,7 +272,7 @@ public class WorldRebuilder
 
 		// Delete notification command
 		final Command.Parameterized deleteNotificationCommand = Command.builder()
-				.shortDescription(text("Add notification to region. Use {REGION_NAME} to include region's name."))
+				.shortDescription(text("Delete notification for region"))
 				.permission(Permissions.DELETE_NOTIFICATION_COMMAND)
 				.executor(new DeleteNotificationCommand(this))
 				.addParameter(Parameter.duration().key("timeBeforeRebuild").build())
