@@ -3,9 +3,9 @@ package io.github.aquerr.worldrebuilder.strategy;
 public enum RebuildStrategyType
 {
     SAME_BLOCK(false, false),
-    RANDOM_BLOCK_FROM_SET(true, false),
-    SAME_BLOCK_CONSTANT_IN_INTERVAL(false, true),
-    RANDOM_BLOCK_FROM_SET_CONSTANT_IN_INTERVAL(true, true);
+    RANDOM_BLOCK_FROM_LIST(true, false),
+    SAME_BLOCK_CONTINUOUS(false, true),
+    RANDOM_BLOCK_FROM_LIST_CONTINUOUS(true, true);
 
     private final boolean hasPredefinedBlockSet;
     private final boolean doesRunContinuously;

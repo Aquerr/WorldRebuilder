@@ -29,7 +29,7 @@ class RebuildBlockFromRandomBlockSetInIntervalStrategy extends AbstractRebuildBl
     @Override
     public RebuildStrategyType getType()
     {
-        return RebuildStrategyType.RANDOM_BLOCK_FROM_SET_CONSTANT_IN_INTERVAL;
+        return RebuildStrategyType.RANDOM_BLOCK_FROM_LIST_CONTINUOUS;
     }
 
     @Override

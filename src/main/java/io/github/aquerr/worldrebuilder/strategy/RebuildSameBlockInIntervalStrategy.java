@@ -39,7 +39,7 @@ class RebuildSameBlockInIntervalStrategy implements RebuildBlocksStrategy
     @Override
     public RebuildStrategyType getType()
     {
-        return RebuildStrategyType.SAME_BLOCK_CONSTANT_IN_INTERVAL;
+        return RebuildStrategyType.SAME_BLOCK_CONTINUOUS;
     }
 
     @Override

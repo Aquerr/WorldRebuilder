@@ -8,11 +8,11 @@ public final class RebuildStrategyFactory
     {
         switch (strategyType)
         {
-            case RANDOM_BLOCK_FROM_SET:
+            case RANDOM_BLOCK_FROM_LIST:
                 return new RebuildBlockFromRandomBlockSetStrategy(predefinedBlockList);
-            case RANDOM_BLOCK_FROM_SET_CONSTANT_IN_INTERVAL:
+            case RANDOM_BLOCK_FROM_LIST_CONTINUOUS:
                 return new RebuildBlockFromRandomBlockSetInIntervalStrategy(predefinedBlockList);
-            case SAME_BLOCK_CONSTANT_IN_INTERVAL:
+            case SAME_BLOCK_CONTINUOUS:
                 return new RebuildSameBlockInIntervalStrategy();
             case SAME_BLOCK:
             default:

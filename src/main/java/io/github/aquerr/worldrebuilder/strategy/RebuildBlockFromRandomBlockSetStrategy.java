@@ -36,7 +36,7 @@ class RebuildBlockFromRandomBlockSetStrategy extends AbstractRebuildBlockFromRan
     @Override
     public RebuildStrategyType getType()
     {
-        return RebuildStrategyType.RANDOM_BLOCK_FROM_SET;
+        return RebuildStrategyType.RANDOM_BLOCK_FROM_LIST;
     }
 
     @Override
