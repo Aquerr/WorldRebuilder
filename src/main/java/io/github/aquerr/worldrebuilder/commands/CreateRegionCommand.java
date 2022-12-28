@@ -84,8 +84,8 @@ public class CreateRegionCommand extends WRCommand
 	private Map<Long, String> prepareDefaultNotifications()
 	{
 		Map<Long, String> defaultNotifications = new HashMap<>();
-		defaultNotifications.put(10L, "Region &a{REGION_NAME}&r will be rebuild in &610 seconds");
-		defaultNotifications.put(60L, "Region &a{REGION_NAME}&r will be rebuild in &61 minute");
+		defaultNotifications.put(10L, "Region &a{REGION_NAME}&r will be rebuilt in &610 seconds");
+		defaultNotifications.put(60L, "Region &a{REGION_NAME}&r will be rebuilt in &61 minute");
 		return defaultNotifications;
 	}
 }
