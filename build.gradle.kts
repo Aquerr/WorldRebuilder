@@ -15,6 +15,13 @@ buildscript {
     }
 }
 
+val worldRebuilderId = findProperty("worldRebuilder.id") as String
+val worldRebuilderName = findProperty("worldRebuilder.name") as String
+val worldRebuilderVersion = findProperty("worldRebuilder.version") as String
+val forgeVersion = findProperty("forge.version") as String
+val spongeApiVersion = findProperty("sponge-api.version") as String
+val minecraftVersion = findProperty("minecraft.version") as String
+
 plugins {
     java
     `java-library`
@@ -27,7 +34,7 @@ plugins {
 apply(plugin = "net.minecraftforge.gradle")
 
 group = "io.github.aquerr"
-version = findProperty("worldrebuilder.file.version") as String
+version = worldRebuilderVersion + "-API-" + spongeApiVersion
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -35,8 +42,8 @@ java {
 }
 
 dependencies {
-    "minecraft"("net.minecraftforge:forge:${project.property("forge.version")}")
-    api("org.spongepowered:spongeapi:${project.property("sponge-api.version")}")
+    "minecraft"("net.minecraftforge:forge:${forgeVersion}")
+    api("org.spongepowered:spongeapi:${spongeApiVersion}")
 }
 
 tasks {
@@ -44,7 +51,7 @@ tasks {
         finalizedBy("reobfJar")
         if(System.getenv("JENKINS_HOME") != null) {
             project.version = project.version.toString() + "_" + System.getenv("BUILD_NUMBER")
-            println("File name => " + archiveBaseName)
+            println("File name => " + archiveBaseName.get())
         } else {
             project.version = project.version.toString() + "-SNAPSHOT"
         }
@@ -52,19 +59,19 @@ tasks {
 }
 
 configure<UserDevExtension> {
-    mappings("official", project.property("minecraft.version") as String)
+    mappings("official", minecraftVersion)
 }
 
 sponge {
-    apiVersion(project.property("sponge-api.version") as String)
+    apiVersion(spongeApiVersion)
     license("MIT")
     loader {
         name(PluginLoaders.JAVA_PLAIN)
         version("1.0")
     }
-    plugin("worldrebuilder") {
-        displayName("World Rebuilder")
-        version(project.property("worldrebuilder.version") as String)
+    plugin(worldRebuilderId) {
+        displayName(worldRebuilderName)
+        version(worldRebuilderVersion)
         entrypoint("io.github.aquerr.worldrebuilder.WorldRebuilder")
         description("Rebuilds destroyed blocks after specified time.")
         links {
@@ -145,9 +152,9 @@ publishing {
     }
 
     publications {
-        create<MavenPublication>("worldrebuilder")
+        create<MavenPublication>(worldRebuilderId)
         {
-            artifactId = "worldrebuilder"
+            artifactId = worldRebuilderId
             description = project.description
 
             from(components["java"])
