@@ -13,6 +13,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -89,6 +90,10 @@ public class BlockBreakListener extends AbstractListener
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onBlockDrop(final DropItemEvent.Destruct event)
 	{
+		// Allows drop from killed mobs and players inside regions.
+		if (event.getSource() instanceof EntityDamageSource)
+			return;
+
 		final Collection<Region> regions = super.getPlugin().getRegionManager().getRegions();
 		event.filterEntities(x->
 		{

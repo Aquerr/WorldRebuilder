@@ -31,7 +31,7 @@ import java.util.*;
 @Plugin(id = "worldrebuilder", name = "Worldrebuilder", version = WorldRebuilder.VERSION, description = "Rebuilds destroyed blocks after specified time.", authors = {"Aquerr"})
 public class WorldRebuilder
 {
-	public static final String VERSION = "1.3.0";
+	public static final String VERSION = "1.3.1";
 
 	public static final Text PLUGIN_ERROR = Text.of(TextColors.RED, "[WR] ");
 	public static final Text PLUGIN_PREFIX = Text.of(TextColors.GREEN, "[WR] ");
