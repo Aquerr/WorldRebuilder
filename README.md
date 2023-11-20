@@ -32,4 +32,4 @@ For example, you are making a **WWII style RPG map with guns and vehicles** and 
 
 ## Donation
 
-Creation of this plugin is really a time-consuming task. If you would like to support me then you can star this repo or send me some cookies through [PayPal](https://www.paypal.me/aquerr).
+Creation of this plugin is really a time-consuming task. If you would like to support me then you can star this repo or send me some cookies through [PayPal](https://paypal.me/aquerrnerdi).
