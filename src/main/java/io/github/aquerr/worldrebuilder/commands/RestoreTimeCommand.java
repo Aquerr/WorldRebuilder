@@ -4,8 +4,6 @@ import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.commands.args.WorldRebuilderCommandParameters;
 import io.github.aquerr.worldrebuilder.model.Region;
 import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -26,7 +24,7 @@ public class RestoreTimeCommand extends WRCommand
 
 		region.setRestoreTime(timeInSeconds);
 		super.getPlugin().getRegionManager().updateRegion(region);
-		context.sendMessage(Identity.nil(), WorldRebuilder.PLUGIN_PREFIX.append(Component.text("Restore time has been changed!", NamedTextColor.GREEN)));
+		context.sendMessage(Identity.nil(), getPlugin().getMessageSource().resolveMessageWithPrefix("command.region.updated"));
 		return CommandResult.success();
 	}
 }

@@ -34,7 +34,7 @@ plugins {
 apply(plugin = "net.minecraftforge.gradle")
 
 group = "io.github.aquerr"
-version = worldRebuilderVersion + "-API-" + spongeApiVersion
+version = "$worldRebuilderVersion-API-$spongeApiVersion"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17

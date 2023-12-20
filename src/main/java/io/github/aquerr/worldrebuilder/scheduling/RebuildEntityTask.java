@@ -3,8 +3,6 @@ package io.github.aquerr.worldrebuilder.scheduling;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.model.Region;
 import io.github.aquerr.worldrebuilder.util.WorldUtils;
-import net.kyori.adventure.text.Component;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ArtType;
 import org.spongepowered.api.entity.Entity;
@@ -94,7 +92,7 @@ public class RebuildEntityTask implements WorldRebuilderTask
 		boolean didSpawn = world.spawnEntity(newEntity);
 		if (!didSpawn)
 		{
-			Sponge.server().sendMessage(WorldRebuilder.PLUGIN_ERROR.append(Component.text("Could not restore entity " + entity)));
+			WorldRebuilder.getPlugin().getLogger().error(WorldRebuilder.PLUGIN_PREFIX_PLAIN + "Could not restore entity: " + entity);
 		}
 
 		WorldRebuilderScheduler.getInstance().removeTaskForRegion(regionName, this);

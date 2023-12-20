@@ -3,8 +3,6 @@ package io.github.aquerr.worldrebuilder.listener;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.model.SelectionPoints;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.LinearComponents;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Keys;
@@ -52,9 +50,7 @@ public class WandUsageListener extends AbstractListener
         }
 
         super.getPlugin().getPlayerSelectionPoints().put(player.uniqueId(), selectionPoints);
-        player.sendMessage(LinearComponents.linear(Component.text("Second point", NamedTextColor.GOLD),
-                Component.text(" has been selected at ", NamedTextColor.BLUE),
-                Component.text(event.block().position().toString(), NamedTextColor.GOLD)));
+        player.sendMessage(getPlugin().getMessageSource().resolveMessageWithPrefix("wand.second-point-selected", event.block().position().toString()));
         event.setCancelled(true);
     }
 
@@ -87,9 +83,7 @@ public class WandUsageListener extends AbstractListener
         }
 
         super.getPlugin().getPlayerSelectionPoints().put(player.uniqueId(), selectionPoints);
-        player.sendMessage(LinearComponents.linear(Component.text("First point", NamedTextColor.GOLD),
-                Component.text(" has been selected at ", NamedTextColor.BLUE),
-                Component.text(event.block().position().toString(), NamedTextColor.GOLD)));
+        player.sendMessage(getPlugin().getMessageSource().resolveMessageWithPrefix("wand.first-point-selected", event.block().position().toString()));
         event.setCancelled(true);
     }
 

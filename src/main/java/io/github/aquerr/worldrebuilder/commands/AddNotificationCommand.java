@@ -3,7 +3,6 @@ package io.github.aquerr.worldrebuilder.commands;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.model.Region;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -11,8 +10,6 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 
 import java.time.Duration;
-
-import static net.kyori.adventure.text.Component.text;
 
 public class AddNotificationCommand extends WRCommand
 {
@@ -30,7 +27,7 @@ public class AddNotificationCommand extends WRCommand
 
         region.getNotifications().put(timeBeforeRebuild.getSeconds(), LegacyComponentSerializer.legacyAmpersand().serialize(message));
         super.getPlugin().getRegionManager().updateRegion(region);
-        context.cause().audience().sendMessage(WorldRebuilder.PLUGIN_PREFIX.append(text("Notification has been added.", NamedTextColor.GREEN)));
+        context.cause().audience().sendMessage(getPlugin().getMessageSource().resolveMessageWithPrefix("command.region.notification.add"));
         return CommandResult.success();
     }
 }

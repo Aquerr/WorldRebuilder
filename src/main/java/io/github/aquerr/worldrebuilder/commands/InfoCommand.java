@@ -1,6 +1,7 @@
 package io.github.aquerr.worldrebuilder.commands;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
+import io.github.aquerr.worldrebuilder.messaging.MessageSource;
 import io.github.aquerr.worldrebuilder.model.Region;
 import io.github.aquerr.worldrebuilder.util.WorldUtils;
 import net.kyori.adventure.text.Component;
@@ -19,15 +20,15 @@ import java.util.Optional;
 import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
-import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
-import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class InfoCommand extends WRCommand
 {
+	private final MessageSource messageSource;
+
 	public InfoCommand(final WorldRebuilder plugin)
 	{
 		super(plugin);
+		this.messageSource = plugin.getMessageSource();
 	}
 
 	@Override
@@ -36,29 +37,35 @@ public class InfoCommand extends WRCommand
 		final Region region = context.requireOne(Parameter.key("region", Region.class));
 		final List<Component> helpList = new LinkedList<>();
 
-		String worldName = "Not Found";
-		final Optional<ServerWorld> optionalWorld = WorldUtils.getWorldByUUID(region.getWorldUniqueId());
-		if(optionalWorld.isPresent())
-			worldName = optionalWorld.get().properties().name();
-
-
-		final Component component = LinearComponents.linear(
-				text(" - Name: ", BLUE), text(region.getName(), GOLD), newline(),
-				text(" - World Name: ", BLUE), text(worldName, GOLD), newline(),
-				text(" - First Point: ", BLUE), text(region.getFirstPoint().toString(), GOLD), newline(),
-				text(" - Second Point: ", BLUE), text(region.getSecondPoint().toString(), GOLD), newline(),
-				text(" - Restore Time: ", BLUE), text(region.getRestoreTime(), GOLD), newline(),
-				text(" - Drops blocks: ", BLUE), text(region.shouldDropBlocks(), GOLD), newline(),
-				text(" - Active: ", BLUE), text(region.isActive(), region.isActive() ? GREEN : RED)
-		);
+		final Component component = createRegionInfoComponent(messageSource, region);
 
 		helpList.add(component);
 		final PaginationList paginationList = PaginationList.builder()
-				.title(text("Region Info", GOLD))
+				.title(messageSource.resolveComponentWithMessage("command.region.info.header"))
 				.contents(helpList).linesPerPage(14)
 				.padding(text("-", BLUE))
 				.build();
 		paginationList.sendTo(context.cause().audience());
 		return CommandResult.success();
+	}
+
+	public static Component createRegionInfoComponent(MessageSource messageSource, Region region)
+	{
+		String worldName = messageSource.resolveMessage("command.region.info.world-name.not-found");
+		final Optional<ServerWorld> optionalWorld = WorldUtils.getWorldByUUID(region.getWorldUniqueId());
+		if(optionalWorld.isPresent())
+			worldName = optionalWorld.get().properties().name();
+
+		return LinearComponents.linear(
+				messageSource.resolveComponentWithMessage("command.region.info.name", region.getName()), newline(),
+				messageSource.resolveComponentWithMessage("command.region.info.world-name", worldName), newline(),
+				messageSource.resolveComponentWithMessage("command.region.info.first-point", region.getFirstPoint().toString()), newline(),
+				messageSource.resolveComponentWithMessage("command.region.info.second-point", region.getSecondPoint().toString()), newline(),
+				messageSource.resolveComponentWithMessage("command.region.info.restore-time", region.getRestoreTime()), newline(),
+				messageSource.resolveComponentWithMessage("command.region.info.drop-blocks",
+						region.shouldDropBlocks() ? messageSource.resolveMessage("command.region.info.drop-blocks.yes") : messageSource.resolveMessage("command.region.info.drop-blocks.no"), newline(),
+						messageSource.resolveComponentWithMessage("command.region.info.active",
+								region.isActive() ? messageSource.resolveMessage("command.region.info.active.yes") : messageSource.resolveMessage("command.region.info.active.no")))
+		);
 	}
 }

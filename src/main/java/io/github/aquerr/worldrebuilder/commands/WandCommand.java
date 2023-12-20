@@ -1,6 +1,7 @@
 package io.github.aquerr.worldrebuilder.commands;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
+import io.github.aquerr.worldrebuilder.messaging.MessageSource;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.command.CommandResult;
@@ -17,23 +18,26 @@ import java.util.List;
 
 public class WandCommand extends WRCommand
 {
+	private final MessageSource messageSource;
+
 	public WandCommand(final WorldRebuilder plugin)
 	{
 		super(plugin);
+		this.messageSource = plugin.getMessageSource();
 	}
 
 	@Override
 	public CommandResult execute(CommandContext context) throws CommandException
 	{
 		if(!(context.cause().audience() instanceof ServerPlayer))
-			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(Component.text("Only in-game players can use this command!", NamedTextColor.RED)));
+			throw messageSource.resolveExceptionWithMessage("error.command.in-game-player-required");
 
 		final ServerPlayer player = (ServerPlayer) context.cause().audience();
 		final Inventory inventory = player.inventory();
 
 		final List<Component> wandDescriptionLines = new ArrayList<>();
-		final Component firstLine = Component.text("Select first point with your", NamedTextColor.GOLD).append(Component.text(" left click."));
-		final Component secondLine = Component.text("Select second point with your", NamedTextColor.GOLD).append(Component.text(" right click."));
+		final Component firstLine = messageSource.resolveComponentWithMessage("command.region.wand.select-first-point");
+		final Component secondLine = messageSource.resolveComponentWithMessage("command.region.wand-select-second-point");
 		wandDescriptionLines.add(firstLine);
 		wandDescriptionLines.add(secondLine);
 

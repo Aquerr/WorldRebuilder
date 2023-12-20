@@ -22,8 +22,8 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * This task is meant to run every second.
  *
- * It prints information messages about rebuild when will take place.
- * Times can be specified by the user. By default, message is displayed once 10 seconds before rebuild.
+ * It displays information in the chat about remaining time to next rebuild.
+ * Notifications can be configured by the user. By default, notification is displayed once, 10 seconds before rebuild.
  */
 public class ConstantRebuildRegionFromRandomBlockSetTask extends RebuildBlocksTask
 {
