@@ -10,7 +10,6 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,7 +41,7 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 
 		for(final BlockSnapshot blockSnapshot : this.blocks)
 		{
-			world.restoreSnapshot(blockSnapshot.position(), blockSnapshot, true, BlockChangeFlags.ALL);
+			world.restoreSnapshot(blockSnapshot.position(), blockSnapshot, true, BlockChangeFlags.DEFAULT_PLACEMENT);
 
 			// Will the block spawn where player stands?
 			// If so, teleport the player to safe location.
@@ -51,11 +50,6 @@ public class RebuildBlocksTask implements WorldRebuilderTask
 		}
 
 		WorldRebuilderScheduler.getInstance().removeTaskForRegion(regionName, this);
-		if (region.getRebuildBlocksStrategy().doesRunContinuously())
-		{
-			// Reschedule with the latest settings
-			region.rebuildBlocks(Collections.emptyList());
-		}
 	}
 
 	@Override

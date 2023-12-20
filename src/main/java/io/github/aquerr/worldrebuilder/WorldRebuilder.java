@@ -2,7 +2,6 @@
 package io.github.aquerr.worldrebuilder;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import io.github.aquerr.worldrebuilder.commands.ActiveCommand;
 import io.github.aquerr.worldrebuilder.commands.AddNotificationCommand;
 import io.github.aquerr.worldrebuilder.commands.BlockDropCommand;

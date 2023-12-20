@@ -7,12 +7,13 @@ import io.github.aquerr.worldrebuilder.util.WorldUtils;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.LinearComponents;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.server.ServerWorld;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +25,8 @@ import java.util.Optional;
  */
 public class ConstantRebuildRegionBlocksTask extends RebuildBlocksTask
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConstantRebuildRegionBlocksTask.class);
+
     private final Region region;
     private int currentSeconds;
 
@@ -38,25 +41,36 @@ public class ConstantRebuildRegionBlocksTask extends RebuildBlocksTask
     @Override
     public void run()
     {
-        if (this.currentSeconds > 0)
+        try
         {
-            displayNotificationIfNecessary(this.currentSeconds);
-            this.currentSeconds--;
-            return;
+            if (this.currentSeconds > 0)
+            {
+                displayNotificationIfNecessary(this.currentSeconds);
+                this.currentSeconds--;
+                return;
+            }
+
+            Region region = WorldRebuilder.getPlugin().getRegionManager().getRegion(regionName);
+            if (!region.isActive())
+                return;
+
+            final Optional<ServerWorld> optionalWorld = WorldUtils.getWorldByUUID(region.getWorldUniqueId());
+            if(!optionalWorld.isPresent())
+                return;
+            final ServerWorld world = optionalWorld.get();
+
+            WorldRebuilderScheduler.getInstance().scheduleTask(new DoRebuild(region, world, blocks));
+            resetTime();
         }
+        catch (Exception exception)
+        {
+            LOGGER.error("Could not rebuild region.", exception);
+        }
+    }
 
-        Region region = WorldRebuilder.getPlugin().getRegionManager().getRegion(regionName);
-        if (!region.isActive())
-            return;
-
-        final Optional<ServerWorld> optionalWorld = WorldUtils.getWorldByUUID(region.getWorldUniqueId());
-        if(!optionalWorld.isPresent())
-            return;
-        final ServerWorld world = optionalWorld.get();
-
-        WorldRebuilderScheduler.getInstance().scheduleTask(new DoRebuild(region, world, blocks));
-        WorldRebuilderScheduler.getInstance().cancelTasksForRegion(regionName);
-        region.rebuildBlocks(Collections.emptyList());
+    private void resetTime()
+    {
+        this.currentSeconds = delay;
     }
 
     private void displayNotificationIfNecessary(int secondsLeft)
@@ -88,7 +102,7 @@ public class ConstantRebuildRegionBlocksTask extends RebuildBlocksTask
         {
             for(final BlockSnapshot blockSnapshot : this.blockSnapshots)
             {
-                serverWorld.restoreSnapshot(blockSnapshot.position(), blockSnapshot, true, BlockChangeFlags.ALL);
+                serverWorld.restoreSnapshot(blockSnapshot.position(), blockSnapshot, true, BlockChangeFlags.DEFAULT_PLACEMENT);
 
                 // Will the block spawn where player stands?
                 // If so, teleport the player to safe location.
