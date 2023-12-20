@@ -92,8 +92,8 @@ public class CreateRegionCommand extends WRCommand
 	private Map<Long, String> prepareDefaultNotifications()
 	{
 		Map<Long, String> defaultNotifications = new HashMap<>();
-		defaultNotifications.put(10L, messageSource.resolveMessage("region.default-notification.rebuild-10-seconds"));
-		defaultNotifications.put(60L, messageSource.resolveMessage("region.default-notification.rebuild-1-minute"));
+		defaultNotifications.put(10L, messageSource.resolveRawMessage("region.default-notification.rebuild-10-seconds"));
+		defaultNotifications.put(60L, messageSource.resolveRawMessage("region.default-notification.rebuild-1-minute"));
 		return defaultNotifications;
 	}
 }

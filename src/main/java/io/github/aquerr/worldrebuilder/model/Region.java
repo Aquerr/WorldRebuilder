@@ -1,6 +1,5 @@
 package io.github.aquerr.worldrebuilder.model;
 
-import com.google.common.base.Preconditions;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.strategy.RebuildBlocksStrategy;
 import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyFactory;

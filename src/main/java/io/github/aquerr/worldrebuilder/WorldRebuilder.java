@@ -108,8 +108,9 @@ public class WorldRebuilder
 	{
 		try
 		{
-			this.logger.info(messageSource.resolveMessage("plugin.initializing", PLUGIN_PREFIX_PLAIN));
 			setupConfigs();
+			setupLocalization();
+			this.logger.info(messageSource.resolveMessage("plugin.initializing", PLUGIN_PREFIX_PLAIN));
 			setupManagers();
 			this.logger.info(messageSource.resolveMessage("plugin.loading-completed", PLUGIN_PREFIX_PLAIN));
 		}
@@ -150,18 +151,21 @@ public class WorldRebuilder
 
 	private void setupConfigs() throws IOException
 	{
-		Resource resource = ResourceUtils.getResource("assets/chestrefill/" + ConfigurationImpl.CONFIG_FILE_NAME);
+		Resource resource = ResourceUtils.getResource("assets/worldrebuilder/" + ConfigurationImpl.CONFIG_FILE_NAME);
 		if (resource == null)
 			return;
 
 		this.configuration = new ConfigurationImpl(configDir, resource);
 	}
 
-	private void setupManagers()
+	private void setupLocalization()
 	{
 		WRMessageSource.init(this.configDir.resolve("messages"), this.configuration.getLangConfig().getLanguageTag());
 		this.messageSource = WRMessageSource.getInstance();
+	}
 
+	private void setupManagers()
+	{
 		this.regionManager.init();
 	}
 
@@ -249,7 +253,7 @@ public class WorldRebuilder
 		final Command.Parameterized strategyCommand = prepareCommand("command.region.strategy.desc",
 				Permissions.REGION_STRATEGY_COMMAND,
 				new StrategyCommand(this),
-				Parameter.enumValue(RebuildStrategyType.class).key("strategyType").optional().build(),
+				Parameter.enumValue(RebuildStrategyType.class).key("strategyType").build(),
 				Parameter.blockState().key("blockList").optional().consumeAllRemaining().build());
 
 		// List notifications command

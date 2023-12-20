@@ -70,7 +70,7 @@ public class WorldRebuilderScheduler
 		}
 	}
 
-	public void scheduleIntervalTask(WorldRebuilderTask worldRebuilderTask)
+	public void scheduleIntervalTaskAsync(WorldRebuilderTask worldRebuilderTask)
 	{
 		if (this.logger.isDebugEnabled())
 		{

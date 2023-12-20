@@ -46,8 +46,7 @@ public class HelpCommand extends WRCommand
 
 			final Component commandHelp = LinearComponents.linear(
 					text("/wr " + String.join(", ", command.getKey()), GOLD),
-					text(" - ").append(command.getValue().shortDescription(CommandCause.create()).get().color(WHITE)),
-			        Component.newline()
+					text(" - ").append(command.getValue().shortDescription(CommandCause.create()).get().color(WHITE))
 			);
 			helpList.add(commandHelp);
 		}
