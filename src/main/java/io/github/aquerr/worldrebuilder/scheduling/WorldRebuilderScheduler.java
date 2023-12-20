@@ -52,7 +52,7 @@ public class WorldRebuilderScheduler
 	{
 		if (this.logger.isDebugEnabled())
 		{
-			this.logger.debug("Scheduling task: " + worldRebuilderTask);
+			this.logger.debug("Scheduling task: {}", worldRebuilderTask);
 		}
 
 		ScheduledTask scheduledTask = this.syncScheduler.submit(Task.builder()
@@ -66,7 +66,7 @@ public class WorldRebuilderScheduler
 
 		if (this.logger.isDebugEnabled())
 		{
-			this.logger.debug("Scheduled task: " + worldRebuilderTask);
+			this.logger.debug("Scheduled task: {}", worldRebuilderTask);
 		}
 	}
 
@@ -74,7 +74,7 @@ public class WorldRebuilderScheduler
 	{
 		if (this.logger.isDebugEnabled())
 		{
-			this.logger.debug("Scheduling task: " + worldRebuilderTask);
+			this.logger.debug("Scheduling task: {}", worldRebuilderTask);
 		}
 
 		ScheduledTask scheduledTask = this.asyncScheduler.submit(Task.builder()
@@ -88,7 +88,7 @@ public class WorldRebuilderScheduler
 
 		if (this.logger.isDebugEnabled())
 		{
-			this.logger.debug("Scheduled task: " + worldRebuilderTask);
+			this.logger.debug("Scheduled task: {}", worldRebuilderTask);
 		}
 	}
 
@@ -96,7 +96,7 @@ public class WorldRebuilderScheduler
 	{
 		if (this.logger.isDebugEnabled())
 		{
-			this.logger.debug("Scheduling task: " + runnable);
+			this.logger.debug("Scheduling task: {}", runnable);
 		}
 
 		this.syncScheduler.submit(Task.builder()
@@ -106,7 +106,7 @@ public class WorldRebuilderScheduler
 
 		if (this.logger.isDebugEnabled())
 		{
-			this.logger.debug("Scheduled task: " + runnable);
+			this.logger.debug("Scheduled task: {}", runnable);
 		}
 	}
 
@@ -150,7 +150,7 @@ public class WorldRebuilderScheduler
 		if (tasks != null)
 		{
 			tasks.remove(worldRebuilderTask);
-			if (tasks.size() == 0)
+			if (tasks.isEmpty())
 				this.rebuildTasks.remove(regionName);
 		}
 	}
