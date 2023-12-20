@@ -19,8 +19,8 @@ import java.util.Optional;
 /**
  * This task is meant to run every second.
  *
- * It prints information messages about rebuild when will take place.
- * Times can be specified by the user. By default, message is displayed once 10 seconds before rebuild.
+ * It displays information in the chat about remaining time to next rebuild.
+ * Notifications can be configured by the user. By default, notification is displayed once, 10 seconds before rebuild.
  */
 public class ConstantRebuildRegionBlocksTask extends RebuildBlocksTask
 {
@@ -40,7 +40,7 @@ public class ConstantRebuildRegionBlocksTask extends RebuildBlocksTask
     {
         if (this.currentSeconds > 0)
         {
-            displayRebuildMessageIfNecessary(this.currentSeconds);
+            displayNotificationIfNecessary(this.currentSeconds);
             this.currentSeconds--;
             return;
         }
@@ -59,7 +59,7 @@ public class ConstantRebuildRegionBlocksTask extends RebuildBlocksTask
         region.rebuildBlocks(Collections.emptyList());
     }
 
-    private void displayRebuildMessageIfNecessary(int secondsLeft)
+    private void displayNotificationIfNecessary(int secondsLeft)
     {
         String message = this.region.getNotifications().get((long)secondsLeft);
         if (message != null)

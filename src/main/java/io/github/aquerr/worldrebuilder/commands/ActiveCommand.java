@@ -3,8 +3,6 @@ package io.github.aquerr.worldrebuilder.commands;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.model.Region;
 import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -25,7 +23,7 @@ public class ActiveCommand extends WRCommand
 
         region.setActive(isActive);
         super.getPlugin().getRegionManager().updateRegion(region);
-        context.sendMessage(Identity.nil(), WorldRebuilder.PLUGIN_PREFIX.append(Component.text("Region has been " + (isActive ? "activated" : "deactivated") + "!", NamedTextColor.GREEN)));
+        context.sendMessage(Identity.nil(), getPlugin().getMessageSource().resolveMessageWithPrefix(isActive ? "command.region.active.activated" : "command.region.active.deactivated"));
         return CommandResult.success();
     }
 }

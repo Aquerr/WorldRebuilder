@@ -16,7 +16,12 @@ public final class RebuildStrategyFactory
                 return new RebuildSameBlockInIntervalStrategy();
             case SAME_BLOCK:
             default:
-                return new RebuildSameBlockStrategy();
+                return getDefaultStrategy();
         }
+    }
+
+    public static RebuildBlocksStrategy getDefaultStrategy()
+    {
+        return new RebuildSameBlockStrategy();
     }
 }

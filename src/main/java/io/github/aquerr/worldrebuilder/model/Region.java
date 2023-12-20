@@ -1,7 +1,9 @@
 package io.github.aquerr.worldrebuilder.model;
 
+import com.google.common.base.Preconditions;
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
 import io.github.aquerr.worldrebuilder.strategy.RebuildBlocksStrategy;
+import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyFactory;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
@@ -11,13 +13,14 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class Region
 {
@@ -39,12 +42,17 @@ public class Region
 	private List<BlockSnapshot> blockSnapshotsExceptions;
 
 	// Placed in the territory by mob/player after the region was created.
-	private List<EntitySnapshot> entitySnapshotsException;
+	private List<EntitySnapshot> entitySnapshotsExceptions;
 
 	private RebuildBlocksStrategy rebuildBlocksStrategy;
 
 	//  USED BY INTERVAL REGIONS  //
 	private Map<Long, String> notifications;
+
+	public static Builder builder()
+	{
+		return new Builder();
+	}
 
 	public Region(final String name,
 				  final UUID worldUniqueId,
@@ -60,7 +68,7 @@ public class Region
 	public Region(final String name, final UUID worldUniqueId, final Vector3i firstPoint,
 				  final Vector3i secondPoint, final int restoreTime,
 				  final boolean isActive, final boolean shouldDropBlocks,
-				  final List<BlockSnapshot> blockSnapshotsExceptions, final List<EntitySnapshot> entitySnapshotsException,
+				  final List<BlockSnapshot> blockSnapshotsExceptions, final List<EntitySnapshot> entitySnapshotsExceptions,
 				  RebuildBlocksStrategy rebuildBlocksStrategy, Map<Long, String> notifications)
 	{
 		this.name = name;
@@ -73,11 +81,30 @@ public class Region
 		this.shouldDropBlocks = shouldDropBlocks;
 
 		this.blockSnapshotsExceptions = blockSnapshotsExceptions;
-		this.entitySnapshotsException = entitySnapshotsException;
+		this.entitySnapshotsExceptions = entitySnapshotsExceptions;
 
 		this.rebuildBlocksStrategy = rebuildBlocksStrategy;
 
 		this.notifications = notifications;
+	}
+
+	private Region(final Builder builder)
+	{
+		this.name = builder.name;
+		this.worldUniqueId = builder.worldUniqueId;
+		this.firstPoint = builder.firstPoint;
+		this.secondPoint = builder.secondPoint;
+
+		this.restoreTime = builder.restoreTime;
+		this.isActive = builder.active;
+		this.shouldDropBlocks = builder.dropBlocks;
+
+		this.blockSnapshotsExceptions = builder.blockSnapshotsExceptions;
+		this.entitySnapshotsExceptions = builder.entitySnapshotsException;
+
+		this.rebuildBlocksStrategy = builder.rebuildBlocksStrategy;
+
+		this.notifications = builder.notifications;
 	}
 
 	public String getName()
@@ -199,12 +226,12 @@ public class Region
 
 	public List<EntitySnapshot> getEntitySnapshotsExceptions()
 	{
-		return this.entitySnapshotsException;
+		return this.entitySnapshotsExceptions;
 	}
 
 	public boolean isEntityIgnored(final Entity entity)
 	{
-		for (final EntitySnapshot entitySnapshot : this.entitySnapshotsException)
+		for (final EntitySnapshot entitySnapshot : this.entitySnapshotsExceptions)
 		{
 			if (entity.location().blockPosition().equals(entitySnapshot.position()) && entity.type().equals(entitySnapshot.type()))
 			{
@@ -218,7 +245,7 @@ public class Region
 	{
 		CompletableFuture.runAsync(() -> {
 			EntitySnapshot entityToRemove = null;
-			for (final EntitySnapshot entitySnapshot : this.entitySnapshotsException)
+			for (final EntitySnapshot entitySnapshot : this.entitySnapshotsExceptions)
 			{
 				if (entity.location().blockPosition().equals(entitySnapshot.position()) && entity.type().equals(entitySnapshot.type()))
 				{
@@ -229,7 +256,7 @@ public class Region
 			if (entityToRemove == null)
 				return;
 
-			entitySnapshotsException.remove(entityToRemove);
+			entitySnapshotsExceptions.remove(entityToRemove);
 			WorldRebuilder.getPlugin().getRegionManager().updateRegion(this);
 		});
 	}
@@ -303,5 +330,109 @@ public class Region
 	private boolean canRestoreBlockSnapshotLocation(ServerLocation serverLocation)
 	{
 		return intersects(serverLocation.world().uniqueId(), serverLocation.blockPosition());
+	}
+
+	public static class Builder
+	{
+		private UUID worldUniqueId;
+		private Vector3i firstPoint;
+		private Vector3i secondPoint;
+
+		private String name;
+
+		private boolean active = true;
+
+		private int restoreTime = 10;
+
+		private boolean dropBlocks = true;
+
+		//  USED BY NON INTERVAL REGIONS  //
+
+		// Placed in the territory by mob/player after the region was created.
+		private List<BlockSnapshot> blockSnapshotsExceptions = new ArrayList<>();
+
+		// Placed in the territory by mob/player after the region was created.
+		private List<EntitySnapshot> entitySnapshotsException = new ArrayList<>();
+
+		private RebuildBlocksStrategy rebuildBlocksStrategy = RebuildStrategyFactory.getDefaultStrategy();
+
+		//  USED BY INTERVAL REGIONS  //
+		private Map<Long, String> notifications = new HashMap<>();
+
+		public Builder worldUniqueId(UUID worldUniqueId)
+		{
+			this.worldUniqueId = worldUniqueId;
+			return this;
+		}
+
+		public Builder name(String name)
+		{
+			this.name = name;
+			return this;
+		}
+
+		public Builder firstPoint(Vector3i firstPoint)
+		{
+			this.firstPoint = firstPoint;
+			return this;
+		}
+
+		public Builder secondPoint(Vector3i secondPoint)
+		{
+			this.secondPoint = secondPoint;
+			return this;
+		}
+
+		public Builder active(boolean active)
+		{
+			this.active = active;
+			return this;
+		}
+
+		public Builder restoreTime(int restoreTimeSeconds)
+		{
+			this.restoreTime = restoreTimeSeconds;
+			return this;
+		}
+
+		public Builder dropBlocks(boolean dropBlocks)
+		{
+			this.dropBlocks = dropBlocks;
+			return this;
+		}
+
+		public Builder blockSnapshotsExceptions(List<BlockSnapshot> blockSnapshotsExceptions)
+		{
+			this.blockSnapshotsExceptions = blockSnapshotsExceptions;
+			return this;
+		}
+
+		public Builder entitySnapshotsException(List<EntitySnapshot> entitySnapshotsExceptions)
+		{
+			this.entitySnapshotsException = entitySnapshotsExceptions;
+			return this;
+		}
+
+		public Builder rebuildBlocksStrategy(RebuildBlocksStrategy rebuildBlocksStrategy)
+		{
+			this.rebuildBlocksStrategy = rebuildBlocksStrategy;
+			return this;
+		}
+
+		public Builder notifications(Map<Long, String> notifications)
+		{
+			this.notifications = notifications;
+			return this;
+		}
+
+		public Region build()
+		{
+			checkNotNull(this.name);
+			checkNotNull(this.worldUniqueId);
+			checkNotNull(this.firstPoint);
+			checkNotNull(this.secondPoint);
+
+			return new Region(this);
+		}
 	}
 }

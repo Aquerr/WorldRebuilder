@@ -1,13 +1,13 @@
 package io.github.aquerr.worldrebuilder.commands;
 
 import io.github.aquerr.worldrebuilder.WorldRebuilder;
+import io.github.aquerr.worldrebuilder.messaging.MessageSource;
 import io.github.aquerr.worldrebuilder.model.Region;
 import io.github.aquerr.worldrebuilder.model.SelectionPoints;
 import io.github.aquerr.worldrebuilder.strategy.RebuildBlocksStrategy;
-import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyType;
 import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyFactory;
+import io.github.aquerr.worldrebuilder.strategy.RebuildStrategyType;
 import io.github.aquerr.worldrebuilder.strategy.WRBlockState;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -21,14 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static net.kyori.adventure.text.Component.text;
-
 public class CreateRegionCommand extends WRCommand
 {
+	private final MessageSource messageSource;
 
 	public CreateRegionCommand(final WorldRebuilder plugin)
 	{
 		super(plugin);
+		this.messageSource = plugin.getMessageSource();
 	}
 
 	@Override
@@ -40,24 +40,24 @@ public class CreateRegionCommand extends WRCommand
 		final Collection<? extends BlockState> blockList = context.all(Parameter.blockState().key("blockList").build());
 
 		if (!(context.cause().audience() instanceof ServerPlayer))
-			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(text("Only in-game players can use this command!", NamedTextColor.RED)));
+			throw messageSource.resolveExceptionWithMessage("error.command.in-game-player-required");
 
 		final ServerPlayer player = (ServerPlayer) context.cause().audience();
 		if (!super.getPlugin().getPlayerSelectionPoints().containsKey(player.uniqueId()))
-			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(text("You must select two points in the world first before creating an arena!", NamedTextColor.RED)));
+			throw messageSource.resolveExceptionWithMessage("command.region.create.error.you-must-select-two-points");
 
 		final ServerWorld world = player.world();
 		final SelectionPoints selectionPoints = super.getPlugin().getPlayerSelectionPoints().get(player.uniqueId());
 
 		if (selectionPoints.getFirstPoint() == null || selectionPoints.getSecondPoint() == null)
-			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(text("You must select two points in the world first before creating an arena!", NamedTextColor.RED)));
+			throw messageSource.resolveExceptionWithMessage("command.region.create.error.you-must-select-two-points");
 
 		if (super.getPlugin().getRegionManager().getRegion(name) != null)
-			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(text("Region with such name already exists!", NamedTextColor.RED)));
+			throw messageSource.resolveExceptionWithMessage("command.region.create.error.region-with-such-name-already-exists");
 
 		Region region = createRegionForSelectedStrategy(name, strategyType, blockList, world, selectionPoints);
 		super.getPlugin().getRegionManager().addRegion(region);
-		player.sendMessage(WorldRebuilder.PLUGIN_PREFIX.append(text("Region has been created!", NamedTextColor.GREEN)));
+		player.sendMessage(messageSource.resolveMessageWithPrefix("command.region.create.region-created"));
 		return CommandResult.success();
 	}
 
@@ -65,27 +65,35 @@ public class CreateRegionCommand extends WRCommand
 	{
 		if (rebuildStrategyType.hasPredefinedBlockSet() && blocks == null)
 		{
-			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(text("Selected rebuild strategy require predefined block set!")));
+			throw messageSource.resolveExceptionWithMessage("command.region.create.error.selected-rebuild-strategy-requires-predefined-block-set");
 		}
 
 		try
 		{
 			RebuildBlocksStrategy rebuildBlocksStrategy = RebuildStrategyFactory.getStrategy(rebuildStrategyType, blocks.stream().map(WRBlockState::of).collect(Collectors.toList()));
 			int restoreTime = rebuildBlocksStrategy.doesRunContinuously() ? 60 : 10;
-			return new Region(regionName, world.uniqueId(), selectionPoints.getFirstPoint(), selectionPoints.getSecondPoint(), restoreTime, rebuildBlocksStrategy, prepareDefaultNotifications());
+
+			return Region.builder()
+					.name(regionName)
+					.worldUniqueId(world.uniqueId())
+					.firstPoint(selectionPoints.getFirstPoint())
+					.secondPoint(selectionPoints.getSecondPoint())
+					.restoreTime(restoreTime)
+					.rebuildBlocksStrategy(rebuildBlocksStrategy)
+					.notifications(prepareDefaultNotifications())
+					.build();
 		}
 		catch (Exception exception)
 		{
-
-			throw new CommandException(WorldRebuilder.PLUGIN_ERROR.append(text("Could not create region. Reason: " + exception.getMessage())), exception);
+			throw messageSource.resolveExceptionWithMessageAndThrowable("command.region.create.error.could-not-create-region", exception);
 		}
 	}
 
 	private Map<Long, String> prepareDefaultNotifications()
 	{
 		Map<Long, String> defaultNotifications = new HashMap<>();
-		defaultNotifications.put(10L, "Region &a{REGION_NAME}&r will be rebuilt in &610 seconds");
-		defaultNotifications.put(60L, "Region &a{REGION_NAME}&r will be rebuilt in &61 minute");
+		defaultNotifications.put(10L, messageSource.resolveMessage("region.default-notification.rebuild-10-seconds"));
+		defaultNotifications.put(60L, messageSource.resolveMessage("region.default-notification.rebuild-1-minute"));
 		return defaultNotifications;
 	}
 }

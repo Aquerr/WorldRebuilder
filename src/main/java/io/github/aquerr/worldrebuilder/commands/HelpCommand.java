@@ -57,7 +57,7 @@ public class HelpCommand extends WRCommand
 		final PaginationList paginationList = PaginationList.builder()
 				.linesPerPage(16)
 				.padding(text("-", NamedTextColor.BLUE))
-				.title(text("Commands List", NamedTextColor.GOLD))
+				.title(getPlugin().getMessageSource().resolveComponentWithMessage("command.help.command-list"))
 				.contents(helpList).build();
 		paginationList.sendTo(context.cause().audience(), pageNumber);
 
