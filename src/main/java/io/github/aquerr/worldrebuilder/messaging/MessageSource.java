@@ -22,5 +22,7 @@ public interface MessageSource
 
     String resolveMessage(String messageKey);
 
+    String resolveRawMessage(String messageKey);
+
     String resolveMessage(String messageKey, Object... args);
 }

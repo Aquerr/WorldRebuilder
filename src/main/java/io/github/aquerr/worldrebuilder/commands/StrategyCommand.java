@@ -28,7 +28,7 @@ public class StrategyCommand extends WRCommand
     public CommandResult execute(CommandContext context) throws CommandException
     {
         final Region region = context.requireOne(WorldRebuilderCommandParameters.region());
-        final RebuildStrategyType strategy = context.requireOne(Parameter.enumValue(RebuildStrategyType.class).key("strategy").build());
+        final RebuildStrategyType strategy = context.requireOne(Parameter.enumValue(RebuildStrategyType.class).key("strategyType").build());
         final Collection<? extends BlockState> blockList = context.all(Parameter.blockState().key("blockList").build());
 
         if (strategy.hasPredefinedBlockSet() && blockList == null)

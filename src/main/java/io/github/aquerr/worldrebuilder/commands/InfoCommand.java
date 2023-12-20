@@ -62,10 +62,8 @@ public class InfoCommand extends WRCommand
 				messageSource.resolveComponentWithMessage("command.region.info.first-point", region.getFirstPoint().toString()), newline(),
 				messageSource.resolveComponentWithMessage("command.region.info.second-point", region.getSecondPoint().toString()), newline(),
 				messageSource.resolveComponentWithMessage("command.region.info.restore-time", region.getRestoreTime()), newline(),
-				messageSource.resolveComponentWithMessage("command.region.info.drop-blocks",
-						region.shouldDropBlocks() ? messageSource.resolveMessage("command.region.info.drop-blocks.yes") : messageSource.resolveMessage("command.region.info.drop-blocks.no"), newline(),
-						messageSource.resolveComponentWithMessage("command.region.info.active",
-								region.isActive() ? messageSource.resolveMessage("command.region.info.active.yes") : messageSource.resolveMessage("command.region.info.active.no")))
+				region.shouldDropBlocks() ? messageSource.resolveComponentWithMessage("command.region.info.drop-blocks.yes") : messageSource.resolveComponentWithMessage("command.region.info.drop-blocks.no"), newline(),
+				region.isActive() ? messageSource.resolveComponentWithMessage("command.region.info.active.yes") : messageSource.resolveComponentWithMessage("command.region.info.active.no")
 		);
 	}
 }

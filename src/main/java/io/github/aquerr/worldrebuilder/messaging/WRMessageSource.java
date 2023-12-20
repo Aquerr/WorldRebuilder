@@ -22,7 +22,7 @@ public class WRMessageSource implements MessageSource
 {
     private static final String MESSAGES_FILE_NAME = "messages_%s.properties";
     private static final String JAR_MESSAGES_FILE_PATH = "assets/worldrebuilder/lang/" + MESSAGES_FILE_NAME;
-    private static final String JAR_MESSAGES_FILE_PATH_DEFAULT = "assets/worldrebuilder/lang/messages.properties";
+    private static final String JAR_MESSAGES_FILE_PATH_DEFAULT = "assets/worldrebuilder/lang/messages_en.properties";
 
     private static class InstanceHolder {
         public static MessageSource INSTANCE = null;
@@ -146,6 +146,12 @@ public class WRMessageSource implements MessageSource
     public String resolveMessage(String messageKey)
     {
         return this.resolveMessage(messageKey, new Object[0]);
+    }
+
+    @Override
+    public String resolveRawMessage(String messageKey)
+    {
+        return this.localization.getMessage(messageKey);
     }
 
     @Override

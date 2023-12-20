@@ -23,7 +23,7 @@ class RebuildBlockFromRandomBlockSetInIntervalStrategy extends AbstractRebuildBl
             return;
 
         ConstantRebuildRegionFromRandomBlockSetTask constantRebuildRegionFromRandomBlockSetTask = new ConstantRebuildRegionFromRandomBlockSetTask(region, new ArrayList<>(blocksToRebuild), this.blocksToUse, region.getRestoreTime());
-        WorldRebuilderScheduler.getInstance().scheduleIntervalTask(constantRebuildRegionFromRandomBlockSetTask);
+        WorldRebuilderScheduler.getInstance().scheduleIntervalTaskAsync(constantRebuildRegionFromRandomBlockSetTask);
     }
 
     @Override
