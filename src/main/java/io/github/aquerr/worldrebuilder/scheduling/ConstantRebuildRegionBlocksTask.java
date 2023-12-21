@@ -102,6 +102,9 @@ public class ConstantRebuildRegionBlocksTask extends RebuildBlocksTask
         {
             for(final BlockSnapshot blockSnapshot : this.blockSnapshots)
             {
+                if (serverWorld.hasBlockState(blockSnapshot.position(), blockState -> blockSnapshot.state().equals(blockState)))
+                    continue;
+
                 serverWorld.restoreSnapshot(blockSnapshot.position(), blockSnapshot, true, BlockChangeFlags.DEFAULT_PLACEMENT);
 
                 // Will the block spawn where player stands?
