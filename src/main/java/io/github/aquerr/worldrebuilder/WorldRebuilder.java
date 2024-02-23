@@ -37,6 +37,7 @@ import io.github.aquerr.worldrebuilder.util.resource.ResourceUtils;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.logging.log4j.Logger;
+import org.bstats.sponge.Metrics;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
@@ -83,18 +84,24 @@ public class WorldRebuilder
 	private final PluginContainer pluginContainer;
 
 	private final Logger logger;
+
+	//Metrics
+	private final Metrics metrics;
+
 	private boolean isDisabled;
 
 	@Inject
 	public WorldRebuilder(final PluginContainer pluginContainer,
 						  final RegionManager regionManager,
-						  final @ConfigDir(sharedRoot = false) Path configDir)
+						  final @ConfigDir(sharedRoot = false) Path configDir,
+						  final Metrics.Factory factory)
 	{
 		INSTANCE = this;
 		this.configDir = configDir;
 		this.pluginContainer = pluginContainer;
 		this.logger = pluginContainer.logger();
 		this.regionManager = regionManager;
+		this.metrics = factory.make(6828);
 	}
 
 	public static WorldRebuilder getPlugin()
